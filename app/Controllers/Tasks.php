@@ -614,7 +614,9 @@ class Tasks extends Security_Controller {
             if ($value) {
                 $selected_context = get_array_value($obj, "context");
                 $selected_context_id = $value;
-                $view_data["show_contexts_dropdown"] = false; //don't show context dropdown if any context is selected. 
+                if (!$id) {
+                    $view_data["show_contexts_dropdown"] = false; //don't show context dropdown if any context is selected. 
+                }
             }
         }
 
@@ -631,8 +633,11 @@ class Tasks extends Security_Controller {
             if (!$this->can_edit_tasks($model_info)) {
                 app_redirect("forbidden");
             }
-            $contexts = array($model_info->context); //context can't be edited dureing edit. So, pass only the saved context
-            $view_data["show_contexts_dropdown"] = false; //don't show context when editing 
+            $contexts = $this->_get_accessible_contexts("create");
+            if (!in_array($model_info->context, $contexts)) {
+                $contexts[] = $model_info->context;
+            }
+            $view_data["show_contexts_dropdown"] = count($contexts) > 1 ? true : false;
         } else {
             //Going to create new task. Check if the user has access in any context
             if (!$this->can_create_tasks()) {
@@ -981,8 +986,16 @@ class Tasks extends Security_Controller {
         $expense_id = $this->request->getPost('expense_id');
         $ticket_id = $this->request->getPost('ticket_id');
 
-        $context_data = $this->get_context_and_id();
-        $context = $context_data["context"] ? $context_data["context"] : "project";
+        $context = $this->request->getPost("context");
+        $context_id = null;
+        if ($context) {
+            $context_id_key = $context === "general" ? "" : ($context . "_id");
+            $context_id = $context_id_key ? $this->request->getPost($context_id_key) : null;
+        } else {
+            $context_data = $this->get_context_and_id($id ? $task_info : null);
+            $context = $context_data["context"] ? $context_data["context"] : "project";
+            $context_id = $context_data["id"];
+        }
 
         if ($id) {
             $task_info = $this->Tasks_model->get_one($id);
@@ -1036,6 +1049,9 @@ class Tasks extends Security_Controller {
             }
         }
 
+        $project_id = ($context === "project" && $context_id) ? $context_id : 0;
+        $milestone_id = ($context === "project") ? $milestone_id : 0;
+
         $data = array(
             "title" => $this->request->getPost('title'),
             "description" => $this->request->getPost('description'),
@@ -1062,11 +1078,23 @@ class Tasks extends Security_Controller {
             "no_of_cycles" => $no_of_cycles ? $no_of_cycles : 0,
         );
 
+        foreach ($this->get_context_id_pairs() as $pair) {
+            $id_key = get_array_value($pair, "id_key");
+            if ($id_key) {
+                $data[$id_key] = 0;
+            }
+        }
+        if ($context !== "general" && $context_id) {
+            $data[$context . "_id"] = $context_id;
+        }
+
         if (!$id) {
             $data["created_date"] = $now;
             $data["context"] = $context;
             $data["sort"] = $this->Tasks_model->get_next_sort_value($project_id, $status_id);
             $data["created_by"] = $this->login_user->id;
+        } else {
+            $data["context"] = $context;
         }
 
         if ($ticket_id) {

@@ -8,15 +8,20 @@
             <?php
             $contexts_dropdown = array();
 
+            $render_hidden_context_id = (!$show_contexts_dropdown && $selected_context !== "general");
+
             foreach ($contexts as $context) {
                 if ($context !== "general") {
                     $context_id_key = $context . "_id";
                     $contexts_dropdown[$context] = app_lang($context);
+                    if ($render_hidden_context_id && $context === $selected_context) {
             ?>
 
-                    <input type="hidden" name="<?php echo $context_id_key; ?>" value="<?php echo ${$context_id_key}; ?>" />
+                        <input type="hidden" name="<?php echo $context_id_key; ?>" value="<?php echo ${$context_id_key}; ?>" />
 
-            <?php } else {
+            <?php
+                    }
+                } else {
                     $contexts_dropdown[$context] = "-";
                 }
             } ?>

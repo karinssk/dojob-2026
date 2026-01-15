@@ -85,7 +85,6 @@
             $("#kanban-wrapper").css("overflow-x", "hidden");
         }
 
-
         //set column scroll
 
         var columnHeight = $(window).height() - $(".kanban-item-list").offset().top - 57;

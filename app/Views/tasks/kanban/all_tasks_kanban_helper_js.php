@@ -64,7 +64,20 @@
                 setTimeout(function () {
                     $("#kanban-wrapper").animate({scrollLeft: scrollLeft}, 'slow');
                 }, 500);
+                if (typeof adjustViewHeightWidth === "function") {
+                    setTimeout(adjustViewHeightWidth, 100);
+                }
             }
+        });
+
+        var refreshKanbanHeight = function () {
+            if (typeof adjustViewHeightWidth === "function") {
+                setTimeout(adjustViewHeightWidth, 100);
+            }
+        };
+
+        $("body").on("click", ".show-filter-form-button, .cancel-filter-button", function () {
+            refreshKanbanHeight();
         });
 
         $("body").on("change", "[name='context']", function () {
@@ -78,6 +91,8 @@
                 $("#js-kanban-filter-container").find("[name='project_id']").closest(".filter-item-box").removeClass("hide");
                 $("#js-kanban-filter-container").find("[name='milestone_id']").closest(".filter-item-box").removeClass("hide");
             }
+
+            refreshKanbanHeight();
         });
 
     });

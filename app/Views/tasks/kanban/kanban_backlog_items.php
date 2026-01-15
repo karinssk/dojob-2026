@@ -209,11 +209,9 @@ $accordion_id = "backlog-accordion-" . uniqid();
 /* Backlog Column - Override kanban default height behavior */
 .backlog-column,
 #kanban-item-list-7 {
-    height: auto !important;
-    min-height: 100px !important;
-    max-height: calc(100vh - 200px) !important;
-    overflow-y: auto !important;
-    background: #f5f6f8 !important;
+    min-height: 100px;
+    overflow-y: auto;
+    background: #f5f6f8;
 }
 
 .backlog-grouped-container {
@@ -283,6 +281,9 @@ $accordion_id = "backlog-accordion-" . uniqid();
 .backlog-task-card {
     position: relative;
     display: block;
+    width: calc(100% - 12px);
+    max-width: 100%;
+    box-sizing: border-box;
     background: white;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
