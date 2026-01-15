@@ -18,7 +18,7 @@ class App extends BaseConfig
      *
      * @var string
      */
-    public string $baseURL = 'https://dojob.rubyshop.co.th/';
+    public string $baseURL = 'http://localhost:8888/dojob-2026/';
 
     /**
      * Allowed Hostnames
@@ -55,7 +55,7 @@ class App extends BaseConfig
      *
      * ถ้า request ไม่ใช่ HTTPS → redirect ไป HTTPS
      */
-    public $forceGlobalSecureRequests = true;
+    public $forceGlobalSecureRequests = false;
 
     /**
      * Content Security Policy

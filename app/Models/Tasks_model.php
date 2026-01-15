@@ -747,6 +747,8 @@ class Tasks_model extends Crud_model {
                 (SELECT COUNT($checklist_items_table.id) FROM $checklist_items_table WHERE $checklist_items_table.deleted=0 AND $checklist_items_table.task_id=$tasks_table.id) AS total_checklist,
                 (SELECT COUNT($checklist_items_table.id) FROM $checklist_items_table WHERE $checklist_items_table.is_checked=1 AND $checklist_items_table.deleted=0 AND $checklist_items_table.task_id=$tasks_table.id) AS total_checklist_checked,
                 COUNT(sub_tasks_table.id) AS total_sub_tasks, completed_sub_tasks_table.total_sub_tasks_done, $tasks_table.client_id, $tasks_table.contract_id, $tasks_table.estimate_id, $tasks_table.expense_id, $tasks_table.invoice_id, $tasks_table.lead_id, $tasks_table.order_id, $tasks_table.proposal_id, $tasks_table.subscription_id, $tasks_table.ticket_id, $tasks_table.collaborators,
+                (SELECT GROUP_CONCAT(collab_users.id, '--::--', collab_users.first_name, ' ', collab_users.last_name, '--::--' , IFNULL(collab_users.image,''), '--::--', collab_users.user_type) FROM $users_table AS collab_users WHERE collab_users.deleted=0 AND FIND_IN_SET(collab_users.id, $tasks_table.collaborators)) AS collaborator_list,
+                $tasks_table.description,
                 last_comment.description AS last_comment_description, last_comment.files AS last_comment_files, last_comment.created_at AS last_comment_created_at, CONCAT(comment_user.first_name, ' ', comment_user.last_name) AS last_comment_user,
                 $select_labels_data_query
         FROM $tasks_table

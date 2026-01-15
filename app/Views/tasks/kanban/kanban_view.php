@@ -28,14 +28,26 @@
                     ?>
                 </div>
 
-                <div  id="kanban-item-list-<?php echo $column->id; ?>" class="kanban-item-list" data-status_id="<?php echo $column->id; ?>">
+                <div  id="kanban-item-list-<?php echo $column->id; ?>" class="kanban-item-list <?php echo ($column->id == 7) ? 'backlog-column' : ''; ?>" data-status_id="<?php echo $column->id; ?>">
                     <?php
-                    echo view("tasks/kanban/kanban_column_items", array(
-                        "tasks" => $tasks,
-                        "can_edit_project_tasks" > $can_edit_project_tasks,
-                        "project_id" > $project_id,
-                        "tasks_edit_permissions"=> get_array_value($tasks_edit_permissions_list, $column->id)
-                    ));
+                    // Check if this is the Backlog column (status_id = 7)
+                    if ($column->id == 7) {
+                        // Use special backlog view grouped by project
+                        echo view("tasks/kanban/kanban_backlog_items", array(
+                            "tasks" => $tasks,
+                            "can_edit_project_tasks" => $can_edit_project_tasks,
+                            "project_id" => $project_id,
+                            "tasks_edit_permissions" => get_array_value($tasks_edit_permissions_list, $column->id)
+                        ));
+                    } else {
+                        // Use standard kanban column items view
+                        echo view("tasks/kanban/kanban_column_items", array(
+                            "tasks" => $tasks,
+                            "can_edit_project_tasks" => $can_edit_project_tasks,
+                            "project_id" => $project_id,
+                            "tasks_edit_permissions"=> get_array_value($tasks_edit_permissions_list, $column->id)
+                        ));
+                    }
                     ?>
                 </div>
             </li>
