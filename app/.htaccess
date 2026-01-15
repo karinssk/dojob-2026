@@ -1,0 +1,17 @@
+
+
+DirectoryIndex index.php index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Force HTTP (redirect from HTTPS to HTTP)
+  RewriteCond %{HTTPS} on
+  RewriteRule ^(.*)$ http://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Main URL Rewriting (adjust to your app structure)
+  RewriteCond $1 !^(index\.php|assets|install|update|uploadtmp)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ index.php/$1 [NC,L,QSA]
+</IfModule>

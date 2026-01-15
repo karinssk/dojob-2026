@@ -1,0 +1,16 @@
+.DS_Store
+.vscode/
+.idea/
+
+/.env
+/server/.env
+
+/files/
+/writable/
+
+/server/node_modules/
+
+*.log
+*.tmp
+*.cache
+*.sqlite

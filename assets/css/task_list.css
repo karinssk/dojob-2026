@@ -1,0 +1,1121 @@
+/**
+ * Task List Styles - 100% Jira Match
+ * Matching user's exact Jira interface design
+ */
+
+/* Jira Table Styling */
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #DFE1E6;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.42857143;
+}
+
+.table th {
+  background: #FAFBFC;
+  border-bottom: 2px solid #DFE1E6;
+  border-right: 1px solid #DFE1E6;
+  color: #6B778C;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 8px;
+  white-space: nowrap;
+}
+
+.table th:last-child {
+  border-right: none;
+}
+
+.table td {
+  border-bottom: 1px solid #F4F5F7;
+  border-right: 1px solid #F4F5F7;
+  padding: 8px;
+  vertical-align: middle;
+  background: #FFFFFF;
+}
+
+.table td:last-child {
+  border-right: none;
+}
+
+.table tr:hover td {
+  background: #F4F5F7;
+}
+
+/* Jira Task Row Styling */
+.jira-task-row {
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.jira-task-row:hover {
+  background: #F4F5F7 !important;
+}
+
+/* Task Type Cell with Positioned Elements */
+.task-type-cell {
+  position: relative !important;
+  width: 40px !important;
+  text-align: center;
+}
+
+/* Expand/Collapse Button (Left side) */
+.expand-toggle {
+  position: absolute !important;
+  left: 2px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.expand-toggle:hover {
+  background: rgba(0, 82, 204, 0.1);
+  border-radius: 3px;
+}
+
+.expand-toggle .expand-icon {
+  transition: transform 0.2s ease !important;
+}
+
+/* Task Type Icon (Center) */
+.task-type-icon-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 0 18px !important;
+}
+
+/* Add Button positioning (moved to unified rule above) */
+.jira-task-row .btn-add-child {
+  position: absolute !important;
+  right: 2px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 10 !important;
+}
+
+/* Show add buttons on row hover */
+.jira-task-row:hover .btn-add-child,
+.jira-task-row:hover .add-subtask-jira,
+.jira-task-row:hover .add-subtask-btn {
+  opacity: 1 !important;
+}
+
+/* Task Title Inline Editing */
+.task-title-display {
+  cursor: text !important;
+  padding: 4px 8px !important;
+  border-radius: 3px !important;
+  transition: background-color 0.2s !important;
+  display: block !important;
+  min-height: 24px !important;
+  line-height: 16px !important;
+  color: #172B4D !important;
+}
+
+.task-title-display:hover {
+  background: rgba(0, 82, 204, 0.04) !important;
+  border: 1px solid rgba(0, 82, 204, 0.2) !important;
+}
+
+.task-title-editor {
+  display: none !important;
+  border: 2px solid #0052CC !important;
+  border-radius: 3px !important;
+  padding: 4px 8px !important;
+  font-size: 14px !important;
+  width: calc(100% - 16px) !important;
+  outline: none !important;
+  background: white !important;
+  color: #172B4D !important;
+  z-index: 1000 !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2) !important;
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  min-height: 24px !important;
+  line-height: 16px !important;
+}
+
+/* Show editor when editing */
+.task-title-editor.editing {
+  display: block !important;
+}
+
+.task-title-editor:focus {
+  box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.3) !important;
+  border-color: #0052CC !important;
+  pointer-events: auto !important;
+}
+
+/* Inline Task Form */
+.inline-task-form {
+  background: #F7F8F9 !important;
+  border-left: 3px solid #0052CC !important;
+}
+
+.inline-task-form td {
+  border-bottom: 1px solid #DFE1E6 !important;
+}
+
+.new-task-title {
+  border: 2px solid #0052CC !important;
+  border-radius: 3px !important;
+  padding: 6px 12px !important;
+  font-size: 14px !important;
+  width: 300px !important;
+  outline: none !important;
+  background: white !important;
+}
+
+.new-task-title:focus {
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2) !important;
+}
+
+.inline-form-actions {
+  margin-top: 8px !important;
+}
+
+.btn-save-task {
+  background: #0052CC !important;
+  color: white !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  border-radius: 3px !important;
+  margin-right: 8px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  transition: background 0.2s !important;
+}
+
+.btn-save-task:hover {
+  background: #0747A6 !important;
+}
+
+.btn-cancel-task {
+  background: none !important;
+  color: #6B778C !important;
+  border: 1px solid #DFE1E6 !important;
+  padding: 6px 12px !important;
+  border-radius: 3px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  transition: all 0.2s !important;
+}
+
+.btn-cancel-task:hover {
+  background: #F4F5F7 !important;
+  border-color: #B3BAC5 !important;
+}
+
+/* Jira Create Button Hover */
+.jira-create-btn:hover {
+  background: #F4F5F7 !important;
+  color: #0052CC !important;
+  transition: background-color 0.1s ease !important;
+}
+
+/* Selected Task Highlighting */
+.task-selected td {
+  background: #E3FCEF !important;
+  border-color: #ABF5D1 !important;
+}
+
+.task-selected:hover td {
+  background: #D1FAE5 !important;
+}
+
+/* Checkbox Styling */
+.task-checkbox, #select-all-tasks {
+  transform: scale(1.1) !important;
+  accent-color: #0052CC !important;
+}
+
+.jira-task-row:hover {
+  background: #F4F5F7 !important;
+}
+
+.jira-task-row:hover .task-actions-inline {
+  display: inline-block !important;
+}
+
+/* Task Type Icons (Jira Style) */
+.task-type-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Task Key Styling */
+.task-key-link {
+  color: #0052CC;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.task-key-link:hover {
+  text-decoration: underline;
+}
+
+/* Task Summary with Hierarchy */
+.task-summary-container {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.hierarchy-connector {
+  color: #8993A4;
+  font-family: monospace;
+  margin-right: 4px;
+}
+
+.expand-toggle {
+  cursor: pointer;
+  margin-right: 6px;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 3px;
+  transition: background-color 0.1s ease;
+}
+
+.expand-toggle:hover {
+  background: #E4E5EA;
+}
+
+.expand-icon {
+  transition: transform 0.15s ease;
+}
+
+.expand-toggle.expanded .expand-icon {
+  transform: rotate(90deg);
+}
+
+.task-title-link {
+  color: #172B4D;
+  text-decoration: none;
+  font-weight: 400;
+  margin-right: 8px;
+}
+
+.task-title-link:hover {
+  color: #0052CC;
+  text-decoration: underline;
+}
+
+/* Jira Status Badges */
+.jira-status-badge {
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  transition: all 0.1s ease;
+}
+
+.jira-status-badge:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+/* Task Actions */
+.task-actions-inline {
+  display: none;
+  margin-left: 8px;
+}
+
+.btn-add-child {
+  background: none;
+  border: none;
+  color: #0052CC;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: background-color 0.1s ease;
+}
+
+.btn-add-child:hover {
+  background: #E4E8F5;
+}
+
+.task-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 3px;
+  transition: background-color 0.1s ease;
+}
+
+.task-menu-btn:hover {
+  background: #E4E5EA;
+}
+
+/* Checkbox Styling */
+.task-checkbox {
+  transform: scale(1.1);
+  margin: 0;
+}
+
+/* Level-based indentation */
+.level-0 {
+  background: #FFFFFF;
+}
+
+.level-1 .task-summary-container {
+  margin-left: 20px;
+}
+
+.level-2 .task-summary-container {
+  margin-left: 40px;
+}
+
+.level-3 .task-summary-container {
+  margin-left: 60px;
+}
+
+.level-4 .task-summary-container {
+  margin-left: 80px;
+}
+
+/* Create Button Styling */
+.add-root-task {
+  background: #0052CC;
+  border: none;
+  color: white;
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.1s ease;
+}
+
+.add-root-task:hover {
+  background: #0747A6;
+  transform: translateY(-1px);
+}
+
+/* Jira Bottom Create Button */
+.jira-create-btn {
+  background: none !important;
+  border: none !important;
+  color: #42526E !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 3px;
+  transition: all 0.1s ease;
+  font-size: 14px;
+}
+
+.jira-create-btn:hover {
+  background: #E4E5EA !important;
+  color: #172B4D !important;
+}
+
+/* Remove default button styling */
+.jira-create-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #4C9AFF;
+}
+
+/* Table container styling */
+.table-responsive {
+  border: none;
+  overflow-x: auto;
+}
+
+/* Task Content */
+.task-content {
+  padding: 12px 16px;
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.task-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+}
+
+.task-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Task Info */
+.task-info {
+  flex: 1;
+}
+
+.task-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.task-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+.task-key {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* Task row hover states for add buttons - unified */
+.task-item:hover .add-subtask-jira,
+.task-row:hover .add-subtask-jira,
+.jira-task-row:hover .add-subtask-jira,
+.task-item:hover .add-subtask-btn,
+.task-row:hover .add-subtask-btn,
+.jira-task-row:hover .add-subtask-btn,
+.jira-task-row:hover .btn-add-child {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Main Add Task Button Styling */
+.add-root-task {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.add-root-task:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.task-description {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+/* Drag Handles */
+.jira-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  cursor: grab;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+  margin-top: 2px;
+}
+
+.jira-drag-handle:hover {
+  opacity: 0.8;
+}
+
+.jira-drag-handle:active {
+  cursor: grabbing;
+}
+
+.jira-drag-handle svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Expand/Collapse Icons */
+.expand-toggle-jira {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+  margin-top: 2px;
+}
+
+.expand-toggle-jira:hover {
+  background-color: #f3f4f6;
+}
+
+.expand-icon {
+  transition: transform 0.2s ease;
+  width: 12px;
+  height: 12px;
+}
+
+.expand-icon.rotated {
+  transform: rotate(90deg);
+}
+
+.expand-placeholder {
+  width: 16px;
+  height: 16px;
+}
+
+/* Task rows */
+.jira-task-row {
+  transition: background-color 0.2s ease;
+}
+
+.jira-task-row:hover {
+  background-color: #f8f9fa;
+}
+
+.jira-task-row:hover .add-subtask-jira {
+  opacity: 1;
+}
+
+.jira-task-row:hover .jira-drag-handle {
+  opacity: 0.8;
+}
+
+.jira-task-row.dragging {
+  opacity: 0.5;
+  background-color: #e3f2fd;
+}
+
+/* Level-based indentation */
+.jira-task-row.level-0 {
+  font-weight: 600;
+}
+
+.jira-task-row.level-1 {
+  font-weight: 500;
+}
+
+.jira-task-row.level-2,
+.jira-task-row.level-3,
+.jira-task-row.level-4,
+.jira-task-row.level-5,
+.jira-task-row.level-6,
+.jira-task-row.level-7,
+.jira-task-row.level-8,
+.jira-task-row.level-9 {
+  font-weight: 400;
+}
+
+/* Expand/collapse icons */
+.expand-toggle-jira {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+.expand-toggle-jira:hover {
+  background-color: #e5e7eb;
+}
+
+.expand-icon {
+  transition: transform 0.2s ease;
+}
+
+.expand-icon.rotated {
+  transform: rotate(90deg);
+}
+
+/* Add subtask buttons - unified styling for all class combinations */
+.add-subtask-jira,
+.add-subtask-btn,
+.btn-add-child {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 3px !important;
+  transition: all 0.2s ease !important;
+  background: #059669 !important;
+  opacity: 0.9 !important;
+  cursor: pointer !important;
+  color: white !important;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  line-height: 1 !important;
+  border: 1px solid #047857 !important;
+}
+
+.add-subtask-jira:hover,
+.add-subtask-btn:hover,
+.btn-add-child:hover {
+  background: #047857 !important;
+  opacity: 1 !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Drag handles */
+.jira-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.jira-drag-handle:hover {
+  background-color: #f3f4f6;
+  opacity: 1 !important;
+}
+
+.jira-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Status Badges */
+.status-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 28px;
+  text-align: center;
+}
+
+.status-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Task Actions */
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.task-item:hover .task-actions {
+  opacity: 1;
+}
+
+.task-action-btn {
+  padding: 4px;
+  border: none;
+  background: none;
+  color: #6b7280;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-action-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.add-subtask-btn:hover {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.icon-14 {
+  width: 14px;
+  height: 14px;
+}
+
+/* Task title container */
+.task-title-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.task-title-text {
+  flex: 1;
+}
+
+.task-link {
+  color: #374151;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.task-link:hover {
+  color: #1f2937;
+  text-decoration: underline;
+}
+
+/* Task preview images */
+.task-preview-image {
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s ease;
+}
+
+.task-preview-image:hover {
+  transform: scale(1.1);
+}
+
+/* Search and filter bar */
+.search-box {
+  position: relative;
+}
+
+.search-box i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+/* Collapsed children */
+.collapsed-child {
+  display: none !important;
+}
+
+/* Sortable states */
+.sortable-ghost {
+  opacity: 0.4;
+  background-color: #e3f2fd;
+}
+
+.sortable-drag {
+  opacity: 0.8;
+  transform: rotate(5deg);
+}
+
+.sortable-chosen {
+  background-color: #f3e5f5;
+}
+
+/* Drop zone indicators */
+.potential-drop-zone {
+  border-top: 2px dashed #e5e7eb;
+}
+
+.drop-zone-child {
+  border-left: 3px solid #10b981;
+  background-color: #ecfdf5;
+}
+
+.drop-zone-sibling {
+  border-top: 2px solid #3b82f6;
+  background-color: #eff6ff;
+}
+
+/* Priority indicators */
+.text-danger {
+  color: #dc2626 !important;
+}
+
+.text-warning {
+  color: #d97706 !important;
+}
+
+.text-success {
+  color: #059669 !important;
+}
+
+.text-muted {
+  color: #6b7280 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .jira-hierarchy {
+    display: none;
+  }
+
+  .task-title-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .add-subtask-jira {
+    opacity: 1;
+  }
+
+  .jira-drag-handle {
+    opacity: 0.6;
+  }
+}
+
+/* Animation for notifications */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.alert {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Task key styling */
+.task-key {
+  font-family: monospace;
+  font-weight: 600;
+  color: #6b7280;
+  background-color: #f9fafb;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Assignee styling */
+.assignee-name {
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Date styling */
+.due-date,
+.created-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Table cell specific styles */
+.drag-cell {
+  width: 30px;
+  padding: 8px 4px;
+}
+
+.task-type-cell {
+  width: 40px;
+  padding: 8px 4px;
+}
+
+.task-key-cell {
+  width: 80px;
+  padding: 8px 4px;
+}
+
+.task-title-cell {
+  min-width: 200px;
+  padding: 8px 12px;
+}
+
+/* Hover effects for interactive elements */
+.task-comment-link:hover {
+  color: #1f2937 !important;
+}
+
+.dropdown-item:hover {
+  background-color: #f3f4f6;
+}
+
+/* Focus states for accessibility */
+.expand-toggle-jira:focus,
+.add-subtask-jira:focus,
+.jira-drag-handle:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.status-badge:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+/* In
+line Task Creation */
+.inline-task-form {
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  transition: all 0.2s ease;
+}
+
+.inline-task-form.active {
+  background: white;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.inline-task-input {
+  width: 100%;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+  padding: 4px 0;
+  outline: none;
+}
+
+.inline-task-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.inline-task-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.inline-task-actions .btn {
+  font-size: 12px;
+  padding: 4px 12px;
+}
+
+/* Add Task Buttons */
+.add-root-task,
+.add-subtask-btn {
+  transition: all 0.2s ease;
+}
+
+.add-root-task:hover {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+/* Collapsed/Expanded States */
+.task-item.collapsed {
+  display: none;
+}
+
+.task-item.has-children.expanded > .task-content .expand-icon {
+  transform: rotate(90deg);
+}
+
+/* Drag and Drop States */
+.task-item.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.task-item.drop-target {
+  border-top: 2px solid #3b82f6;
+  background: #eff6ff;
+}
+
+.task-item.drop-target-child {
+  border-left-width: 6px;
+  background: #ecfdf5;
+}
+
+/* Level-specific styling */
+.task-item.level-0 .task-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.task-item.level-1 .task-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.task-item.level-2 .task-title,
+.task-item.level-3 .task-title,
+.task-item.level-4 .task-title {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .task-item {
+    margin-left: 0 !important;
+  }
+
+  .task-actions {
+    opacity: 1;
+  }
+
+  .task-content {
+    padding: 8px 12px;
+  }
+
+  .task-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .task-right {
+    align-self: flex-start;
+  }
+}
+
+/* Animation for smooth transitions */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.task-item {
+  animation: slideIn 0.2s ease-out;
+}
+
+/* Focus states for accessibility */
+.task-action-btn:focus,
+.expand-toggle-jira:focus,
+.jira-drag-handle:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.inline-task-input:focus {
+  outline: none;
+}

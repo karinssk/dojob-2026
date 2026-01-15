@@ -1,0 +1,107 @@
+/* Jira-style Task Modal */
+
+/* Fix modal z-index and overlay issues */
+#taskModal {
+    z-index: 1060 !important;
+}
+
+#taskModal .modal-backdrop {
+    z-index: 1055 !important;
+}
+
+#taskModal .modal-dialog {
+    z-index: 1061 !important;
+    pointer-events: auto;
+}
+
+#taskModal .modal-content {
+    z-index: 1062 !important;
+    pointer-events: auto;
+}
+
+/* Simple image viewer - no Bootstrap modal conflicts */
+#imageViewer {
+    z-index: 1070 !important;
+    pointer-events: auto !important;
+}
+
+/* Ensure all interactive elements are clickable */
+#taskModal .modal-content * {
+    pointer-events: auto;
+}
+
+.modal-xl {
+    max-width: 1200px;
+}
+
+#taskModal .modal-content {
+    border: none;
+    border-radius: 3px;
+    box-shadow: 0 10px 40px rgba(9, 30, 66, 0.25);
+}
+
+#taskModal .modal-header {
+    background: #f4f5f7;
+    border-bottom: 1px solid #dfe1e6;
+    padding: 16px 24px;
+}
+
+#taskModal .task-type-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+#taskModal .task-key {
+    font-size: 12px;
+    font-weight: 600;
+    color: #5e6c84;
+    text-transform: uppercase;
+}
+
+#taskModal .modal-body {
+    padding: 0;
+    background: #ffffff;
+}
+
+/* Left column - main content */
+#taskModal .col-md-8 {
+    border-right: 1px solid #dfe1e6;
+}
+
+/* Task title input */
+#taskTitle {
+    font-size: 24px;
+    font-weight: 600;
+    color: #172b4d;
+    border: none;
+    background: transparent;
+    padding: 8px 0;
+    transition: all 0.2s;
+}
+
+#taskTitle:focus {
+    background: #ffffff;
+    border: 2px solid #0052cc;
+    border-radius: 3px;
+    padding: 8px 12px;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+}
+
+/* Description */
+#taskDescription {
+    border: 1px solid #dfe1e6;
+    border-radius: 3px;
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color 0.2s;
+}
+
+#taskDescription:focus {
+    border-color: #0052cc;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+}

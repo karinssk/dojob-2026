@@ -1,0 +1,135 @@
+/* Image Preview Modal Styles */
+.app-modal .image-preview-container {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.95);
+  border-radius: 8px;
+}
+
+.app-modal .image-preview-container img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.app-modal-previous-button,
+.app-modal-next-button {
+  position: absolute;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.6) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 16px !important;
+  border-radius: 50% !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+}
+
+.app-modal-previous-button:hover,
+.app-modal-next-button:hover {
+  background: rgba(0, 0, 0, 0.8) !important;
+  transform: scale(1.1);
+}
+
+.app-modal-previous-button {
+  left: 20px;
+}
+
+.app-modal-next-button {
+  right: 20px;
+}
+
+.image-counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Remove extra padding from modal content area for images */
+.app-modal .app-modal-content-area {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Ensure modal takes reasonable size */
+.app-modal .app-modal-body {
+  height: calc(100vh - 40px);
+  margin: 20px;
+  width: calc(100% - 40px);
+}
+
+.app-modal .app-modal-content {
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+}
+
+/* Specific styling for image modals - make them smaller */
+.app-modal.image-modal .app-modal-body {
+  margin: 5vh auto !important;
+  width: 90vw !important;
+  max-width: 1200px !important;
+  height: 80vh !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.app-modal.image-modal .app-modal-content {
+  background: rgba(0, 0, 0, 0.95);
+  border-radius: 8px;
+}
+
+.app-modal.image-modal .app-modal-content-area {
+  height: 80vh !important;
+  border-radius: 8px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .app-modal.image-modal .app-modal-body {
+    margin: 2vh auto !important;
+    width: 95vw !important;
+    height: 85vh !important;
+  }
+
+  .app-modal.image-modal .app-modal-content-area {
+    height: 85vh !important;
+  }
+
+  .app-modal-previous-button,
+  .app-modal-next-button {
+    width: 40px;
+    height: 40px;
+    padding: 8px 10px !important;
+  }
+
+  .app-modal-previous-button {
+    left: 10px;
+  }
+
+  .app-modal-next-button {
+    right: 10px;
+  }
+
+  .image-counter {
+    bottom: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
