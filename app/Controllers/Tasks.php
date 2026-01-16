@@ -766,8 +766,7 @@ class Tasks extends Security_Controller {
 
         $projects_dropdown = array(array("id" => "", "text" => "-"));
         if ($context == "project" && !$return_empty_context) {
-            //$project_options = array("status_id" => 1);
-            $project_options = array();
+            $project_options = array("status_id" => 1);
             if ($this->login_user->user_type == "staff") {
                 if (!$this->can_manage_all_projects()) {
                     $project_options["user_id"] = $this->login_user->id; //normal user's should be able to see only the projects where they are added as a team mmeber.
