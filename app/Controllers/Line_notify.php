@@ -1373,9 +1373,9 @@ class Line_notify extends Security_Controller {
         }
 
         $comment_images = $this->get_latest_task_comment_images($task_ids);
-        $message = $this->format_task_tracking_message($rise_user, $tasks_by_project, $comment_images);
+        $reply_payload = $this->build_task_tracking_reply($rise_user, $tasks_by_project, $comment_images);
 
-        $this->send_line_reply($reply_token, $message);
+        $this->send_line_reply_with_images($reply_token, $reply_payload["text"], $reply_payload["images"]);
     }
 
     private function find_user_by_line_id($line_user_id) {
@@ -1469,14 +1469,15 @@ class Line_notify extends Security_Controller {
         return $images_by_task;
     }
 
-    private function format_task_tracking_message($rise_user, $tasks_by_project, $comment_images) {
+    private function build_task_tracking_reply($rise_user, $tasks_by_project, $comment_images) {
         $lines = array();
+        $image_urls = array();
         $user_name = trim($rise_user->first_name . " " . $rise_user->last_name);
         $lines[] = "Tasks for {$user_name}";
 
         if (!$tasks_by_project) {
             $lines[] = "No open projects found.";
-            return implode("\n", $lines);
+            return array("text" => implode("\n", $lines), "images" => array());
         }
 
         foreach ($tasks_by_project as $project_data) {
@@ -1492,8 +1493,7 @@ class Line_notify extends Security_Controller {
                 }
 
                 if (isset($comment_images[$task->id])) {
-                    $image_urls = array_slice($comment_images[$task->id], 0, 3);
-                    $lines[] = "  Images: " . implode(", ", $image_urls);
+                    $image_urls = array_merge($image_urls, $comment_images[$task->id]);
                 }
             }
         }
@@ -1504,11 +1504,56 @@ class Line_notify extends Security_Controller {
             $message = mb_substr($message, 0, $max_length) . "\n...more tasks available in the app.";
         }
 
-        return $message;
+        $unique_images = array_values(array_unique($image_urls));
+        return array("text" => $message, "images" => $unique_images);
     }
 
     private function send_line_reply($reply_token, $message) {
         $Line_webhook = new \App\Libraries\Line_webhook();
         $Line_webhook->send_reply_message($reply_token, $message);
+    }
+
+    private function send_line_reply_with_images($reply_token, $message, $image_urls) {
+        $Line_webhook = new \App\Libraries\Line_webhook();
+        $messages = array(
+            array(
+                "type" => "text",
+                "text" => $message
+            )
+        );
+
+        if ($image_urls && is_array($image_urls)) {
+            $image_urls = array_slice($image_urls, 0, 4); // LINE reply limit is 5 messages total
+            foreach ($image_urls as $url) {
+                $url = $this->normalize_line_image_url($url);
+                if (!$url) {
+                    continue;
+                }
+
+                $messages[] = array(
+                    "type" => "image",
+                    "originalContentUrl" => $url,
+                    "previewImageUrl" => $url
+                );
+            }
+        }
+
+        $Line_webhook->send_reply_messages($reply_token, $messages);
+    }
+
+    private function normalize_line_image_url($url) {
+        if (!$url) {
+            return "";
+        }
+
+        if (str_starts_with($url, "//")) {
+            return "https:" . $url;
+        }
+
+        if (!str_starts_with($url, "http://") && !str_starts_with($url, "https://")) {
+            return get_uri($url);
+        }
+
+        return $url;
     }
 }

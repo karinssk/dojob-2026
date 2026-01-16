@@ -348,6 +348,59 @@ class Line_webhook {
     }
 
     /**
+     * Send reply with custom message payloads (text/image/etc.)
+     * @param string $reply_token Reply token from webhook event
+     * @param array $messages Array of LINE message objects
+     * @return bool Success status
+     */
+    public function send_reply_messages($reply_token, $messages) {
+        if (!$reply_token || !$messages || !is_array($messages)) {
+            return false;
+        }
+
+        $url = 'https://api.line.me/v2/bot/message/reply';
+
+        $payload = [
+            'replyToken' => $reply_token,
+            'messages' => $messages
+        ];
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->channel_access_token,
+                'User-Agent: Task-Management-System/1.0'
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_FOLLOWLOCATION => true
+        ]);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            log_message('error', "LINE Reply Message cURL Error: " . $error);
+            return false;
+        }
+
+        if ($http_code >= 200 && $http_code < 300) {
+            return true;
+        }
+
+        log_message('error', "LINE Reply Message failed. HTTP Code: " . $http_code . ', Response: ' . $response);
+        return false;
+    }
+
+    /**
      * Send push message using LINE Messaging API
      * @param string $to User ID or Group ID
      * @param string $message Message content
