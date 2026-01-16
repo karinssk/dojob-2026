@@ -84,6 +84,15 @@ class Line_notify extends Security_Controller {
             log_message('error', 'LINE Webhook: Empty input received');
             return $this->response->setBody('OK');
         }
+
+        $channel_secret = get_setting('line_channel_secret');
+        if ($channel_secret) {
+            $signature = $this->request->getHeaderLine('X-Line-Signature');
+            if (!$this->verify_line_signature($input, $signature, $channel_secret)) {
+                log_message('error', 'LINE Webhook: Invalid signature');
+                return $this->response->setStatusCode(401)->setBody('Invalid signature');
+            }
+        }
         
         $events = json_decode($input, true);
         
@@ -100,6 +109,8 @@ class Line_notify extends Security_Controller {
         log_message('info', 'LINE Webhook: Processing ' . count($events['events']) . ' events');
         
         foreach ($events['events'] as $event) {
+            $this->capture_line_room($event);
+
             log_message('info', 'LINE Webhook: Event details: ' . json_encode($event));
             log_message('info', 'LINE Webhook: Event type: ' . ($event['type'] ?? 'unknown'));
             
@@ -1070,5 +1081,116 @@ class Line_notify extends Security_Controller {
         } catch (\Exception $e) {
             log_message('error', 'Failed to save button click log: ' . $e->getMessage());
         }
+    }
+
+    private function verify_line_signature($body, $signature, $channel_secret) {
+        if (!$signature || !$channel_secret) {
+            return false;
+        }
+
+        $hash = hash_hmac('sha256', $body, $channel_secret, true);
+        $expected = base64_encode($hash);
+
+        return hash_equals($expected, $signature);
+    }
+
+    private function capture_line_room($event) {
+        $source = get_array_value($event, "source");
+        if (!$source || !is_array($source)) {
+            return;
+        }
+
+        $source_type = get_array_value($source, "type");
+        $room_id = "";
+        $api_type = "";
+
+        if ($source_type === "group") {
+            $room_id = get_array_value($source, "groupId");
+            $api_type = "group";
+        } elseif ($source_type === "room") {
+            $room_id = get_array_value($source, "roomId");
+            $api_type = "room";
+        }
+
+        if (!$room_id) {
+            return;
+        }
+
+        $room_name = $this->fetch_line_room_name($api_type, $room_id);
+        if (!$room_name) {
+            $room_name = $room_id;
+        }
+
+        $rooms = $this->get_line_rooms();
+        $updated = false;
+
+        foreach ($rooms as $index => $room) {
+            if (get_array_value($room, "id") === $room_id) {
+                $rooms[$index] = array(
+                    "id" => $room_id,
+                    "name" => $room_name,
+                    "type" => $api_type,
+                    "updated_at" => get_current_utc_time()
+                );
+                $updated = true;
+                break;
+            }
+        }
+
+        if (!$updated) {
+            $rooms[] = array(
+                "id" => $room_id,
+                "name" => $room_name,
+                "type" => $api_type,
+                "updated_at" => get_current_utc_time()
+            );
+        }
+
+        $settings_model = model('App\Models\Settings_model');
+        $settings_model->save_setting("line_rooms", json_encode($rooms));
+    }
+
+    private function get_line_rooms() {
+        $rooms_json = get_setting('line_rooms');
+        $rooms = $rooms_json ? json_decode($rooms_json, true) : array();
+        return is_array($rooms) ? $rooms : array();
+    }
+
+    private function fetch_line_room_name($type, $room_id) {
+        $token = get_setting('line_channel_access_token');
+        if (!$token || !$type || !$room_id) {
+            return "";
+        }
+
+        $url = "https://api.line.me/v2/bot/{$type}/{$room_id}/summary";
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            "Authorization: Bearer {$token}"
+        ));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200 || !$response) {
+            return "";
+        }
+
+        $data = json_decode($response, true);
+        if (!is_array($data)) {
+            return "";
+        }
+
+        if ($type === "group") {
+            return get_array_value($data, "groupName");
+        }
+
+        if ($type === "room") {
+            return get_array_value($data, "roomName");
+        }
+
+        return "";
     }
 }

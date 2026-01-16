@@ -190,6 +190,7 @@ $routes->group('api', function($routes) {
 
 // LINE Webhook Routes (outside API group for security)
 $routes->post('line_webhook', 'Line_notify::webhook');
+$routes->post('line/v1/webhook', 'Line_notify::webhook');
 
 /*
  * --------------------------------------------------------------------

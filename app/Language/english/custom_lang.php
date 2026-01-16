@@ -121,6 +121,14 @@ $lang['quick_actions'] = 'Quick Actions';
 
 $lang['test_connection'] = 'Test Connection';
 
+$lang['line_settings'] = 'LINE Settings';
+$lang['line_channel_access_token'] = 'Channel Access Token';
+$lang['line_channel_secret'] = 'Channel Secret';
+$lang['line_webhook_url'] = 'Webhook URL';
+$lang['line_webhook_url_help'] = 'Use this URL in your LINE Messaging API webhook settings.';
+$lang['line_default_room'] = 'Default Room/Group';
+$lang['line_detected_rooms'] = 'Rooms are auto-detected after the webhook receives events.';
+
 $lang['configured'] = 'Configured';
 $lang['enabled'] = 'Enabled';
 $lang['line_status'] = 'Line Status';

@@ -205,4 +205,56 @@ class Line_settings extends Security_Controller {
             ));
         }
     }
+
+    function line_settings() {
+        $view_data = array(
+            "line_channel_access_token" => get_setting('line_channel_access_token'),
+            "line_channel_secret" => get_setting('line_channel_secret'),
+            "line_default_room_id" => get_setting('line_default_room_id'),
+            "line_webhook_url" => get_uri("line/v1/webhook"),
+            "line_rooms_dropdown" => $this->_get_line_rooms_dropdown()
+        );
+
+        return $this->template->rander("settings/line_settings", $view_data);
+    }
+
+    function save_line_settings() {
+        $settings = array(
+            "line_channel_access_token",
+            "line_channel_secret",
+            "line_default_room_id"
+        );
+
+        foreach ($settings as $setting) {
+            $value = $this->request->getPost($setting);
+            $this->Settings_model->save_setting($setting, $value);
+        }
+
+        echo json_encode(array("success" => true, 'message' => app_lang('settings_updated')));
+    }
+
+    private function _get_line_rooms_dropdown() {
+        $rooms_json = get_setting('line_rooms');
+        $rooms = $rooms_json ? json_decode($rooms_json, true) : array();
+
+        if (!is_array($rooms)) {
+            $rooms = array();
+        }
+
+        $dropdown = array("" => "-");
+        foreach ($rooms as $room) {
+            $room_id = get_array_value($room, "id");
+            if (!$room_id) {
+                continue;
+            }
+
+            $room_name = get_array_value($room, "name");
+            $room_type = get_array_value($room, "type");
+            $label_name = $room_name ? $room_name : $room_id;
+            $label_type = $room_type ? strtoupper($room_type) : "ROOM";
+            $dropdown[$room_id] = $label_name . " (" . $label_type . ")";
+        }
+
+        return $dropdown;
+    }
 }
