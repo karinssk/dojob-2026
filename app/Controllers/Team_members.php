@@ -676,6 +676,9 @@ class Team_members extends Security_Controller {
         }
         $view_data['role_dropdown'] = $this->_get_roles_dropdown();
         $view_data['can_activate_deactivate_team_members'] = $this->_can_activate_deactivate_team_member($view_data['user_info']);
+        $view_data['line_users_dropdown'] = $this->_get_line_users_dropdown();
+        $view_data['line_user_ids'] = $this->_get_user_line_ids($view_data['user_info']);
+        $view_data['line_user_profiles'] = $this->_get_line_user_profiles();
 
         return $this->template->view("users/account_settings", $view_data);
     }
@@ -757,7 +760,8 @@ class Team_members extends Security_Controller {
         }
 
         $account_data = array(
-            "email" => $this->request->getPost('email')
+            "email" => $this->request->getPost('email'),
+            "line_user_id" => $this->_normalize_line_user_ids($this->request->getPost('line_user_id'))
         );
 
         $role = $this->request->getPost('role');
@@ -793,6 +797,63 @@ class Team_members extends Security_Controller {
         } else {
             echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
         }
+    }
+
+    private function _get_line_users_dropdown() {
+        $profiles_json = get_setting('line_user_profiles');
+        $profiles = $profiles_json ? json_decode($profiles_json, true) : array();
+
+        if (!is_array($profiles)) {
+            $profiles = array();
+        }
+
+        $dropdown = array();
+        foreach ($profiles as $profile) {
+            $user_id = get_array_value($profile, "id");
+            if (!$user_id) {
+                continue;
+            }
+
+            $display_name = get_array_value($profile, "display_name");
+            $label = $display_name ? $display_name : $user_id;
+            $dropdown[$user_id] = $label . " (" . $user_id . ")";
+        }
+
+        return $dropdown;
+    }
+
+    private function _get_line_user_profiles() {
+        $profiles_json = get_setting('line_user_profiles');
+        $profiles = $profiles_json ? json_decode($profiles_json, true) : array();
+        return is_array($profiles) ? $profiles : array();
+    }
+
+    private function _get_user_line_ids($user_info) {
+        $line_user_id = get_array_value($user_info, "line_user_id");
+        if (!$line_user_id) {
+            return array();
+        }
+
+        $decoded = json_decode($line_user_id, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        return array_filter(array_map("trim", explode(",", $line_user_id)));
+    }
+
+    private function _normalize_line_user_ids($line_user_ids) {
+        if (!$line_user_ids) {
+            return "";
+        }
+
+        if (is_array($line_user_ids)) {
+            $line_user_ids = array_filter(array_map("trim", $line_user_ids));
+            return json_encode(array_values($line_user_ids));
+        }
+
+        $line_user_ids = array_filter(array_map("trim", explode(",", $line_user_ids)));
+        return json_encode(array_values($line_user_ids));
     }
 
     //save profile image of a team member

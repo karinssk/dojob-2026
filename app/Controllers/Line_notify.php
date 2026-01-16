@@ -110,6 +110,7 @@ class Line_notify extends Security_Controller {
         
         foreach ($events['events'] as $event) {
             $this->capture_line_room($event);
+            $this->capture_line_user($event);
 
             log_message('info', 'LINE Webhook: Event details: ' . json_encode($event));
             log_message('info', 'LINE Webhook: Event type: ' . ($event['type'] ?? 'unknown'));
@@ -1192,5 +1193,99 @@ class Line_notify extends Security_Controller {
         }
 
         return "";
+    }
+
+    private function capture_line_user($event) {
+        $source = get_array_value($event, "source");
+        if (!$source || !is_array($source)) {
+            return;
+        }
+
+        $user_id = get_array_value($source, "userId");
+        if (!$user_id) {
+            return;
+        }
+
+        $source_type = get_array_value($source, "type");
+        $group_id = get_array_value($source, "groupId");
+        $room_id = get_array_value($source, "roomId");
+
+        $profile = $this->fetch_line_user_profile($user_id, $source_type, $group_id, $room_id);
+        if (!$profile) {
+            return;
+        }
+
+        $profiles = $this->get_line_user_profiles();
+        $updated = false;
+
+        foreach ($profiles as $index => $item) {
+            if (get_array_value($item, "id") === $user_id) {
+                $profiles[$index] = array_merge($item, $profile, array(
+                    "updated_at" => get_current_utc_time()
+                ));
+                $updated = true;
+                break;
+            }
+        }
+
+        if (!$updated) {
+            $profile["updated_at"] = get_current_utc_time();
+            $profiles[] = $profile;
+        }
+
+        $settings_model = model('App\Models\Settings_model');
+        $settings_model->save_setting("line_user_profiles", json_encode($profiles));
+    }
+
+    private function get_line_user_profiles() {
+        $profiles_json = get_setting('line_user_profiles');
+        $profiles = $profiles_json ? json_decode($profiles_json, true) : array();
+        return is_array($profiles) ? $profiles : array();
+    }
+
+    private function fetch_line_user_profile($user_id, $source_type, $group_id, $room_id) {
+        $token = get_setting('line_channel_access_token');
+        if (!$token || !$user_id) {
+            return array();
+        }
+
+        $url = "";
+        if ($source_type === "group" && $group_id) {
+            $url = "https://api.line.me/v2/bot/group/{$group_id}/member/{$user_id}";
+        } elseif ($source_type === "room" && $room_id) {
+            $url = "https://api.line.me/v2/bot/room/{$room_id}/member/{$user_id}";
+        } else {
+            $url = "https://api.line.me/v2/bot/profile/{$user_id}";
+        }
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            "Authorization: Bearer {$token}"
+        ));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200 || !$response) {
+            return array();
+        }
+
+        $data = json_decode($response, true);
+        if (!is_array($data)) {
+            return array();
+        }
+
+        return array(
+            "id" => $user_id,
+            "display_name" => get_array_value($data, "displayName"),
+            "picture_url" => get_array_value($data, "pictureUrl"),
+            "status_message" => get_array_value($data, "statusMessage"),
+            "source_type" => $source_type ? $source_type : "user",
+            "group_id" => $group_id ? $group_id : "",
+            "room_id" => $room_id ? $room_id : ""
+        );
     }
 }

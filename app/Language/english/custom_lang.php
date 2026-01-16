@@ -128,6 +128,8 @@ $lang['line_webhook_url'] = 'Webhook URL';
 $lang['line_webhook_url_help'] = 'Use this URL in your LINE Messaging API webhook settings.';
 $lang['line_default_room'] = 'Default Room/Group';
 $lang['line_detected_rooms'] = 'Rooms are auto-detected after the webhook receives events.';
+$lang['line_user_id'] = 'LINE User ID';
+$lang['line_user_id_help'] = 'Profiles appear after LINE sends events to the webhook.';
 
 $lang['configured'] = 'Configured';
 $lang['enabled'] = 'Enabled';

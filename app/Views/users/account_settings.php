@@ -39,6 +39,41 @@
                 </div>
             </div>
 
+            <?php if (isset($line_users_dropdown) && isset($line_user_ids) && isset($line_user_profiles)) { ?>
+                <div class="form-group">
+                    <div class="row">
+                        <label for="line_user_id" class="col-md-2"><?php echo app_lang('line_user_id'); ?></label>
+                        <div class="col-md-10">
+                            <select name="line_user_id[]" id="line_user_id" class="select2" multiple>
+                                <?php
+                                $selected_ids = is_array($line_user_ids) ? $line_user_ids : array();
+                                foreach ($line_user_profiles as $profile) {
+                                    $profile_id = get_array_value($profile, "id");
+                                    if (!$profile_id) {
+                                        continue;
+                                    }
+
+                                    $display_name = get_array_value($profile, "display_name");
+                                    $picture_url = get_array_value($profile, "picture_url");
+                                    $label = $display_name ? $display_name : $profile_id;
+                                    $is_selected = in_array($profile_id, $selected_ids);
+                                    ?>
+                                    <option
+                                        value="<?php echo htmlspecialchars($profile_id); ?>"
+                                        data-image="<?php echo htmlspecialchars($picture_url); ?>"
+                                        data-name="<?php echo htmlspecialchars($label); ?>"
+                                        <?php echo $is_selected ? "selected" : ""; ?>
+                                    >
+                                        <?php echo htmlspecialchars($label . " (" . $profile_id . ")"); ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                            <small class="form-text text-muted"><?php echo app_lang('line_user_id_help'); ?></small>
+                        </div>
+                    </div>
+                </div>
+            <?php } ?>
+
             <?php if (($user_info->id == $login_user->id) || $login_user->is_admin) { ?> 
                 <div class="form-group">
                     <div class="row">
@@ -159,6 +194,36 @@
         });
         $("#account-info-form .select2").select2();
 
+        var $lineSelect = $("#line_user_id");
+        if ($lineSelect.length) {
+            $lineSelect.select2("destroy");
+
+            function formatLineUser(option) {
+                if (!option.id) {
+                    return option.text;
+                }
+
+                var $option = $(option.element);
+                var image = $option.data("image");
+                var name = $option.data("name") || option.text;
+                var text = option.text || name;
+
+                if (!image) {
+                    return text;
+                }
+
+                return "<span class='line-user-option'><img src='" + image + "' class='line-user-avatar' /> " + text + "</span>";
+            }
+
+            $lineSelect.select2({
+                templateResult: formatLineUser,
+                templateSelection: formatLineUser,
+                escapeMarkup: function (markup) {
+                    return markup;
+                }
+            });
+        }
+
 
         //show/hide asmin permission help message
         $("#user-role").change(function () {
@@ -198,3 +263,18 @@
         });
     });
 </script>    
+
+<style>
+    .line-user-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .line-user-avatar {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+</style>
