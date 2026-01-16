@@ -10,6 +10,7 @@ $settings_menu = array(
         array("name" => "notifications", "url" => "settings/notifications"),
         array("name" => "integration", "url" => "settings/integration"),
         array("name" => "line_settings", "url" => "line_settings/line_settings"),
+        array("name" => "tasks_tracking", "url" => "tasks-tracking"),
         array("name" => "cron_job", "url" => "settings/cron_job"),
         array("name" => "updates", "url" => "Updates"),
     ),

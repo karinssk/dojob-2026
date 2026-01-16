@@ -294,6 +294,11 @@ class Line_notify extends Security_Controller {
         
         // Log the message for debugging
         log_message('info', "LINE Message from {$user_id}: {$message_text}");
+
+        if ($this->is_task_tracking_keyword($message_text)) {
+            $this->handle_task_tracking_request($event);
+            return;
+        }
         
         // Simple command handling
         if (strtolower($message_text) === 'help') {
@@ -1287,5 +1292,223 @@ class Line_notify extends Security_Controller {
             "group_id" => $group_id ? $group_id : "",
             "room_id" => $room_id ? $room_id : ""
         );
+    }
+
+    private function is_task_tracking_keyword($message_text) {
+        $keywords = $this->get_task_tracking_keywords();
+        if (!$keywords || !$message_text) {
+            return false;
+        }
+
+        $text = trim(mb_strtolower($message_text));
+        foreach ($keywords as $keyword) {
+            $keyword = trim(mb_strtolower($keyword));
+            if (!$keyword) {
+                continue;
+            }
+
+            if ($text === $keyword || str_starts_with($text, $keyword . " ")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function get_task_tracking_keywords() {
+        $keywords = get_setting("line_task_tracking_keywords");
+        if (!$keywords) {
+            $keywords = "work,งาน";
+        }
+
+        $parts = array_map("trim", explode(",", $keywords));
+        return array_filter($parts);
+    }
+
+    private function handle_task_tracking_request($event) {
+        $reply_token = $event['replyToken'] ?? '';
+        $line_user_id = $event['source']['userId'] ?? '';
+
+        if (!$reply_token || !$line_user_id) {
+            return;
+        }
+
+        $rise_user = $this->find_user_by_line_id($line_user_id);
+        if (!$rise_user) {
+            $this->send_line_reply($reply_token, "No linked Rise user found for this LINE account.");
+            return;
+        }
+
+        $status_ids = $this->get_tracking_status_ids();
+        if (!$status_ids) {
+            $this->send_line_reply($reply_token, "No matching task statuses found for tracking.");
+            return;
+        }
+
+        $options = array(
+            "specific_user_id" => $rise_user->id,
+            "project_status" => 1,
+            "status_ids" => implode(",", $status_ids),
+            "sort_by_project" => 1,
+            "order_by" => "project",
+            "order_dir" => "ASC"
+        );
+
+        $tasks = $this->Tasks_model->get_details($options)->getResult();
+        if (!$tasks) {
+            $this->send_line_reply($reply_token, "No open tasks found for your account.");
+            return;
+        }
+
+        $tasks_by_project = array();
+        $task_ids = array();
+        foreach ($tasks as $task) {
+            if (!$task->project_id) {
+                continue;
+            }
+
+            $tasks_by_project[$task->project_id]["title"] = $task->project_title ?: "Project #" . $task->project_id;
+            $tasks_by_project[$task->project_id]["tasks"][] = $task;
+            $task_ids[] = $task->id;
+        }
+
+        $comment_images = $this->get_latest_task_comment_images($task_ids);
+        $message = $this->format_task_tracking_message($rise_user, $tasks_by_project, $comment_images);
+
+        $this->send_line_reply($reply_token, $message);
+    }
+
+    private function find_user_by_line_id($line_user_id) {
+        $users_table = $this->db->prefixTable('users');
+        $sql = "SELECT id, first_name, last_name, user_type, client_id, line_user_id
+            FROM $users_table
+            WHERE deleted=0 AND line_user_id!=''";
+        $users = $this->db->query($sql)->getResult();
+
+        foreach ($users as $user) {
+            $line_ids = $this->parse_line_user_ids($user->line_user_id);
+            if (in_array($line_user_id, $line_ids, true)) {
+                return $user;
+            }
+        }
+
+        return null;
+    }
+
+    private function parse_line_user_ids($line_user_id) {
+        if (!$line_user_id) {
+            return array();
+        }
+
+        $decoded = json_decode($line_user_id, true);
+        if (is_array($decoded)) {
+            return array_values(array_filter(array_map("trim", $decoded)));
+        }
+
+        return array_values(array_filter(array_map("trim", explode(",", $line_user_id))));
+    }
+
+    private function get_tracking_status_ids() {
+        $task_status_model = model('App\Models\Task_status_model');
+        $statuses = $task_status_model->get_details()->getResult();
+        $matches = array();
+
+        foreach ($statuses as $status) {
+            $key_name = isset($status->key_name) ? $status->key_name : "";
+            $title = isset($status->title) ? $status->title : "";
+            $value = mb_strtolower($key_name ?: $title);
+
+            if ($value === "to_do" || $value === "to do" || $value === "in_progress" || $value === "in progress") {
+                $matches[] = $status->id;
+            }
+        }
+
+        return array_values(array_unique($matches));
+    }
+
+    private function get_latest_task_comment_images($task_ids) {
+        if (!$task_ids) {
+            return array();
+        }
+
+        $images_by_task = array();
+        $project_comments_model = model('App\Models\Project_comments_model');
+        $files = $project_comments_model->get_files_for_tasks($task_ids);
+
+        foreach ($files as $file_row) {
+            $task_id = $file_row->task_id;
+            if (!$task_id || isset($images_by_task[$task_id])) {
+                continue;
+            }
+
+            $file_items = @unserialize($file_row->files);
+            if (!$file_items || !is_array($file_items)) {
+                continue;
+            }
+
+            $images = array();
+            foreach ($file_items as $file) {
+                $file_name = get_array_value($file, "file_name");
+                if (!$file_name) {
+                    continue;
+                }
+
+                $ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+                if (!in_array($ext, array("jpg", "jpeg", "png", "gif", "webp"))) {
+                    continue;
+                }
+
+                $images[] = get_source_url_of_file($file, get_setting("timeline_file_path"), "raw");
+            }
+
+            if ($images) {
+                $images_by_task[$task_id] = $images;
+            }
+        }
+
+        return $images_by_task;
+    }
+
+    private function format_task_tracking_message($rise_user, $tasks_by_project, $comment_images) {
+        $lines = array();
+        $user_name = trim($rise_user->first_name . " " . $rise_user->last_name);
+        $lines[] = "Tasks for {$user_name}";
+
+        if (!$tasks_by_project) {
+            $lines[] = "No open projects found.";
+            return implode("\n", $lines);
+        }
+
+        foreach ($tasks_by_project as $project_data) {
+            $lines[] = "";
+            $lines[] = "Project: " . $project_data["title"];
+
+            foreach ($project_data["tasks"] as $task) {
+                $lines[] = "- " . $task->title;
+
+                $description = $task->description ? trim(strip_tags($task->description)) : "";
+                if ($description) {
+                    $lines[] = "  " . mb_substr($description, 0, 140);
+                }
+
+                if (isset($comment_images[$task->id])) {
+                    $image_urls = array_slice($comment_images[$task->id], 0, 3);
+                    $lines[] = "  Images: " . implode(", ", $image_urls);
+                }
+            }
+        }
+
+        $message = implode("\n", $lines);
+        $max_length = 4500;
+        if (mb_strlen($message) > $max_length) {
+            $message = mb_substr($message, 0, $max_length) . "\n...more tasks available in the app.";
+        }
+
+        return $message;
+    }
+
+    private function send_line_reply($reply_token, $message) {
+        $Line_webhook = new \App\Libraries\Line_webhook();
+        $Line_webhook->send_reply_message($reply_token, $message);
     }
 }
