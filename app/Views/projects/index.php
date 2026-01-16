@@ -1,3 +1,8 @@
+<?php
+if (!isset($selected_status_id) || !$selected_status_id) {
+    $selected_status_id = 1; // default to Open
+}
+?>
 <div id="page-content" class="page-wrapper clearfix">
     <div class="card grid-button">
         <div class="page-title clearfix projects-page">
