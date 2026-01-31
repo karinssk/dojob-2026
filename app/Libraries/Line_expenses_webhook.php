@@ -597,12 +597,15 @@ class Line_expenses_webhook {
                 return null;
             }
 
-            $upload_dir = WRITEPATH . 'uploads/line_expenses/';
+            $app_config = config("App");
+            $upload_dir = FCPATH . $app_config->timeline_file_path;
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
 
-            $file_name = 'expense_file' . time() . '-' . rand(100000000, 999999999) . '.jpg';
+            $ms = (int) round(microtime(true) * 1000);
+            $iso = gmdate('Y-m-d\TH:i:s', (int) ($ms / 1000)) . '.' . str_pad($ms % 1000, 3, '0', STR_PAD_LEFT) . 'Z';
+            $file_name = 'expense_file' . $ms . '-' . rand(100000000, 999999999) . '_' . $iso . '.jpg';
             $file_path = $upload_dir . $file_name;
             file_put_contents($file_path, $content);
 
