@@ -186,6 +186,41 @@ class Line_expenses_model extends Crud_model {
     // ========== User Mappings ==========
 
     function get_rise_user_id_from_line_id($line_user_id) {
+        if (!$line_user_id) {
+            return null;
+        }
+
+        // Prefer array-based mappings if available
+        if ($this->db->tableExists('user_mappings_arr')) {
+            $table = $this->db->table($this->db->getPrefix() . 'user_mappings_arr');
+
+            $row = $table->where('line_user_id', $line_user_id)->get()->getRow();
+            if ($row && isset($row->rise_user_id)) {
+                return $row->rise_user_id;
+            }
+
+            $rows = $table->select('rise_user_id, line_user_ids')->where('line_user_ids IS NOT NULL', null, false)->get()->getResult();
+            foreach ($rows as $r) {
+                $ids = $this->_parse_line_user_ids($r->line_user_ids ?? "");
+                if (in_array($line_user_id, $ids, true)) {
+                    return $r->rise_user_id;
+                }
+            }
+        }
+
+        // Fallback: check users table line_user_id field (may contain JSON or CSV)
+        if ($this->db->tableExists('users')) {
+            $users_table = $this->db->table($this->db->getPrefix() . 'users');
+            $rows = $users_table->select('id, line_user_id')->where('line_user_id IS NOT NULL', null, false)->get()->getResult();
+            foreach ($rows as $r) {
+                $ids = $this->_parse_line_user_ids($r->line_user_id ?? "");
+                if (in_array($line_user_id, $ids, true)) {
+                    return $r->id;
+                }
+            }
+        }
+
+        // Legacy single-value mappings
         $this->use_table('user_mappings');
         $result = $this->db_builder->where('line_user_id', $line_user_id)->get();
         if ($result->getRow()) {
@@ -195,6 +230,39 @@ class Line_expenses_model extends Crud_model {
     }
 
     function save_user_mapping($line_user_id, $display_name, $rise_user_id) {
+        if ($this->db->tableExists('user_mappings_arr')) {
+            $table_name = $this->db->getPrefix() . 'user_mappings_arr';
+            $fields = $this->db->getFieldNames($table_name);
+            if (in_array('line_user_id', $fields, true) && in_array('rise_user_id', $fields, true)) {
+                $table = $this->db->table($table_name);
+                $data = array(
+                    'line_user_id' => $line_user_id,
+                    'rise_user_id' => $rise_user_id
+                );
+                if (in_array('line_display_name', $fields, true)) {
+                    $data['line_display_name'] = $display_name;
+                }
+                if (in_array('line_user_ids', $fields, true)) {
+                    $data['line_user_ids'] = json_encode(array($line_user_id));
+                }
+                if (in_array('updated_at', $fields, true)) {
+                    $data['updated_at'] = date('Y-m-d H:i:s');
+                }
+
+                $existing = $table->where('line_user_id', $line_user_id)->get()->getRow();
+                if ($existing) {
+                    $table->where('line_user_id', $line_user_id);
+                    return $table->update($data);
+                }
+
+                if (in_array('created_at', $fields, true)) {
+                    $data['created_at'] = date('Y-m-d H:i:s');
+                }
+                return $table->insert($data);
+            }
+        }
+
+        // Legacy table fallback
         $this->use_table('user_mappings');
         $existing = $this->db_builder->where('line_user_id', $line_user_id)->get();
         if ($existing->getRow()) {
@@ -204,14 +272,14 @@ class Line_expenses_model extends Crud_model {
                 'rise_user_id' => $rise_user_id,
                 'updated_at' => date('Y-m-d H:i:s')
             ));
-        } else {
-            return $this->db_builder->insert(array(
-                'line_user_id' => $line_user_id,
-                'line_display_name' => $display_name,
-                'rise_user_id' => $rise_user_id,
-                'created_at' => date('Y-m-d H:i:s')
-            ));
         }
+
+        return $this->db_builder->insert(array(
+            'line_user_id' => $line_user_id,
+            'line_display_name' => $display_name,
+            'rise_user_id' => $rise_user_id,
+            'created_at' => date('Y-m-d H:i:s')
+        ));
     }
 
     // ========== Report Data Queries ==========
@@ -325,7 +393,7 @@ class Line_expenses_model extends Crud_model {
         }
 
         // Create new user
-        return $this->db_builder->insert(array(
+        $saved = $this->db_builder->insert(array(
             'first_name' => $display_name,
             'last_name' => '',
             'user_type' => 'staff',
@@ -335,5 +403,22 @@ class Line_expenses_model extends Crud_model {
             'language' => 'thai',
             'created_at' => date('Y-m-d H:i:s')
         ));
+        if ($saved) {
+            return $this->db->insertID();
+        }
+        return null;
+    }
+
+    private function _parse_line_user_ids($raw) {
+        if (!$raw) {
+            return array();
+        }
+
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded)) {
+            return array_values(array_filter(array_map("trim", $decoded)));
+        }
+
+        return array_values(array_filter(array_map("trim", explode(",", $raw))));
     }
 }
