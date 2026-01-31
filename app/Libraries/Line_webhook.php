@@ -563,7 +563,7 @@ class Line_webhook {
             ];
         }
 
-        $test_message = " Test Message\n\nThis is a test message from your Task Management System.\n\n LINE Messaging API is working correctly!";
+        $test_message = " Test Message!";
         
         $success = $this->send_notification($test_message, ['type' => 'test']);
         
