@@ -381,6 +381,7 @@ class Line_expenses_webhook {
             $display_name = $profile['displayName'] ?? 'คุณ';
             $mapping = $this->get_rise_user_mapping($line_user_id, $display_name);
             $rise_user_id = $mapping["rise_user_id"] ?? 1;
+            log_message('info', 'LINE Expenses: process_expense start line_user_id=' . $line_user_id . ' rise_user_id=' . $rise_user_id);
 
             $db_prefix = $this->db->getPrefix();
 
@@ -440,6 +441,7 @@ class Line_expenses_webhook {
             ));
 
             $expense_id = $this->db->insertID();
+            log_message('info', 'LINE Expenses: expense created expense_id=' . $expense_id);
 
             // Log activity
             $mapping_meta = json_encode(array(
@@ -477,7 +479,7 @@ class Line_expenses_webhook {
             );
 
         } catch (\Exception $e) {
-            log_message('error', 'Error processing expense: ' . $e->getMessage());
+            log_message('error', 'LINE Expenses: process_expense error: ' . $e->getMessage());
             return array(
                 'success' => false,
                 'message' => "เกิดข้อผิดพลาด: {$e->getMessage()}",
@@ -571,7 +573,13 @@ class Line_expenses_webhook {
             $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
-            return array('success' => ($http_code >= 200 && $http_code < 300), 'response' => $response);
+            $success = ($http_code >= 200 && $http_code < 300);
+            if (!$success) {
+                log_message('error', 'LINE Expenses: LINE API call failed. code=' . $http_code . ' response=' . $response);
+            } else {
+                log_message('info', 'LINE Expenses: LINE API call success. code=' . $http_code);
+            }
+            return array('success' => $success, 'response' => $response);
         } catch (\Exception $e) {
             log_message('error', 'LINE API error: ' . $e->getMessage());
             return array('success' => false, 'response' => $e->getMessage());

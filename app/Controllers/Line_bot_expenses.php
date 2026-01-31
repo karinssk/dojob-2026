@@ -497,41 +497,46 @@ class Line_bot_expenses extends Security_Controller {
     function expense_logs_list_data() {
         $this->_require_auth();
 
-        $logs = $this->Line_expenses_model->get_expense_logs()->getResult();
-        $data = array();
+        try {
+            $logs = $this->Line_expenses_model->get_expense_logs()->getResult();
+            $data = array();
 
-        foreach ($logs as $row) {
-            $mapping_status = $row->user_id == 1 ? app_lang('fallback_user_id') : app_lang('mapped_user_id');
-            $line_user_id = "";
-            $mapping_source = "";
-            $mapping_reason = "";
-            if ($row->changes) {
-                $decoded = json_decode($row->changes, true);
-                if (is_array($decoded)) {
-                    $line_user_id = $decoded["line_user_id"] ?? "";
-                    $mapping_source = $decoded["mapping_source"] ?? "";
-                    $mapping_reason = $decoded["mapping_reason"] ?? "";
+            foreach ($logs as $row) {
+                $mapping_status = $row->user_id == 1 ? app_lang('fallback_user_id') : app_lang('mapped_user_id');
+                $line_user_id = "";
+                $mapping_source = "";
+                $mapping_reason = "";
+                if ($row->changes) {
+                    $decoded = json_decode($row->changes, true);
+                    if (is_array($decoded)) {
+                        $line_user_id = $decoded["line_user_id"] ?? "";
+                        $mapping_source = $decoded["mapping_source"] ?? "";
+                        $mapping_reason = $decoded["mapping_reason"] ?? "";
+                    }
                 }
+                $data[] = array(
+                    $row->log_created_at,
+                    $row->expense_date,
+                    $row->title,
+                    to_currency($row->amount),
+                    $row->category_name ?: ('ID: ' . $row->category_id),
+                    $row->project_name ?: ('ID: ' . $row->project_id),
+                    $row->client_name ?: ('ID: ' . $row->client_id),
+                    $row->user_name ?: 'Unknown',
+                    $row->user_id,
+                    $mapping_status,
+                    $line_user_id,
+                    $mapping_source,
+                    $mapping_reason,
+                    $row->expense_id
+                );
             }
-            $data[] = array(
-                $row->log_created_at,
-                $row->expense_date,
-                $row->title,
-                to_currency($row->amount),
-                $row->category_name ?: ('ID: ' . $row->category_id),
-                $row->project_name ?: ('ID: ' . $row->project_id),
-                $row->client_name ?: ('ID: ' . $row->client_id),
-                $row->user_name ?: 'Unknown',
-                $row->user_id,
-                $mapping_status,
-                $line_user_id,
-                $mapping_source,
-                $mapping_reason,
-                $row->expense_id
-            );
-        }
 
-        echo json_encode(array("data" => $data));
+            echo json_encode(array("data" => $data));
+        } catch (\Exception $e) {
+            log_message('error', 'LINE Expenses: expense_logs_list_data error: ' . $e->getMessage());
+            echo json_encode(array("data" => array(), "error" => $e->getMessage()));
+        }
     }
 
     function check_category_keyword_duplicate() {
