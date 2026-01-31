@@ -186,11 +186,12 @@ class Line_expenses_model extends Crud_model {
     // ========== User Mappings ==========
 
     function get_rise_user_id_from_line_id($line_user_id) {
-        if (!$line_user_id || !$this->db->tableExists('user_mappings_arr')) {
+        $table_name = $this->_resolve_user_mappings_arr_table();
+        if (!$line_user_id || !$table_name) {
             return null;
         }
 
-        $table = $this->db->table($this->db->getPrefix() . 'user_mappings_arr');
+        $table = $this->db->table($table_name);
         $row = $table->where('line_user_id', $line_user_id)->get()->getRow();
         if ($row && isset($row->rise_user_id) && intval($row->rise_user_id)) {
             return $row->rise_user_id;
@@ -216,7 +217,8 @@ class Line_expenses_model extends Crud_model {
             );
         }
 
-        if (!$this->db->tableExists('user_mappings_arr')) {
+        $table_name = $this->_resolve_user_mappings_arr_table();
+        if (!$table_name) {
             return array(
                 "rise_user_id" => 1,
                 "source" => "fallback",
@@ -225,7 +227,7 @@ class Line_expenses_model extends Crud_model {
         }
 
         $last_reason = "";
-        $table = $this->db->table($this->db->getPrefix() . 'user_mappings_arr');
+        $table = $this->db->table($table_name);
         $row = $table->where('line_user_id', $line_user_id)->get()->getRow();
         if ($row && isset($row->rise_user_id) && intval($row->rise_user_id)) {
             return array(
@@ -269,11 +271,11 @@ class Line_expenses_model extends Crud_model {
     }
 
     function save_user_mapping($line_user_id, $display_name, $rise_user_id) {
-        if (!$this->db->tableExists('user_mappings_arr')) {
+        $table_name = $this->_resolve_user_mappings_arr_table();
+        if (!$table_name) {
             return false;
         }
 
-        $table_name = $this->db->getPrefix() . 'user_mappings_arr';
         $fields = $this->db->getFieldNames($table_name);
         if (!in_array('line_user_id', $fields, true) || !in_array('rise_user_id', $fields, true)) {
             return false;
@@ -304,6 +306,22 @@ class Line_expenses_model extends Crud_model {
             $data['created_at'] = date('Y-m-d H:i:s');
         }
         return $table->insert($data);
+    }
+
+    private function _resolve_user_mappings_arr_table() {
+        $db_prefix = $this->db->getPrefix();
+        $prefixed = $db_prefix . 'user_mappings_arr';
+        $res = $this->db->query("SHOW TABLES LIKE ?", array($prefixed))->getResultArray();
+        if ($res) {
+            return $prefixed;
+        }
+
+        $res = $this->db->query("SHOW TABLES LIKE ?", array("user_mappings_arr"))->getResultArray();
+        if ($res) {
+            return "user_mappings_arr";
+        }
+
+        return null;
     }
 
     // ========== Report Data Queries ==========
