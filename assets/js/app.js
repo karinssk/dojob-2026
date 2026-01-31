@@ -1,3 +1,7 @@
+var ajaxModalXhr = null;
+var ajaxRequestXhr = null;
+var appModalXhr = null;
+
 $(document).ready(function () {
     $.ajaxSetup({cache: false});
 
@@ -108,7 +112,9 @@ $(document).ready(function () {
 
     //abort ajax request on modal close.
     $('#ajaxModal').on('hidden.bs.modal', function (e) {
-        ajaxModalXhr.abort();
+        if (ajaxModalXhr && ajaxModalXhr.abort) {
+            ajaxModalXhr.abort();
+        }
         $("#ajaxModal").find(".modal-dialog").removeClass("modal-lg");
         $("#ajaxModal").find(".modal-dialog").addClass("modal-lg");
 
