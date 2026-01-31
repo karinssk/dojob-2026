@@ -325,7 +325,17 @@ class Line_expenses_webhook {
         // Handle regular project
         $project_id = 0;
         $project_name = $project_config->project_name;
-        if (!empty($project_name)) {
+        if (!empty($project_config->project_id)) {
+            $project_result = $this->db->query(
+                "SELECT id, title FROM {$db_prefix}projects WHERE id = ? AND deleted = 0",
+                array($project_config->project_id)
+            );
+
+            if ($project_result->getRow()) {
+                $project_id = $project_result->getRow()->id;
+                $project_name = $project_result->getRow()->title;
+            }
+        } else if (!empty($project_name)) {
             $project_result = $this->db->query(
                 "SELECT id FROM {$db_prefix}projects WHERE title LIKE ? AND deleted = 0",
                 array('%' . $project_name . '%')

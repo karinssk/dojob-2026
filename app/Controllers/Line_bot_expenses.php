@@ -231,7 +231,24 @@ class Line_bot_expenses extends Security_Controller {
         $selected_client_id = 0;
         $selected_project_id = 0;
 
-        if ($model_info && $model_info->client_name) {
+        if ($model_info && $model_info->project_id) {
+            $project = $this->Projects_model->get_one($model_info->project_id);
+            if ($project && $project->id) {
+                $selected_project_id = $project->id;
+                $selected_client_id = $project->client_id;
+                if (!$model_info->project_name) {
+                    $model_info->project_name = $project->title;
+                }
+                if (!$model_info->client_name && $selected_client_id) {
+                    $client = $this->Clients_model->get_one($selected_client_id);
+                    if ($client && $client->id) {
+                        $model_info->client_name = $client->company_name;
+                    }
+                }
+            }
+        }
+
+        if ($model_info && $model_info->client_name && !$selected_client_id) {
             $client = $this->Clients_model->get_all_where(array(
                 "company_name" => $model_info->client_name,
                 "deleted" => 0,
@@ -242,7 +259,7 @@ class Line_bot_expenses extends Security_Controller {
             }
         }
 
-        if ($selected_client_id && $model_info && $model_info->project_name) {
+        if ($selected_client_id && !$selected_project_id && $model_info && $model_info->project_name) {
             $project = $this->Projects_model->get_all_where(array(
                 "client_id" => $selected_client_id,
                 "title" => $model_info->project_name,
@@ -280,10 +297,16 @@ class Line_bot_expenses extends Security_Controller {
         if (!$project_name && $project_id) {
             $project = $this->Projects_model->get_one($project_id);
             $project_name = $project ? $project->title : '';
+            if (!$client_id && $project && $project->client_id) {
+                $client_id = $project->client_id;
+                $client = $this->Clients_model->get_one($client_id);
+                $client_name = $client ? $client->company_name : $client_name;
+            }
         }
 
         if ($this->request->getPost('is_monthly_project')) {
             $project_name = '';
+            $project_id = 0;
         }
 
         $sort = intval($this->request->getPost('sort') ?: 0);
@@ -295,6 +318,7 @@ class Line_bot_expenses extends Security_Controller {
             'keyword' => $this->request->getPost('keyword'),
             'client_name' => $client_name,
             'project_name' => $project_name,
+            'project_id' => intval($project_id ?: 0),
             'is_monthly_project' => $this->request->getPost('is_monthly_project') ? 1 : 0,
             'sort' => $sort
         );

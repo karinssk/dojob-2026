@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS `rise_line_expenses_project_keywords` (
   `keyword` VARCHAR(100) NOT NULL,
   `client_name` VARCHAR(500) NOT NULL,
   `project_name` VARCHAR(500) DEFAULT '',
+  `project_id` INT UNSIGNED DEFAULT 0,
   `is_monthly_project` TINYINT(1) DEFAULT 0,
   `sort` INT DEFAULT 0,
   `deleted` TINYINT(1) DEFAULT 0,
