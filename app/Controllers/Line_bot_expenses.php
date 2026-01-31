@@ -492,6 +492,34 @@ class Line_bot_expenses extends Security_Controller {
         }
     }
 
+    // ========== EXPENSE LOGS ==========
+
+    function expense_logs_list_data() {
+        $this->_require_auth();
+
+        $logs = $this->Line_expenses_model->get_expense_logs()->getResult();
+        $data = array();
+
+        foreach ($logs as $row) {
+            $mapping_status = $row->user_id == 1 ? app_lang('fallback_user_id') : app_lang('mapped_user_id');
+            $data[] = array(
+                $row->log_created_at,
+                $row->expense_date,
+                $row->title,
+                to_currency($row->amount),
+                $row->category_name ?: ('ID: ' . $row->category_id),
+                $row->project_name ?: ('ID: ' . $row->project_id),
+                $row->client_name ?: ('ID: ' . $row->client_id),
+                $row->user_name ?: 'Unknown',
+                $row->user_id,
+                $mapping_status,
+                $row->expense_id
+            );
+        }
+
+        echo json_encode(array("data" => $data));
+    }
+
     function check_category_keyword_duplicate() {
         $this->_require_auth();
 

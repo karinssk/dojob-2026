@@ -30,6 +30,9 @@
                         <a class="nav-link" data-bs-toggle="tab" href="#lbe-workflow-tab" role="tab"><?php echo app_lang('line_expenses_workflow'); ?></a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#lbe-logs-tab" role="tab"><?php echo app_lang('line_expenses_logs'); ?></a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="tab" href="#lbe-daily-report-tab" role="tab"><?php echo app_lang('daily_report_settings'); ?></a>
                     </li>
                     <li class="nav-item">
@@ -52,6 +55,9 @@
                     </div>
                     <div class="tab-pane fade" id="lbe-workflow-tab" role="tabpanel">
                         <?php echo view('settings/line_bot_expenses/workflow_tab', $this->data); ?>
+                    </div>
+                    <div class="tab-pane fade" id="lbe-logs-tab" role="tabpanel">
+                        <?php echo view('settings/line_bot_expenses/logs_tab', $this->data); ?>
                     </div>
                     <div class="tab-pane fade" id="lbe-daily-report-tab" role="tabpanel">
                         <?php echo view('settings/line_bot_expenses/daily_report_tab', $this->data); ?>

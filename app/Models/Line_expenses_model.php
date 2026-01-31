@@ -375,6 +375,30 @@ class Line_expenses_model extends Crud_model {
         return $this->db->query($sql, array($project_id, $start_date, $end_date));
     }
 
+    // ========== Expense Logs ==========
+
+    function get_expense_logs($limit = 200) {
+        $db_prefix = $this->db->getPrefix();
+        $limit = intval($limit) > 0 ? intval($limit) : 200;
+
+        $sql = "SELECT al.created_at AS log_created_at, e.id AS expense_id, e.expense_date, e.title,
+                       e.amount, e.category_id, e.project_id, e.client_id, e.user_id,
+                       p.title AS project_name, c.company_name AS client_name,
+                       cat.title AS category_name,
+                       CONCAT(u.first_name, ' ', u.last_name) AS user_name
+                FROM {$db_prefix}activity_logs al
+                LEFT JOIN {$db_prefix}expenses e ON e.id = al.log_type_id
+                LEFT JOIN {$db_prefix}projects p ON p.id = e.project_id
+                LEFT JOIN {$db_prefix}clients c ON c.id = e.client_id
+                LEFT JOIN {$db_prefix}expense_categories cat ON cat.id = e.category_id
+                LEFT JOIN {$db_prefix}users u ON u.id = e.user_id
+                WHERE al.log_type = 'expense' AND al.action = 'created' AND al.deleted = 0
+                ORDER BY al.created_at DESC
+                LIMIT {$limit}";
+
+        return $this->db->query($sql);
+    }
+
     // ========== Find or Create Rise User ==========
 
     function find_or_create_rise_user($display_name, $line_user_id) {
