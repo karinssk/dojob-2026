@@ -546,7 +546,7 @@ function renderPriorityDropdownsFallback() {
 
 // Manual test function for debugging
 window.testPriorityAPI = function() {
-  console.log("🧪 Manual priority API test...");
+  console.log(" Manual priority API test...");
   convertPriorityIconsToDropdowns();
 };
 

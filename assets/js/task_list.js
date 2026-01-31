@@ -3622,7 +3622,7 @@ function initCheckboxes() {
 
 // Global test function for debugging
 window.testTaskListFunctions = function () {
-  console.log("🧪 Testing task list functions...");
+  console.log(" Testing task list functions...");
 
   // Test expand/collapse with both class names
   const expandButtons = $(".expand-toggle, .expand-toggle-jira");
@@ -4725,7 +4725,7 @@ function createTaskElement(task, level) {
 
 // Test function for comprehensive functionality check - run this in console
 function testAllFunctionality() {
-  console.log("🧪 === COMPREHENSIVE FUNCTIONALITY TEST ===");
+  console.log(" === COMPREHENSIVE FUNCTIONALITY TEST ===");
 
   // Test 1: Check if all elements exist
   console.log("📊 Element Count Test:");
@@ -4840,7 +4840,7 @@ function testAllFunctionality() {
 
 // Test function for hierarchical functionality
 function testHierarchicalView() {
-  console.log("🧪 Testing hierarchical view...");
+  console.log(" Testing hierarchical view...");
 
   // Count tasks by level
   var tasksByLevel = {};

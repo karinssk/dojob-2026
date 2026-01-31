@@ -961,7 +961,7 @@ $(document).ready(function() {
         
         // Global test functions for debugging
         window.testModularSystem = function() {
-            console.log('🧪 Testing modular system...');
+            console.log(' Testing modular system...');
             
             console.log(' Available test functions:');
             console.log('  - testTaskListFunctions()');
@@ -986,7 +986,7 @@ $(document).ready(function() {
         
         // Add test function for add buttons
         window.testAddButtons = function() {
-            console.log('=== 🧪 TESTING ADD BUTTONS ===');
+            console.log('===  TESTING ADD BUTTONS ===');
             
             // Test main add task buttons
             var $addRootButtons = $('.add-root-task');
@@ -1028,7 +1028,7 @@ $(document).ready(function() {
         
         // Add test function for expand/collapse
         window.testExpandCollapse = function() {
-            console.log('=== 🧪 TESTING EXPAND/COLLAPSE ===');
+            console.log('===  TESTING EXPAND/COLLAPSE ===');
             
             var $expandButtons = $('.expand-toggle, .expand-toggle-jira');
             console.log('Expand buttons found:', $expandButtons.length);
@@ -1054,7 +1054,7 @@ $(document).ready(function() {
         
         // Add test function for inline editing
         window.testInlineEditing = function() {
-            console.log('=== 🧪 TESTING INLINE EDITING ===');
+            console.log('===  TESTING INLINE EDITING ===');
             
             var $titleDisplays = $('.task-title-display');
             console.log('Title displays found:', $titleDisplays.length);
@@ -1681,7 +1681,7 @@ $(document).ready(function() {
     
     // Test function for kanban
     window.testKanbanBoard = function() {
-        console.log('🧪 Testing Kanban Board...');
+        console.log(' Testing Kanban Board...');
         
         // Test loading
         loadKanbanBoard();
@@ -1830,7 +1830,7 @@ $(document).ready(function() {
     
     // Test function for upload functionality
     window.testImageUpload = function() {
-        console.log('🧪 Testing image upload functionality...');
+        console.log(' Testing image upload functionality...');
         
         // Load kanban first
         loadKanbanBoard();
@@ -2504,7 +2504,7 @@ $(document).ready(function() {
     
     // Add global test functions for debugging
     window.testHideColumn = function() {
-        console.log('🧪 Testing hideColumn function...');
+        console.log(' Testing hideColumn function...');
         if (typeof window.hideColumn === 'function') {
             window.hideColumn('description');
         } else {
@@ -2513,7 +2513,7 @@ $(document).ready(function() {
     };
     
     window.testSortColumn = function() {
-        console.log('🧪 Testing sortColumn function...');
+        console.log(' Testing sortColumn function...');
         if (typeof window.sortColumn === 'function') {
             window.sortColumn('summary', 'asc');
         } else {

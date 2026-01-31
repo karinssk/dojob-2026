@@ -5,7 +5,7 @@
 
 // Test drag and drop functionality
 window.testDragDrop = function() {
-    console.log('=== 🧪 DRAG & DROP TEST ===');
+    console.log('===  DRAG & DROP TEST ===');
     console.log('SortableJS available:', typeof Sortable !== 'undefined');
     console.log('jQuery available:', typeof $ !== 'undefined');
     console.log('Task table found:', $('#sortable-tasks').length > 0);
@@ -70,7 +70,7 @@ window.debugCurrentState = function() {
 
 // Test status dropdown functionality
 window.testStatusDropdown = function() {
-    console.log('=== 🧪 STATUS DROPDOWN TEST ===');
+    console.log('===  STATUS DROPDOWN TEST ===');
     
     var $statusBadges = $('.status-badge');
     var $statusOptions = $('.status-option');
@@ -182,7 +182,7 @@ window.testJiraExpandCollapse = function() {
 
 // Test inline task creation
 window.testInlineTaskCreation = function() {
-    console.log('=== 🧪 INLINE TASK CREATION TEST ===');
+    console.log('===  INLINE TASK CREATION TEST ===');
     
     var $createBtn = $('#create-task-btn');
     var $addButtons = $('.add-subtask-jira');
@@ -211,7 +211,7 @@ window.testInlineTaskCreation = function() {
 
 // Create test hierarchy
 window.createTestHierarchy = function() {
-    console.log('=== 🧪 CREATING TEST HIERARCHY ===');
+    console.log('===  CREATING TEST HIERARCHY ===');
     
     alert('🚧 Test Hierarchy Creation\n\n' +
          'This will create a multi-level test hierarchy:\n' +
@@ -322,7 +322,7 @@ window.reinitializeTaskList = function() {
 
 // Debug click handlers
 window.debugClickHandlers = function() {
-    console.log('=== 🧪 CLICK HANDLERS TEST ===');
+    console.log('===  CLICK HANDLERS TEST ===');
     
     var handlers = {
         'Create Task Button': $('#create-task-btn').length,

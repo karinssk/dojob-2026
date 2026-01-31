@@ -246,7 +246,7 @@ function showDirectChildRows(parentId, parentLevel) {
 
 // Test function for hierarchical functionality
 function testHierarchicalView() {
-  console.log("🧪 Testing hierarchical view...");
+  console.log(" Testing hierarchical view...");
 
   // Count tasks by level
   var tasksByLevel = {};

@@ -1678,7 +1678,7 @@ app.get('/api/test-monthly-summary', async (req, res) => {
     const summary = await generateMonthlyExpenseSummary(dbPool, client_and_project, formatNumberWithCommas, targetDate);
     
     res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
-    res.end(`🧪 TEST MONTHLY SUMMARY REPORT\n${'='.repeat(50)}\n\n${summary}\n\n${'='.repeat(50)}\nGenerated at: ${new Date().toLocaleString('th-TH')}`);
+    res.end(` TEST MONTHLY SUMMARY REPORT\n${'='.repeat(50)}\n\n${summary}\n\n${'='.repeat(50)}\nGenerated at: ${new Date().toLocaleString('th-TH')}`);
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -1692,7 +1692,7 @@ app.get('/api/test-send-monthly-summary', async (req, res) => {
   try {
     const targetDate = req.query.date || null;
     
-    console.log('🧪 TEST: Sending monthly flex messages to LINE...');
+    console.log(' TEST: Sending monthly flex messages to LINE...');
     console.log(`📱 Target LINE User ID: ${REPORT_LINE_USER_ID}`);
     
     const result = await sendMonthlySummaryReport(dbPool, client_and_project, formatNumberWithCommas, LINE_ACCESS_TOKEN, REPORT_LINE_USER_ID, targetDate);
@@ -1730,7 +1730,7 @@ app.get('/api/test-flex-preview', async (req, res) => {
   try {
     const targetDate = req.query.date || null;
     
-    console.log('🧪 TEST: Generating flex message preview...');
+    console.log(' TEST: Generating flex message preview...');
     
     const monthData = await generateMonthlyExpenseData(dbPool, client_and_project, formatNumberWithCommas, targetDate);
     
@@ -1857,7 +1857,7 @@ function scheduleMonthlyReports() {
 app.listen(port, async () => {
   console.log(`🚀 Expense Bot Server running on port ${port}`);
   console.log(`📱 LINE Webhook URL: http://localhost:${port}/webhook/line`);
-  console.log(`🧪 Test API: http://localhost:${port}/api/test-expense`);
+  console.log(` Test API: http://localhost:${port}/api/test-expense`);
   console.log(`📊 View Expenses: http://localhost:${port}/api/expenses`);
   console.log(`🔢 Test Amount Parsing: http://localhost:${port}/api/test-amount-parsing/1,500.50`);
   console.log(`📝 Test Expense Parsing: http://localhost:${port}/api/test-expense-parsing`);
@@ -1869,11 +1869,11 @@ app.listen(port, async () => {
   console.log(`📱 Daily Flex Summary: http://localhost:${port}/api/daily/flex-summary`);
   console.log(`📤 Send Daily Summary: http://localhost:${port}/api/daily/send-summary`);
   console.log(`📲 Send Daily Flex: http://localhost:${port}/api/daily/send-flex-summary`);
-  console.log(`🧪 Test Daily Flex: http://localhost:${port}/api/daily/test-flex-summary`);
+  console.log(` Test Daily Flex: http://localhost:${port}/api/daily/test-flex-summary`);
   console.log(`🎨 Daily Flex Preview: http://localhost:${port}/api/daily/test-flex-preview`);
   console.log(`📋 Monthly Summary: http://localhost:${port}/api/monthly-summary`);
   console.log(`📤 Send Monthly Summary: http://localhost:${port}/api/send-monthly-summary`);
-  console.log(`🧪 Test Monthly Summary: http://localhost:${port}/api/test-monthly-summary`);
+  console.log(` Test Monthly Summary: http://localhost:${port}/api/test-monthly-summary`);
   console.log(`📲 Test Send to LINE: http://localhost:${port}/api/test-send-monthly-summary`);
   console.log(`🎨 Test Flex Preview: http://localhost:${port}/api/test-flex-preview`);
   console.log(`🔍 Flex Validation: http://localhost:${port}/api/test-flex-preview`);

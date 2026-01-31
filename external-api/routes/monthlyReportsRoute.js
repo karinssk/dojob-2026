@@ -52,7 +52,7 @@ router.get('/send-other-projects-to-line', async (req, res) => {
       });
     }
     
-    console.log('🧪 Sending other projects to LINE with Flex Messages...');
+    console.log(' Sending other projects to LINE with Flex Messages...');
     
     // Get other projects data
     const result = await getAllProjectsWithExpensesExceptMain(

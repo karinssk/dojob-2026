@@ -1059,7 +1059,7 @@ body.board-tab-active .project-details-view > .container-fluid > .row > .col-md-
                                             🤖 Auto Load
                                         </button>
                                         <button onclick="window.testBoardLoading()" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-gray-800">
-                                            🧪 Force Load
+                                             Force Load
                                         </button>
                                         <button onclick="window.debugKanbanLoading()" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-gray-800">
                                             🔍 Debug Info
@@ -1798,7 +1798,7 @@ window.checkAuthStatus = function() {
 
 // Debug function to test API directly
 window.testProjectsAPI = function() {
-    console.log('🧪 Testing Projects API directly...');
+    console.log(' Testing Projects API directly...');
     console.log('🔗 Base URL:', baseUrl);
     console.log('🔗 Full API URL:', baseUrl + 'api/projects');
     
@@ -1963,7 +1963,7 @@ console.log(" Global saveColumnOrder function defined");
 
 // Test function for debugging
 window.testTablePreferences = function() {
-    console.log('🧪 Testing table preferences controller...');
+    console.log(' Testing table preferences controller...');
     
     // Test 1: Basic controller test
     $.ajax({
@@ -2126,7 +2126,7 @@ $(document).ready(function() {
         
         // Global test functions for debugging
         window.testModularSystem = function() {
-            console.log('🧪 Testing modular system...');
+            console.log(' Testing modular system...');
             
             console.log(' Available test functions:');
             console.log('  - testTaskListFunctions()');
@@ -2151,7 +2151,7 @@ $(document).ready(function() {
         
         // Add test function for add buttons
         window.testAddButtons = function() {
-            console.log('=== 🧪 TESTING ADD BUTTONS ===');
+            console.log('===  TESTING ADD BUTTONS ===');
             
             // Test main add task buttons
             var $addRootButtons = $('.add-root-task');
@@ -2193,7 +2193,7 @@ $(document).ready(function() {
         
         // Add test function for expand/collapse
         window.testExpandCollapse = function() {
-            console.log('=== 🧪 TESTING EXPAND/COLLAPSE ===');
+            console.log('===  TESTING EXPAND/COLLAPSE ===');
             
             var $expandButtons = $('.expand-toggle, .expand-toggle-jira');
             console.log('Expand buttons found:', $expandButtons.length);
@@ -2219,7 +2219,7 @@ $(document).ready(function() {
         
         // Add test function for inline editing
         window.testInlineEditing = function() {
-            console.log('=== 🧪 TESTING INLINE EDITING ===');
+            console.log('===  TESTING INLINE EDITING ===');
             
             var $titleDisplays = $('.task-title-display');
             console.log('Title displays found:', $titleDisplays.length);
@@ -2834,7 +2834,7 @@ $(document).ready(function() {
     
     // Test function for kanban
     window.testKanbanBoard = function() {
-        console.log('🧪 Testing Kanban Board...');
+        console.log(' Testing Kanban Board...');
         
         // Test loading
         loadKanbanBoard();
@@ -2983,7 +2983,7 @@ $(document).ready(function() {
     
     // Test function for upload functionality
     window.testImageUpload = function() {
-        console.log('🧪 Testing image upload functionality...');
+        console.log(' Testing image upload functionality...');
         
         // Load kanban first
         loadKanbanBoard();
@@ -3537,7 +3537,7 @@ $(document).ready(function() {
     
     // Add test functions for debugging
     window.testDropdownDirectly = function() {
-        console.log('🧪 Testing dropdown directly...');
+        console.log(' Testing dropdown directly...');
         console.log('🔍 Elements check:');
         console.log('  - #loading-projects:', $('#loading-projects').length);
         console.log('  - #project-dropdown-menu:', $('#project-dropdown-menu').length);
@@ -3582,7 +3582,7 @@ $(document).ready(function() {
     
     // Test function to populate with known data
     window.testPopulateWithKnownData = function() {
-        console.log('🧪 Testing populate with known data...');
+        console.log(' Testing populate with known data...');
         const testData = [
             {id: "125", title: "81 - น้ำรั่ว", status: "open"},
             {id: "122", title: "บ้าน99 - ออฟฟิต ชั้นลอย", status: "open"},
@@ -4246,7 +4246,7 @@ window.debugKanbanLoading = function() {
 
 // Add manual board test function
 window.testBoardLoading = function() {
-    console.log("🧪 Testing board loading manually...");
+    console.log(" Testing board loading manually...");
     
     const projectId = <?php echo $project_info->id ?? 1; ?>;
     console.log("🎯 Using project ID:", projectId);

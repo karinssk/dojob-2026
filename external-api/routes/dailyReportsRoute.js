@@ -1020,7 +1020,7 @@ router.get('/test-flex-summary', async (req, res) => {
     const LINE_ACCESS_TOKEN = process.env.LINE_ACCESS_TOKEN;
     const REPORT_LINE_USER_ID = process.env.REPORT_LINE_USER_ID;
     
-    console.log('🧪 TEST: Sending daily flex messages to LINE...');
+    console.log(' TEST: Sending daily flex messages to LINE...');
     console.log(`📱 Target LINE User ID: ${REPORT_LINE_USER_ID}`);
     
     const result = await sendDailySummaryFlexReport(dbPool, client_and_project, formatNumberWithCommas, LINE_ACCESS_TOKEN, REPORT_LINE_USER_ID, targetDate);
@@ -1059,7 +1059,7 @@ router.get('/test-flex-preview', async (req, res) => {
     const formatNumberWithCommas = req.app.locals.formatNumberWithCommas;
     const targetDate = req.query.date || null;
     
-    console.log('🧪 TEST: Generating daily flex message preview...');
+    console.log(' TEST: Generating daily flex message preview...');
     
     const dailyData = await generateDailyExpenseData(dbPool, client_and_project, formatNumberWithCommas, targetDate);
     

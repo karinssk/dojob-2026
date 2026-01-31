@@ -363,7 +363,7 @@ $(document).ready(function() {
     
     // Test function
     window.testTableCustomization = function() {
-        console.log('🧪 Testing table customization...');
+        console.log(' Testing table customization...');
         console.log('SortableJS:', typeof Sortable !== 'undefined');
         console.log('Table found:', $('#task-table').length > 0);
         console.log('Columns found:', $('.draggable-column').length);
