@@ -387,21 +387,34 @@ class Line_notify extends Security_Controller {
         // API endpoint for sending manual notifications
         $message = $this->request->getPost('message');
         $type = $this->request->getPost('type') ?: 'info';
-        
+
         if (empty($message)) {
             echo json_encode(['success' => false, 'message' => 'Message is required']);
             return;
         }
-        
+
         $Line_webhook = new \App\Libraries\Line_webhook();
         $formatted_message = "📢 Manual Notification\n\n" . $message;
-        
+
         $success = $Line_webhook->send_notification($formatted_message, ['type' => $type]);
-        
-        echo json_encode([
+
+        $response = [
             'success' => $success,
-            'message' => $success ? 'Notification sent successfully!' : 'Failed to send notification'
-        ]);
+            'message' => $success ? 'Notification sent successfully!' : 'Failed to send notification',
+        ];
+
+        if (!$success) {
+            $response['error_detail'] = $Line_webhook->last_error;
+            $response['debug'] = [
+                'enabled' => get_setting('enable_line_notifications'),
+                'has_token' => !empty(get_setting('line_channel_access_token')),
+                'user_ids' => get_setting('line_user_ids'),
+                'group_ids' => get_setting('line_group_ids'),
+                'formatted_message' => $formatted_message,
+            ];
+        }
+
+        echo json_encode($response);
     }
 
     function get_bot_status() {

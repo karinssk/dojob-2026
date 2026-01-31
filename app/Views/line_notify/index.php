@@ -335,9 +335,10 @@
         })
         .then(response => response.json())
         .then(data => {
+            console.log('[LINE Notify Events] Full response:', JSON.stringify(data, null, 2));
             if (data.success) {
                 let message = data.message || '<?php echo app_lang("today_events_triggered_successfully"); ?>';
-                
+
                 if (data.notifications && data.notifications.length > 0) {
                     let details = '\n\n<?php echo app_lang("today_events"); ?>:\n';
                     data.notifications.forEach(notif => {
@@ -348,13 +349,15 @@
                 } else {
                     appAlert.success(message + '\n\n<?php echo app_lang("no_events_found_for_today"); ?>');
                 }
-                
+
                 setTimeout(refreshLogs, 1000);
             } else {
+                console.error('[LINE Notify Events] FAILED:', JSON.stringify(data, null, 2));
                 appAlert.error(data.message || '<?php echo app_lang("failed_to_trigger_today_events"); ?>');
             }
         })
         .catch(error => {
+            console.error('[LINE Notify Events] Fetch error:', error);
             appAlert.error('<?php echo app_lang("error_triggering_today_events"); ?>: ' + error.message);
         })
         .finally(() => {
@@ -387,15 +390,19 @@
         })
         .then(response => response.json())
         .then(data => {
+            console.log('[LINE Notify] Full response:', JSON.stringify(data, null, 2));
             if (data.success) {
                 appAlert.success(data.message || '<?php echo app_lang("notification_sent_successfully"); ?>');
                 document.getElementById('test-message').value = '';
                 setTimeout(refreshLogs, 1000);
             } else {
-                appAlert.error(data.message || '<?php echo app_lang("failed_to_send_notification"); ?>');
+                console.error('[LINE Notify] FAILED:', data.error_detail || 'unknown');
+                console.error('[LINE Notify] Debug info:', JSON.stringify(data.debug, null, 2));
+                appAlert.error((data.message || '<?php echo app_lang("failed_to_send_notification"); ?>') + (data.error_detail ? ' - ' + data.error_detail : ''));
             }
         })
         .catch(error => {
+            console.error('[LINE Notify] Fetch error:', error);
             appAlert.error('<?php echo app_lang("error_sending_notification"); ?>: ' + error.message);
         })
         .finally(() => {

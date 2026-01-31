@@ -8,6 +8,7 @@ class Line_webhook {
     private $enabled;
     private $user_ids;
     private $group_ids;
+    public $last_error = '';
 
     function __construct() {
         $this->channel_access_token = get_setting('line_channel_access_token');
@@ -71,14 +72,18 @@ class Line_webhook {
      * @return bool Success status
      */
     public function send_notification($message, $options = []) {
+        $this->last_error = '';
+
         if (!$this->enabled || !$this->channel_access_token) {
-            $this->log_notification($message, $options, false, 'LINE notifications disabled or token missing');
+            $this->last_error = 'LINE notifications disabled or token missing';
+            $this->log_notification($message, $options, false, $this->last_error);
             return false;
         }
 
         if (empty($this->user_ids) && empty($this->group_ids)) {
-            log_message('error', 'LINE: No user IDs or group IDs configured');
-            $this->log_notification($message, $options, false, 'No user IDs or group IDs configured');
+            $this->last_error = 'No user IDs or group IDs configured';
+            log_message('error', 'LINE: ' . $this->last_error);
+            $this->log_notification($message, $options, false, $this->last_error);
             return false;
         }
 
@@ -91,11 +96,11 @@ class Line_webhook {
         try {
             $success = true;
             $responses = [];
-            
+
             // Prevent duplicates: Prioritize groups over individual users
             // If groups are configured, only send to groups (not individual users)
             $has_groups = !empty($this->group_ids) && !empty(array_filter($this->group_ids));
-            
+
             if ($has_groups) {
                 // Send to groups only
                 foreach ($this->group_ids as $group_id) {
@@ -127,17 +132,23 @@ class Line_webhook {
                     }
                 }
             }
-            
+
             // Update rate limit counter (temporarily disabled for debugging)
             // $this->update_rate_limit_counter();
-            
+
+            $response_str = implode(', ', $responses);
+            if (!$success) {
+                $this->last_error = $response_str;
+            }
+
             // Log the notification
-            $this->log_notification($message, $options, $success, implode(', ', $responses));
-            
+            $this->log_notification($message, $options, $success, $response_str);
+
             return $success;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            $this->last_error = 'Exception: ' . $e->getMessage();
             log_message('error', 'LINE Messaging API Error: ' . $e->getMessage());
-            $this->log_notification($message, $options, false, 'Exception: ' . $e->getMessage());
+            $this->log_notification($message, $options, false, $this->last_error);
             return false;
         }
     }
