@@ -72,7 +72,7 @@ class Line_expenses_webhook {
                 $christian_year = $year - 543;
                 return sprintf('%04d-%02d-%02d', $christian_year, $month, $day);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             log_message('error', 'Error parsing Buddhist date: ' . $e->getMessage());
         }
 
@@ -93,7 +93,7 @@ class Line_expenses_webhook {
                 $month_name = $this->thai_month_names[$month - 1] ?? 'มกราคม';
                 return "ค่าใช้จ่าย เดือน{$month_name} {$year}";
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             log_message('error', 'Error getting Buddhist month/year: ' . $e->getMessage());
         }
 
@@ -131,6 +131,13 @@ class Line_expenses_webhook {
         if (empty($text) || !is_string($text)) {
             throw new \Exception('Invalid input: text is required');
         }
+
+        // Normalize multi-line input from LINE:
+        // Replace \r\n and \r with \n, then \n- with -, then remaining \n with -
+        $text = str_replace(array("\r\n", "\r"), "\n", $text);
+        $text = str_replace("\n-", "-", $text);
+        $text = str_replace("\n", "-", $text);
+        $text = trim($text, "- \t");
 
         $parts = explode('-', $text);
 
@@ -220,7 +227,7 @@ class Line_expenses_webhook {
             if ($result->getRow()) {
                 return $result->getRow()->percentage / 100;
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             log_message('error', 'Error getting VAT rate: ' . $e->getMessage());
         }
         return 0.07;
@@ -478,8 +485,8 @@ class Line_expenses_webhook {
                 'userDisplayName' => $display_name
             );
 
-        } catch (\Exception $e) {
-            log_message('error', 'LINE Expenses: process_expense error: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            log_message('error', 'LINE Expenses: process_expense error: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
             return array(
                 'success' => false,
                 'message' => "เกิดข้อผิดพลาด: {$e->getMessage()}",
@@ -504,7 +511,7 @@ class Line_expenses_webhook {
             curl_close($ch);
             $data = json_decode($response, true);
             return $data ?: array('displayName' => 'คุณ', 'userId' => $user_id);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return array('displayName' => 'คุณ', 'userId' => $user_id);
         }
     }
@@ -580,7 +587,7 @@ class Line_expenses_webhook {
                 log_message('info', 'LINE Expenses: LINE API call success. code=' . $http_code);
             }
             return array('success' => $success, 'response' => $response);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             log_message('error', 'LINE API error: ' . $e->getMessage());
             return array('success' => false, 'response' => $e->getMessage());
         }
@@ -620,7 +627,7 @@ class Line_expenses_webhook {
                 'file_size' => filesize($file_path),
                 'file_path' => $file_path
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             log_message('error', 'Error downloading LINE image: ' . $e->getMessage());
             return null;
         }

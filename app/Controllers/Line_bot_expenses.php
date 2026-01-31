@@ -533,7 +533,7 @@ class Line_bot_expenses extends Security_Controller {
             }
 
             echo json_encode(array("data" => $data));
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             log_message('error', 'LINE Expenses: expense_logs_list_data error: ' . $e->getMessage());
             echo json_encode(array("data" => array(), "error" => $e->getMessage()));
         }
@@ -600,17 +600,35 @@ class Line_bot_expenses extends Security_Controller {
 
         // User sessions stored in settings
         foreach ($events['events'] as $event) {
-            $this->_capture_room($event);
-            $this->_capture_user($event);
+            try {
+                $this->_capture_room($event);
+            } catch (\Throwable $e) {
+                log_message('error', 'LINE Expenses: _capture_room error: ' . $e->getMessage());
+            }
+
+            try {
+                $this->_capture_user($event);
+            } catch (\Throwable $e) {
+                log_message('error', 'LINE Expenses: _capture_user error: ' . $e->getMessage());
+            }
 
             if ($event['type'] === 'message') {
                 $user_id = $event['source']['userId'] ?? '';
                 $reply_token = $event['replyToken'] ?? '';
 
-                if ($event['message']['type'] === 'image') {
-                    $this->_handle_image_message($event, $lib, $user_id, $reply_token);
-                } else if ($event['message']['type'] === 'text') {
-                    $this->_handle_text_message($event, $lib, $user_id, $reply_token);
+                try {
+                    if ($event['message']['type'] === 'image') {
+                        $this->_handle_image_message($event, $lib, $user_id, $reply_token);
+                    } else if ($event['message']['type'] === 'text') {
+                        $this->_handle_text_message($event, $lib, $user_id, $reply_token);
+                    }
+                } catch (\Throwable $e) {
+                    log_message('error', 'LINE Expenses: Unhandled error in webhook event: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
+                    try {
+                        $lib->send_reply($reply_token, "เกิดข้อผิดพลาด: {$e->getMessage()}");
+                    } catch (\Throwable $e2) {
+                        log_message('error', 'LINE Expenses: Failed to send error reply: ' . $e2->getMessage());
+                    }
                 }
             }
         }
@@ -642,8 +660,8 @@ class Line_bot_expenses extends Security_Controller {
             // Clear session
             $this->Settings_model->save_setting($session_key, '');
 
-        } catch (\Exception $e) {
-            log_message('error', 'LINE Expenses: Error processing text: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            log_message('error', 'LINE Expenses: Error processing text: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
             $lib->send_reply($reply_token, "รูปแบบข้อมูลไม่ถูกต้อง: {$e->getMessage()}");
         }
     }
