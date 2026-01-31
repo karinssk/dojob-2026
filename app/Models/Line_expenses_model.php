@@ -229,6 +229,80 @@ class Line_expenses_model extends Crud_model {
         return null;
     }
 
+    function get_rise_user_mapping_info($line_user_id) {
+        if (!$line_user_id) {
+            return array(
+                "rise_user_id" => 1,
+                "source" => "fallback",
+                "reason" => "empty_line_user_id"
+            );
+        }
+
+        if ($this->db->tableExists('user_mappings_arr')) {
+            $table = $this->db->table($this->db->getPrefix() . 'user_mappings_arr');
+            $row = $table->where('line_user_id', $line_user_id)->get()->getRow();
+            if ($row && isset($row->rise_user_id)) {
+                return array(
+                    "rise_user_id" => $row->rise_user_id,
+                    "source" => "user_mappings_arr.line_user_id",
+                    "reason" => ""
+                );
+            }
+
+            $rows = $table->select('rise_user_id, line_user_ids')->where('line_user_ids IS NOT NULL', null, false)->get()->getResult();
+            foreach ($rows as $r) {
+                $ids = $this->_parse_line_user_ids($r->line_user_ids ?? "");
+                if (in_array($line_user_id, $ids, true)) {
+                    return array(
+                        "rise_user_id" => $r->rise_user_id,
+                        "source" => "user_mappings_arr.line_user_ids",
+                        "reason" => ""
+                    );
+                }
+            }
+        }
+
+        if ($this->db->tableExists('users')) {
+            $users_table = $this->db->table($this->db->getPrefix() . 'users');
+            $rows = $users_table->select('id, line_user_id')->where('line_user_id IS NOT NULL', null, false)->get()->getResult();
+            foreach ($rows as $r) {
+                $ids = $this->_parse_line_user_ids($r->line_user_id ?? "");
+                if (in_array($line_user_id, $ids, true)) {
+                    return array(
+                        "rise_user_id" => $r->id,
+                        "source" => "users.line_user_id",
+                        "reason" => ""
+                    );
+                }
+            }
+        }
+
+        $this->use_table('user_mappings');
+        $result = $this->db_builder->where('line_user_id', $line_user_id)->get();
+        if ($result->getRow()) {
+            return array(
+                "rise_user_id" => $result->getRow()->rise_user_id,
+                "source" => "user_mappings.line_user_id",
+                "reason" => ""
+            );
+        }
+
+        $created_id = $this->find_or_create_rise_user("LINE User", $line_user_id);
+        if ($created_id) {
+            return array(
+                "rise_user_id" => $created_id,
+                "source" => "created_user",
+                "reason" => ""
+            );
+        }
+
+        return array(
+            "rise_user_id" => 1,
+            "source" => "fallback",
+            "reason" => "no_mapping_found"
+        );
+    }
+
     function save_user_mapping($line_user_id, $display_name, $rise_user_id) {
         if ($this->db->tableExists('user_mappings_arr')) {
             $table_name = $this->db->getPrefix() . 'user_mappings_arr';
@@ -381,7 +455,7 @@ class Line_expenses_model extends Crud_model {
         $db_prefix = $this->db->getPrefix();
         $limit = intval($limit) > 0 ? intval($limit) : 200;
 
-        $sql = "SELECT al.created_at AS log_created_at, e.id AS expense_id, e.expense_date, e.title,
+        $sql = "SELECT al.created_at AS log_created_at, al.changes, e.id AS expense_id, e.expense_date, e.title,
                        e.amount, e.category_id, e.project_id, e.client_id, e.user_id,
                        p.title AS project_name, c.company_name AS client_name,
                        cat.title AS category_name,

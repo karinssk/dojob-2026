@@ -17,6 +17,9 @@
                 <th><?php echo app_lang('user'); ?></th>
                 <th><?php echo app_lang('user_id'); ?></th>
                 <th><?php echo app_lang('mapping_status'); ?></th>
+                <th><?php echo app_lang('line_user_id'); ?></th>
+                <th><?php echo app_lang('mapping_source'); ?></th>
+                <th><?php echo app_lang('mapping_reason'); ?></th>
                 <th><?php echo app_lang('expense_id'); ?></th>
             </tr>
         </thead>
@@ -42,7 +45,10 @@
                 {data: 7},
                 {data: 8},
                 {data: 9},
-                {data: 10}
+                {data: 10},
+                {data: 11},
+                {data: 12},
+                {data: 13}
             ],
             order: [[0, "desc"]],
             responsive: true,

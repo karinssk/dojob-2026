@@ -362,33 +362,25 @@ class Line_expenses_webhook {
 
     // ========== GET RISE USER FROM LINE USER ==========
 
-    private function get_rise_user_id($line_user_id) {
-        $rise_user_id = $this->Line_expenses_model->get_rise_user_id_from_line_id($line_user_id);
+    private function get_rise_user_mapping($line_user_id, $display_name) {
+        $mapping = $this->Line_expenses_model->get_rise_user_mapping_info($line_user_id);
+        $rise_user_id = $mapping["rise_user_id"] ?? 1;
 
-        if ($rise_user_id) {
-            return $rise_user_id;
-        }
-
-        // Get LINE profile and create mapping
-        $profile = $this->get_user_profile($line_user_id);
-        $display_name = $profile['displayName'] ?? 'คุณ';
-
-        $rise_user_id = $this->Line_expenses_model->find_or_create_rise_user($display_name, $line_user_id);
-
-        if ($rise_user_id) {
+        if (($mapping["source"] ?? "") === "created_user") {
             $this->Line_expenses_model->save_user_mapping($line_user_id, $display_name, $rise_user_id);
         }
 
-        return $rise_user_id ?: 1;
+        return $mapping;
     }
 
     // ========== PROCESS EXPENSE ==========
 
     public function process_expense($line_user_id, $expense_data, $files = array()) {
         try {
-            $rise_user_id = $this->get_rise_user_id($line_user_id);
             $profile = $this->get_user_profile($line_user_id);
             $display_name = $profile['displayName'] ?? 'คุณ';
+            $mapping = $this->get_rise_user_mapping($line_user_id, $display_name);
+            $rise_user_id = $mapping["rise_user_id"] ?? 1;
 
             $db_prefix = $this->db->getPrefix();
 
@@ -450,12 +442,18 @@ class Line_expenses_webhook {
             $expense_id = $this->db->insertID();
 
             // Log activity
+            $mapping_meta = json_encode(array(
+                "line_user_id" => $line_user_id,
+                "mapping_source" => $mapping["source"] ?? "fallback",
+                "mapping_reason" => $mapping["reason"] ?? ""
+            ));
+
             $this->db->query("
                 INSERT INTO {$db_prefix}activity_logs (
                     created_at, created_by, action, log_type, log_type_title,
                     log_type_id, changes, log_for, log_for_id, log_for2, log_for_id2, deleted
-                ) VALUES (NOW(), ?, 'created', 'expense', ?, ?, NULL, 'project', ?, NULL, NULL, 0)
-            ", array($rise_user_id, $title, $expense_id, $client_project['projectId']));
+                ) VALUES (NOW(), ?, 'created', 'expense', ?, ?, ?, 'project', ?, NULL, NULL, 0)
+            ", array($rise_user_id, $title, $expense_id, $mapping_meta, $client_project['projectId']));
 
             // Get category name
             $cat_obj = $this->Line_expenses_model->find_category_by_id($category_id);

@@ -502,6 +502,17 @@ class Line_bot_expenses extends Security_Controller {
 
         foreach ($logs as $row) {
             $mapping_status = $row->user_id == 1 ? app_lang('fallback_user_id') : app_lang('mapped_user_id');
+            $line_user_id = "";
+            $mapping_source = "";
+            $mapping_reason = "";
+            if ($row->changes) {
+                $decoded = json_decode($row->changes, true);
+                if (is_array($decoded)) {
+                    $line_user_id = $decoded["line_user_id"] ?? "";
+                    $mapping_source = $decoded["mapping_source"] ?? "";
+                    $mapping_reason = $decoded["mapping_reason"] ?? "";
+                }
+            }
             $data[] = array(
                 $row->log_created_at,
                 $row->expense_date,
@@ -513,6 +524,9 @@ class Line_bot_expenses extends Security_Controller {
                 $row->user_name ?: 'Unknown',
                 $row->user_id,
                 $mapping_status,
+                $line_user_id,
+                $mapping_source,
+                $mapping_reason,
                 $row->expense_id
             );
         }
