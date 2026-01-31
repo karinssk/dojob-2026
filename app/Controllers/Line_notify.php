@@ -394,7 +394,7 @@ class Line_notify extends Security_Controller {
         }
 
         $Line_webhook = new \App\Libraries\Line_webhook();
-        $formatted_message = "📢 Manual Notification\n\n" . $message;
+        $formatted_message = " Manual Notification\n\n" . $message;
 
         $success = $Line_webhook->send_notification($formatted_message, ['type' => $type]);
         log_message('info', 'LINE Notify: manual notification result=' . ($success ? 'success' : 'fail') . ' error=' . ($Line_webhook->last_error ?? ''));
