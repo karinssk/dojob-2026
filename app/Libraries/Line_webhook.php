@@ -101,16 +101,14 @@ class Line_webhook {
                 foreach ($this->group_ids as $group_id) {
                     $group_id = trim($group_id);
                     if (!empty($group_id)) {
-                        // Add delay between messages
                         if (count($responses) > 0) {
-                            sleep(1); // 1 second delay between messages
+                            sleep(1);
                         }
-                        
                         $result = $this->send_push_message($group_id, $message, 'group');
-                        if (!$result) {
+                        if (!$result['success']) {
                             $success = false;
                         }
-                        $responses[] = "Group {$group_id}: " . ($result ? 'success' : 'failed');
+                        $responses[] = "Group {$group_id}: " . ($result['success'] ? 'OK' : $result['error']);
                     }
                 }
             } else {
@@ -118,16 +116,14 @@ class Line_webhook {
                 foreach ($this->user_ids as $user_id) {
                     $user_id = trim($user_id);
                     if (!empty($user_id)) {
-                        // Add delay between messages to respect rate limits
                         if (count($responses) > 0) {
-                            sleep(1); // 1 second delay between messages
+                            sleep(1);
                         }
-                        
                         $result = $this->send_push_message($user_id, $message, 'user');
-                        if (!$result) {
+                        if (!$result['success']) {
                             $success = false;
                         }
-                        $responses[] = "User {$user_id}: " . ($result ? 'success' : 'failed');
+                        $responses[] = "User {$user_id}: " . ($result['success'] ? 'OK' : $result['error']);
                     }
                 }
             }
@@ -409,7 +405,10 @@ class Line_webhook {
      */
     public function send_push_message($to, $message, $type = 'user') {
         $url = 'https://api.line.me/v2/bot/message/push';
-        
+
+        // LINE doesn't support markdown - strip ** markers
+        $message = str_replace('**', '', $message);
+
         $payload = [
             'to' => $to,
             'messages' => [
@@ -421,11 +420,11 @@ class Line_webhook {
         ];
 
         $ch = curl_init();
-        
+
         curl_setopt_array($ch, [
             CURLOPT_URL => $url,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Authorization: Bearer ' . $this->channel_access_token,
@@ -441,31 +440,19 @@ class Line_webhook {
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
-        
+
         curl_close($ch);
 
-        // Debug log all the details
-        error_log("LINE API Debug - URL: $url");
-        error_log("LINE API Debug - Payload: " . json_encode($payload));
-        error_log("LINE API Debug - Token: " . substr($this->channel_access_token, 0, 10) . "...");
-        error_log("LINE API Debug - HTTP Code: $http_code");
-        error_log("LINE API Debug - Response: $response");
-        error_log("LINE API Debug - cURL Error: $error");
+        log_message('info', "LINE Push to {$type} {$to}: HTTP {$http_code} | Response: {$response} | cURL: {$error}");
 
         if ($error) {
-            log_message('error', "LINE Push Message cURL Error ({$type} {$to}): " . $error);
-            error_log("LINE Push Message cURL Error ({$type} {$to}): " . $error);
-            return false;
+            return ['success' => false, 'error' => "cURL Error: {$error}"];
         }
 
         if ($http_code >= 200 && $http_code < 300) {
-            log_message('info', "LINE Push Message sent successfully to {$type} {$to}. HTTP Code: " . $http_code);
-            error_log("LINE Push Message sent successfully to {$type} {$to}. HTTP Code: " . $http_code);
-            return true;
+            return ['success' => true, 'error' => ''];
         } else {
-            log_message('error', "LINE Push Message failed to {$type} {$to}. HTTP Code: " . $http_code . ', Response: ' . $response);
-            error_log("LINE Push Message failed to {$type} {$to}. HTTP Code: " . $http_code . ', Response: ' . $response);
-            return false;
+            return ['success' => false, 'error' => $this->_parse_line_error($http_code, $response)];
         }
     }
 
@@ -477,7 +464,7 @@ class Line_webhook {
      */
     private function send_flex_message($to, $flex_content) {
         $url = 'https://api.line.me/v2/bot/message/push';
-        
+
         $payload = [
             'to' => $to,
             'messages' => [
@@ -489,14 +476,12 @@ class Line_webhook {
             ]
         ];
 
-        log_message('info', 'LINE Flex Message: Sending to ' . $to . ' - Payload: ' . json_encode($payload));
-
         $ch = curl_init();
-        
+
         curl_setopt_array($ch, [
             CURLOPT_URL => $url,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Authorization: Bearer ' . $this->channel_access_token,
@@ -512,20 +497,19 @@ class Line_webhook {
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
-        
+
         curl_close($ch);
 
+        log_message('info', "LINE Flex to {$to}: HTTP {$http_code} | Response: {$response} | cURL: {$error}");
+
         if ($error) {
-            log_message('error', 'LINE Flex Message cURL Error: ' . $error);
-            return false;
+            return ['success' => false, 'error' => "cURL Error: {$error}"];
         }
 
         if ($http_code >= 200 && $http_code < 300) {
-            log_message('info', "LINE Flex Message sent successfully to {$to}. HTTP Code: " . $http_code);
-            return true;
+            return ['success' => true, 'error' => ''];
         } else {
-            log_message('error', "LINE Flex Message failed to {$to}. HTTP Code: " . $http_code . ', Response: ' . $response);
-            return false;
+            return ['success' => false, 'error' => $this->_parse_line_error($http_code, $response)];
         }
     }
 
@@ -533,6 +517,24 @@ class Line_webhook {
      * Test LINE Messaging API connection
      * @return array Test result with status and message
      */
+    private function _parse_line_error($http_code, $response) {
+        $decoded = json_decode($response, true);
+        $error_msg = "HTTP {$http_code}";
+        if ($decoded && isset($decoded['message'])) {
+            $error_msg .= ": {$decoded['message']}";
+            if (!empty($decoded['details'])) {
+                $detail_msgs = [];
+                foreach ($decoded['details'] as $d) {
+                    $detail_msgs[] = ($d['property'] ?? '') . ' ' . ($d['message'] ?? '');
+                }
+                $error_msg .= ' [' . implode('; ', $detail_msgs) . ']';
+            }
+        } else {
+            $error_msg .= ": {$response}";
+        }
+        return $error_msg;
+    }
+
     public function test_connection() {
         if (!$this->channel_access_token) {
             return [
@@ -874,10 +876,10 @@ class Line_webhook {
                         sleep(1);
                     }
                     $result = $this->send_flex_message($group_id, $flex_content);
-                    if (!$result) {
+                    if (!$result['success']) {
                         $success = false;
                     }
-                    $responses[] = "Group {$group_id}: " . ($result ? 'success' : 'failed');
+                    $responses[] = "Group {$group_id}: " . ($result['success'] ? 'OK' : $result['error']);
                 }
             }
         } else {
@@ -888,10 +890,10 @@ class Line_webhook {
                         sleep(1);
                     }
                     $result = $this->send_flex_message($user_id, $flex_content);
-                    if (!$result) {
+                    if (!$result['success']) {
                         $success = false;
                     }
-                    $responses[] = "User {$user_id}: " . ($result ? 'success' : 'failed');
+                    $responses[] = "User {$user_id}: " . ($result['success'] ? 'OK' : $result['error']);
                 }
             }
         }

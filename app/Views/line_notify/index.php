@@ -186,6 +186,7 @@
                                                 <th><?php echo app_lang('event_task'); ?></th>
                                                 <th><?php echo app_lang('status'); ?></th>
                                                 <th><?php echo app_lang('message'); ?></th>
+                                                <th>Response / Error</th>
                                             </tr>
                                         </thead>
                                         <tbody id="logs-tbody">
@@ -207,11 +208,18 @@
                                                     <td class="text-truncate" style="max-width: 200px;" title="<?php echo htmlspecialchars($log->message); ?>">
                                                         <?php echo character_limiter($log->message, 50); ?>
                                                     </td>
+                                                    <td class="text-truncate" style="max-width: 300px;" title="<?php echo htmlspecialchars($log->response ?? ''); ?>">
+                                                        <?php if (!empty($log->response)): ?>
+                                                            <small class="<?php echo $log->status === 'sent' ? 'text-success' : 'text-danger'; ?>"><?php echo htmlspecialchars($log->response); ?></small>
+                                                        <?php else: ?>
+                                                            <small class="text-muted">-</small>
+                                                        <?php endif; ?>
+                                                    </td>
                                                 </tr>
                                                 <?php endforeach; ?>
                                             <?php else: ?>
                                                 <tr>
-                                                    <td colspan="5" class="text-center text-muted">
+                                                    <td colspan="6" class="text-center text-muted">
                                                         <?php echo app_lang('no_notification_logs_found'); ?>
                                                     </td>
                                                 </tr>
@@ -406,16 +414,18 @@
                 tbody.innerHTML = '';
                 
                 if (data.logs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted"><?php echo app_lang("no_notification_logs_found"); ?></td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted"><?php echo app_lang("no_notification_logs_found"); ?></td></tr>';
                 } else {
                     data.logs.forEach(log => {
-                        const statusBadge = log.status === 'sent' 
+                        const statusBadge = log.status === 'sent'
                             ? '<span class="badge bg-success"><?php echo app_lang("sent"); ?></span>'
                             : '<span class="badge bg-danger"><?php echo app_lang("failed"); ?></span>';
-                        
+
                         const eventTask = log.event_title || log.task_title || '-';
                         const message = log.message.length > 50 ? log.message.substring(0, 50) + '...' : log.message;
-                        
+                        const response = log.response || '-';
+                        const responseClass = log.status === 'sent' ? 'text-success' : 'text-danger';
+
                         tbody.innerHTML += `
                             <tr>
                                 <td>${log.sent_at}</td>
@@ -423,6 +433,7 @@
                                 <td>${eventTask}</td>
                                 <td>${statusBadge}</td>
                                 <td class="text-truncate" style="max-width: 200px;" title="${log.message}">${message}</td>
+                                <td class="text-truncate" style="max-width: 300px;" title="${response}"><small class="${responseClass}">${response}</small></td>
                             </tr>
                         `;
                     });
