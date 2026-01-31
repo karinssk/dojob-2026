@@ -18,7 +18,7 @@ function getUsersList(callback) {
     dataType: "json",
     timeout: 10000, // 10 second timeout
     success: function (response) {
-      console.log("✅ Users list response:", response);
+      console.log(" Users list response:", response);
       if (
         response &&
         response.success &&
@@ -40,7 +40,7 @@ function getUsersList(callback) {
           }
         });
         console.log(
-          "✅ Processed " + response.users.length + " users successfully"
+          " Processed " + response.users.length + " users successfully"
         );
         callback(response.users);
       } else {
@@ -211,7 +211,7 @@ function showAssigneeDropdown($container, taskId, currentAssignee) {
       // Save assignee
       saveTaskAssignee(taskId, assigneeId, function (success) {
         if (success) {
-          console.log("✅ Assignee updated successfully");
+          console.log(" Assignee updated successfully");
           var assigneeData = null;
           var assigneeName = "Unassigned";
           if (assigneeId > 0) {
@@ -574,7 +574,7 @@ function showCollaboratorsDropdown($container, taskId, currentCollaborators) {
       // Save collaborators
       saveTaskCollaborators(taskId, selectedIds, function (success) {
         if (success) {
-          console.log("✅ Collaborators updated successfully");
+          console.log(" Collaborators updated successfully");
           
           var collaboratorCount = selectedIds.length;
           var message = collaboratorCount === 0 ? 
@@ -651,7 +651,7 @@ function saveTaskAssignee(taskId, assigneeId, callback) {
     },
     dataType: "json",
     success: function (response) {
-      console.log("✅ Task assignee saved successfully:", response);
+      console.log(" Task assignee saved successfully:", response);
       if (response && response.success) {
         callback(true);
       } else {
@@ -696,7 +696,7 @@ function saveTaskCollaborators(taskId, collaboratorIds, callback) {
     },
     dataType: "json",
     success: function (response) {
-      console.log("✅ Task collaborators saved successfully:", response);
+      console.log(" Task collaborators saved successfully:", response);
       if (response && response.success) {
         callback(true);
       } else {
@@ -940,7 +940,7 @@ function loadAndDisplayCollaborators($container, collaboratorIds) {
   getUsersList(function (users) {
     if (users && users.length > 0) {
       console.log(
-        "✅ Loaded users with images for collaborators display:",
+        " Loaded users with images for collaborators display:",
         users.length
       );
       console.log("🖼️ Sample user with image:", users[0]);
@@ -964,7 +964,7 @@ function loadAndDisplayAssignee($container, assigneeId) {
       });
 
       if (assigneeData) {
-        console.log("✅ Found assignee data with image:", assigneeData.name);
+        console.log(" Found assignee data with image:", assigneeData.name);
         updateAssigneeDisplay($container, assigneeId, assigneeData, users);
       } else {
         console.error("❌ Assignee not found in users list:", assigneeId);

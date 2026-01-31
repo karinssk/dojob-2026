@@ -1544,10 +1544,10 @@ window.loadProjectDropdown = function() {
         dataType: 'json',
         timeout: 10000, // 10 second timeout
         success: function(response) {
-            console.log('✅ API Response received:', response);
-            console.log('✅ Response type:', typeof response);
-            console.log('✅ Response success:', response.success);
-            console.log('✅ Response data length:', response.data ? response.data.length : 'no data');
+            console.log(' API Response received:', response);
+            console.log(' Response type:', typeof response);
+            console.log(' Response success:', response.success);
+            console.log(' Response data length:', response.data ? response.data.length : 'no data');
             
             // Check if response is a string (HTML) instead of JSON
             if (typeof response === 'string') {
@@ -1596,11 +1596,11 @@ window.tryFallbackProjectsAPI = function() {
         type: 'GET',
         dataType: 'json',
         success: function(response) {
-            console.log('✅ Fallback API Response:', response);
-            console.log('✅ Response type:', typeof response);
-            console.log('✅ Response.success:', response.success);
-            console.log('✅ Response.data:', response.data);
-            console.log('✅ Response.data length:', response.data ? response.data.length : 'no data');
+            console.log(' Fallback API Response:', response);
+            console.log(' Response type:', typeof response);
+            console.log(' Response.success:', response.success);
+            console.log(' Response.data:', response.data);
+            console.log(' Response.data length:', response.data ? response.data.length : 'no data');
             
             if (response.success && response.data) {
                 console.log('📋 Projects found via fallback:', response.data.length);
@@ -1611,7 +1611,7 @@ window.tryFallbackProjectsAPI = function() {
                 try {
                     // Call the function and log the result
                     const result = populateProjectDropdown(response.data);
-                    console.log('✅ populateProjectDropdown completed successfully, result:', result);
+                    console.log(' populateProjectDropdown completed successfully, result:', result);
                 } catch (error) {
                     console.error('❌ Error in populateProjectDropdown:', error);
                     console.error('❌ Error stack:', error.stack);
@@ -1687,7 +1687,7 @@ window.populateProjectDropdown = function(projects) {
             `);
             dropdown.append(item);
             addedCount++;
-            console.log('✅ Added project to dropdown:', project.title);
+            console.log(' Added project to dropdown:', project.title);
         } else {
             console.log('⏭️ Skipped current project:', project.title);
         }
@@ -1705,7 +1705,7 @@ window.populateProjectDropdown = function(projects) {
         feather.replace();
     }
     
-    console.log('✅ populateProjectDropdown completed');
+    console.log(' populateProjectDropdown completed');
 };
 
 window.addRecentProjectsToDropdown = function(dropdown, currentProjectId) {
@@ -1778,7 +1778,7 @@ window.checkAuthStatus = function() {
         success: function(response) {
             console.log('🔐 Auth Response:', response);
             if (response.authenticated) {
-                console.log('✅ User is authenticated, ID:', response.user_id);
+                console.log(' User is authenticated, ID:', response.user_id);
                 // Now try to load projects directly (skip auth check)
                 console.log('🚀 Calling loadProjectDropdown directly...');
                 loadProjectDropdown();
@@ -1825,7 +1825,7 @@ window.testProjectsAPI = function() {
     // Also test with jQuery
     $.get(baseUrl + 'api/projects')
         .done(function(data) {
-            console.log('✅ jQuery Success:', data);
+            console.log(' jQuery Success:', data);
         })
         .fail(function(xhr, status, error) {
             console.error('❌ jQuery Error:', {
@@ -1884,7 +1884,7 @@ window.reorderTableColumns = function(oldIndex, newIndex) {
         }
     });
     
-    console.log(`✅ Processed ${rowsProcessed} rows`);
+    console.log(` Processed ${rowsProcessed} rows`);
     
     // Add visual feedback by temporarily highlighting the moved column
     setTimeout(function() {
@@ -1903,7 +1903,7 @@ window.reorderTableColumns = function(oldIndex, newIndex) {
         }, 2000);
     }, 100);
     
-    console.log(`✅ Column reordered successfully! (${rowsProcessed} rows updated)`);
+    console.log(` Column reordered successfully! (${rowsProcessed} rows updated)`);
     
     // Try to call saveColumnOrder if it exists
     if (typeof saveColumnOrder === 'function') {
@@ -1938,8 +1938,8 @@ window.saveColumnOrder = function() {
         success: function(response) {
             console.log('📡 AJAX Success - Full response:', response);
             if (response && response.success === true) {
-                console.log('✅ Column order saved to database successfully!', columnOrder);
-                console.log('✅ Server response:', response.message);
+                console.log(' Column order saved to database successfully!', columnOrder);
+                console.log(' Server response:', response.message);
             } else {
                 console.error('❌ Failed to save column order:', response ? response.message : 'No response');
                 console.error('❌ Full response object:', response);
@@ -1958,8 +1958,8 @@ window.saveColumnOrder = function() {
     });
 };
 
-console.log("✅ Global reorderTableColumns function defined");
-console.log("✅ Global saveColumnOrder function defined");
+console.log(" Global reorderTableColumns function defined");
+console.log(" Global saveColumnOrder function defined");
 
 // Test function for debugging
 window.testTablePreferences = function() {
@@ -1970,7 +1970,7 @@ window.testTablePreferences = function() {
         url: baseUrl + 'table_preferences/test',
         type: 'GET',
         success: function(response) {
-            console.log('✅ Controller test response:', response);
+            console.log(' Controller test response:', response);
         },
         error: function(xhr, status, error) {
             console.error('❌ Controller test failed:', error);
@@ -1987,7 +1987,7 @@ window.testTablePreferences = function() {
             column_order: ['test1', 'test2', 'test3']
         },
         success: function(response) {
-            console.log('✅ Save test response:', response);
+            console.log(' Save test response:', response);
         },
         error: function(xhr, status, error) {
             console.error('❌ Save test failed:', error);
@@ -1996,7 +1996,7 @@ window.testTablePreferences = function() {
     });
 };
 
-console.log("✅ Test function available: window.testTablePreferences()");
+console.log(" Test function available: window.testTablePreferences()");
 </script>
 
 <!-- Load Task List Modules in Order -->
@@ -2066,7 +2066,7 @@ $(document).ready(function() {
         return;
     }
     
-    console.log("✅ All modular functions loaded successfully!");
+    console.log(" All modular functions loaded successfully!");
     
     // Debug: Check what's actually in the DOM
     setTimeout(function() {
@@ -2121,20 +2121,20 @@ $(document).ready(function() {
         // Initialize feather icons
         if (typeof feather !== 'undefined') {
             feather.replace();
-            console.log('✅ Feather icons initialized');
+            console.log(' Feather icons initialized');
         }
         
         // Global test functions for debugging
         window.testModularSystem = function() {
             console.log('🧪 Testing modular system...');
             
-            console.log('✅ Available test functions:');
+            console.log(' Available test functions:');
             console.log('  - testTaskListFunctions()');
             console.log('  - testEventHandlers()'); 
             console.log('  - testAllFunctionality()');
             console.log('  - testHierarchicalView()');
             
-            console.log('✅ Available modules loaded:');
+            console.log(' Available modules loaded:');
             console.log('  - Core:', typeof initTaskList);
             console.log('  - Drag Drop:', typeof initDragDrop);
             console.log('  - Inline Creation:', typeof initInlineTaskCreation);
@@ -2146,7 +2146,7 @@ $(document).ready(function() {
             console.log('  - Deadlines:', typeof showDeadlinePicker);
             console.log('  - Utils:', typeof initCheckboxes);
             
-            return "✅ Modular system test complete!";
+            return " Modular system test complete!";
         };
         
         // Add test function for add buttons
@@ -2188,7 +2188,7 @@ $(document).ready(function() {
                 $addRootButtons.first().click();
             }
             
-            alert(`✅ Add Buttons Test Complete!\n\nRoot buttons: ${$addRootButtons.length}\nSubtask buttons: ${$addSubtaskButtons.length}\n\nCheck console for details.`);
+            alert(` Add Buttons Test Complete!\n\nRoot buttons: ${$addRootButtons.length}\nSubtask buttons: ${$addSubtaskButtons.length}\n\nCheck console for details.`);
         };
         
         // Add test function for expand/collapse
@@ -2214,7 +2214,7 @@ $(document).ready(function() {
                 $expandButtons.first().click();
             }
             
-            alert(`✅ Expand/Collapse Test Complete!\n\nExpand buttons: ${$expandButtons.length}\n\nCheck console for details.`);
+            alert(` Expand/Collapse Test Complete!\n\nExpand buttons: ${$expandButtons.length}\n\nCheck console for details.`);
         };
         
         // Add test function for inline editing
@@ -2241,7 +2241,7 @@ $(document).ready(function() {
                 $titleDisplays.first().click();
             }
             
-            alert(`✅ Inline Editing Test Complete!\n\nTitle displays: ${$titleDisplays.length}\n\nCheck console for details.`);
+            alert(` Inline Editing Test Complete!\n\nTitle displays: ${$titleDisplays.length}\n\nCheck console for details.`);
         };
         
         console.log('🎯 Available test functions:');
@@ -2295,7 +2295,7 @@ $(document).ready(function() {
         // Use the kanban board JavaScript class instead of AJAX
         if (window.initKanbanBoard) {
             const kanbanBoard = window.initKanbanBoard(projectId);
-            console.log('✅ Kanban board initialized with Node.js API');
+            console.log(' Kanban board initialized with Node.js API');
         } else {
             console.error('❌ Kanban board initialization function not found');
         }
@@ -2361,7 +2361,7 @@ $(document).ready(function() {
         // For now, let's just add mock images to test the display
         setTimeout(function() {
             addMockPreviewImages();
-            console.log('✅ Mock images added for testing');
+            console.log(' Mock images added for testing');
         }, 500);
     };
     
@@ -2404,7 +2404,7 @@ $(document).ready(function() {
                 const $title = $card.find('.kanban-task-title, .task-title, .card-title, h5, h6').first();
                 if ($title.length) {
                     $title.after($previewImage);
-                    console.log(`✅ Used existing image for task ${taskId}`);
+                    console.log(` Used existing image for task ${taskId}`);
                 }
             }
         }
@@ -2448,7 +2448,7 @@ $(document).ready(function() {
                      style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 3px; margin: 8px 0; border: 1px solid #dfe1e6;"
                      onerror="handleImageError(this, ${JSON.stringify(possibleUrls)})">
             `);
-            console.log(`✅ Added preview image for task ${$card.data('task-id')} with URL: ${primaryUrl}`);
+            console.log(` Added preview image for task ${$card.data('task-id')} with URL: ${primaryUrl}`);
         }
     };
     
@@ -2514,7 +2514,7 @@ $(document).ready(function() {
                                  style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 3px; border: 1px solid #dfe1e6;">
                         </div>
                     `);
-                    console.log(`✅ Added mock image to card ${index}`);
+                    console.log(` Added mock image to card ${index}`);
                 } else {
                     // Fallback: prepend to card
                     $card.prepend(`
@@ -2525,13 +2525,13 @@ $(document).ready(function() {
                                  style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 3px; border: 1px solid #dfe1e6;">
                         </div>
                     `);
-                    console.log(`✅ Added mock image to card ${index} (prepended)`);
+                    console.log(` Added mock image to card ${index} (prepended)`);
                 }
             }
         });
         
         const addedCount = $('.kanban-task-preview-image.mock-image').length;
-        console.log(`✅ Added ${addedCount} mock preview images`);
+        console.log(` Added ${addedCount} mock preview images`);
         
         return addedCount;
     };
@@ -2563,10 +2563,10 @@ $(document).ready(function() {
             if (taskId) {
                 // Use our new TaskModal system
                 if (window.taskModal && typeof window.taskModal.openTask === 'function') {
-                    console.log("✅ Using TaskModal.openTask");
+                    console.log(" Using TaskModal.openTask");
                     window.taskModal.openTask(taskId);
                 } else if (window.TaskModal) {
-                    console.log("✅ Creating new TaskModal instance");
+                    console.log(" Creating new TaskModal instance");
                     window.taskModal = new TaskModal();
                     window.taskModal.openTask(taskId);
                 } else {
@@ -2664,7 +2664,7 @@ $(document).ready(function() {
                     id: taskId // Some endpoints might expect 'id' instead
                 },
                 success: function(response) {
-                    console.log('✅ Task status updated successfully');
+                    console.log(' Task status updated successfully');
                     // Optionally show success message
                     if (response && response.success === false) {
                         tryUpdate(index + 1);
@@ -2714,7 +2714,7 @@ $(document).ready(function() {
                     console.log('🔄 Started dragging column:', evt.item.dataset.column);
                 },
                 onEnd: function(evt) {
-                    console.log('✅ Finished dragging column');
+                    console.log(' Finished dragging column');
                     reorderTableColumns(evt.oldIndex, evt.newIndex);
                 }
             });
@@ -2846,7 +2846,7 @@ $(document).ready(function() {
             console.log('Columns found:', $('.kanban-column, [data-status]').length);
             console.log('Preview images:', $('.kanban-task-preview-image').length);
             
-            alert('✅ Kanban test complete! Check console for details.');
+            alert(' Kanban test complete! Check console for details.');
         }, 2000);
     };
     
@@ -2875,7 +2875,7 @@ $(document).ready(function() {
                 console.log(`Total images now: ${totalImages}`);
                 
                 // Show results
-                alert(`✅ Image test complete!\n\nTask cards found: ${$allCards.length}\nMock images added: ${mockCount}\nTotal images: ${totalImages}\n\nCheck console for details.`);
+                alert(` Image test complete!\n\nTask cards found: ${$allCards.length}\nMock images added: ${mockCount}\nTotal images: ${totalImages}\n\nCheck console for details.`);
             }, 1000);
         }, 2000);
     };
@@ -2939,7 +2939,7 @@ $(document).ready(function() {
             }
         });
         
-        console.log('✅ Image upload capability added');
+        console.log(' Image upload capability added');
     };
     
     // Handle image upload
@@ -2975,9 +2975,9 @@ $(document).ready(function() {
         // Simulate upload (replace with actual upload logic)
         setTimeout(function() {
             const $status = $(`[data-task-id="${taskId}"] .image-status`);
-            $status.html('✅ Uploaded').css('color', '#28a745');
+            $status.html(' Uploaded').css('color', '#28a745');
             
-            console.log(`✅ Image uploaded for task ${taskId}`);
+            console.log(` Image uploaded for task ${taskId}`);
         }, 2000);
     };
     
@@ -2993,7 +2993,7 @@ $(document).ready(function() {
             addImageUploadToCards();
             
             const uploadButtons = $('.image-upload-btn').length;
-            alert(`✅ Upload test ready!\n\nUpload buttons added: ${uploadButtons}\n\nClick any "Add Image" button to test!`);
+            alert(` Upload test ready!\n\nUpload buttons added: ${uploadButtons}\n\nClick any "Add Image" button to test!`);
         }, 2000);
     };
     
@@ -3014,7 +3014,7 @@ $(document).ready(function() {
         // Use the kanban board JavaScript class instead of AJAX
         if (window.initKanbanBoard) {
             const kanbanBoard = window.initKanbanBoard(projectId);
-            console.log('✅ Kanban board initialized with Node.js API (fast mode)');
+            console.log(' Kanban board initialized with Node.js API (fast mode)');
             
             // Hide loading and show container
             $loading.hide();
@@ -3028,7 +3028,7 @@ $(document).ready(function() {
                             feather.replace();
                         }
                         
-                        console.log('✅ Kanban board ready (images disabled for performance)');
+                        console.log(' Kanban board ready (images disabled for performance)');
                     }, 100);
                     
                 } catch (error) {
@@ -3085,7 +3085,7 @@ $(document).ready(function() {
                     console.log('🔄 Started dragging column:', evt.item.dataset.column);
                 },
                 onEnd: function(evt) {
-                    console.log('✅ Finished dragging column');
+                    console.log(' Finished dragging column');
                     reorderTableColumns(evt.oldIndex, evt.newIndex);
                 }
             });
@@ -3146,7 +3146,7 @@ $(document).ready(function() {
                         $(`#task-table tbody tr td:nth-child(${columnIndex + 1})`).addClass('table-column-hidden').hide();
                     }
                 });
-                console.log('✅ Loaded hidden columns from localStorage:', hidden);
+                console.log(' Loaded hidden columns from localStorage:', hidden);
             } catch (e) {
                 console.error('Error loading hidden columns from localStorage:', e);
             }
@@ -3243,7 +3243,7 @@ $(document).ready(function() {
                 dragClass: 'dragging',
                 filter: 'th:first-child, .column-resizer',
                 onEnd: function(evt) {
-                    console.log('✅ Column reordered');
+                    console.log(' Column reordered');
                     reorderTableColumns(evt.oldIndex, evt.newIndex);
                 }
             });
@@ -3312,7 +3312,7 @@ $(document).ready(function() {
             const columnName = currentColumn.data('column');
             const newWidth = currentColumn.outerWidth();
             
-            console.log('✅ Finished resizing column:', columnName, 'to', newWidth + 'px');
+            console.log(' Finished resizing column:', columnName, 'to', newWidth + 'px');
             
             // Save the new width
             saveColumnWidth(columnName, newWidth + 'px');
@@ -3448,7 +3448,7 @@ $(document).ready(function() {
                 });
             });
             
-            console.log('✅ Column order applied successfully - headers and data moved together');
+            console.log(' Column order applied successfully - headers and data moved together');
             
         } catch (error) {
             console.error('❌ Error applying column order:', error);
@@ -3478,13 +3478,13 @@ $(document).ready(function() {
                                 $(`#task-table tbody tr td:nth-child(${columnIndex + 1})`).addClass('table-column-hidden').hide();
                             }
                         });
-                        console.log('✅ Applied hidden columns:', prefs.column_visibility.hidden_columns);
+                        console.log(' Applied hidden columns:', prefs.column_visibility.hidden_columns);
                     }
                     
                     // Apply column order
                     if (prefs.column_order && prefs.column_order.column_order) {
                         applyColumnOrder(prefs.column_order.column_order);
-                        console.log('✅ Applied column order:', prefs.column_order.column_order);
+                        console.log(' Applied column order:', prefs.column_order.column_order);
                     }
                     
                     // Apply column widths
@@ -3495,7 +3495,7 @@ $(document).ready(function() {
                                 $column.css('width', width);
                             }
                         });
-                        console.log('✅ Applied column widths:', prefs.column_width.column_widths);
+                        console.log(' Applied column widths:', prefs.column_width.column_widths);
                     }
                 } else {
                     console.log('No saved preferences found');
@@ -3554,7 +3554,7 @@ $(document).ready(function() {
         console.log('🚀 Testing populateProjectDropdown with test data...');
         try {
             populateProjectDropdown(testProjects);
-            console.log('✅ Test completed successfully');
+            console.log(' Test completed successfully');
         } catch (error) {
             console.error('❌ Test failed:', error);
         }
@@ -3569,7 +3569,7 @@ $(document).ready(function() {
         
         $.get(fallbackUrl)
             .done(function(data) {
-                console.log('✅ Manual API success:', data);
+                console.log(' Manual API success:', data);
                 if (data.success && data.data) {
                     console.log('🚀 Calling populateProjectDropdown manually...');
                     populateProjectDropdown(data.data);
@@ -3594,7 +3594,7 @@ $(document).ready(function() {
         
         try {
             populateProjectDropdown(testData);
-            console.log('✅ Test populate completed');
+            console.log(' Test populate completed');
         } catch (error) {
             console.error('❌ Test populate failed:', error);
         }
@@ -3695,7 +3695,7 @@ $(document).ready(function() {
             $(this).closest('.dropdown-menu').hide();
         });
         
-        console.log('✅ Three-dot buttons fixed');
+        console.log(' Three-dot buttons fixed');
         
     }, 1000);
     
@@ -3718,7 +3718,7 @@ $(document).ready(function() {
         $(`#task-table tbody tr td:nth-child(${columnIndex + 1})`).hide().addClass('table-column-hidden');
         
         alert(columnName + ' column hidden');
-        console.log('✅ Column hidden successfully');
+        console.log(' Column hidden successfully');
     };
     
     // Simple sort column function
@@ -3753,7 +3753,7 @@ $(document).ready(function() {
         
         $tbody.empty().append($rows);
         alert(`Table sorted by ${columnName} (${direction}ending)`);
-        console.log('✅ Column sorted successfully');
+        console.log(' Column sorted successfully');
     };
 });
 </script>
@@ -3782,7 +3782,7 @@ $(document).ready(function() {
                     console.log('🔄 Started dragging column:', evt.oldIndex);
                 },
                 onEnd: function(evt) {
-                    console.log('✅ Finished dragging column from', evt.oldIndex, 'to', evt.newIndex);
+                    console.log(' Finished dragging column from', evt.oldIndex, 'to', evt.newIndex);
                     
                     // Use the unified reorderTableColumns function
                     if (typeof window.reorderTableColumns === 'function') {
@@ -3795,7 +3795,7 @@ $(document).ready(function() {
                 }
             });
             
-            console.log('✅ Table customization override initialized');
+            console.log(' Table customization override initialized');
         } else {
             console.log('❌ SortableJS not available or table not found');
         }
@@ -3839,7 +3839,7 @@ $(document).ready(function() {
                                 hidden_columns: hiddenColumns
                             },
                             success: function(response) {
-                                console.log('✅ Column visibility saved to database');
+                                console.log(' Column visibility saved to database');
                             },
                             error: function() {
                                 console.log('❌ Error saving column visibility');
@@ -3885,7 +3885,7 @@ $(document).ready(function() {
             };
         }
         
-        console.log('✅ All table customization functions ready');
+        console.log(' All table customization functions ready');
         
     }, 2000); // Wait 2 seconds for all other scripts to load
 });
@@ -3937,7 +3937,7 @@ $.ajax = function(options) {
         options.url.includes('kanban_data')
     )) {
         console.log('🚫 BLOCKED old kanban AJAX call:', options.url);
-        console.log('✅ Using Node.js API instead via kanban-board.js');
+        console.log(' Using Node.js API instead via kanban-board.js');
         
         // Return a fake successful response to prevent errors
         return {
@@ -3964,7 +3964,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add board tab click listener with detailed logging
     const boardTabLink = document.querySelector('a[href="#board"]');
     if (boardTabLink) {
-        console.log("✅ Found board tab link, adding click listener...");
+        console.log(" Found board tab link, adding click listener...");
         
         // Method 1: Direct click event
         boardTabLink.addEventListener('click', function(e) {
@@ -4017,7 +4017,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     window.autoInitializeBoard();
                                 }, 200);
                             } else {
-                                console.log("✅ Board already loaded, skipping initialization");
+                                console.log(" Board already loaded, skipping initialization");
                             }
                         }
                     }
@@ -4029,7 +4029,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 attributeFilter: ['class']
             });
             
-            console.log("✅ Board tab visibility observer set up");
+            console.log(" Board tab visibility observer set up");
         }
         
     } else {
@@ -4039,7 +4039,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             const delayedBoardTabLink = document.querySelector('a[href="#board"]');
             if (delayedBoardTabLink) {
-                console.log("✅ Found board tab link on delayed search, adding listeners...");
+                console.log(" Found board tab link on delayed search, adding listeners...");
                 // Add the same event listeners here
                 delayedBoardTabLink.addEventListener('click', function(e) {
                     console.log("🎯 Board tab clicked! (Delayed detection)");
@@ -4090,28 +4090,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Wait a bit for scripts to load, then initialize TaskModal
     setTimeout(() => {
         if (window.getTaskModalInstance) {
-            console.log("✅ Getting single TaskModal instance...");
+            console.log(" Getting single TaskModal instance...");
             try {
                 window.taskModal = window.getTaskModalInstance();
-                console.log("✅ TaskModal instance ready:", window.taskModal.instanceId);
-                console.log("✅ TaskModal.openTask method:", typeof window.taskModal.openTask);
+                console.log(" TaskModal instance ready:", window.taskModal.instanceId);
+                console.log(" TaskModal.openTask method:", typeof window.taskModal.openTask);
             } catch (error) {
                 console.error("❌ Error getting TaskModal instance:", error);
             }
         } else if (window.TaskModal && !window.taskModal) {
-            console.log("✅ Fallback: Creating TaskModal instance...");
+            console.log(" Fallback: Creating TaskModal instance...");
             try {
                 window.taskModal = new window.TaskModal();
-                console.log("✅ TaskModal initialized successfully:", window.taskModal);
-                console.log("✅ TaskModal.openTask method:", typeof window.taskModal.openTask);
+                console.log(" TaskModal initialized successfully:", window.taskModal);
+                console.log(" TaskModal.openTask method:", typeof window.taskModal.openTask);
             } catch (error) {
                 console.error("❌ Error initializing TaskModal:", error);
             }
         } else if (!window.TaskModal) {
             console.error("❌ TaskModal class not available");
         } else {
-            console.log("✅ TaskModal already initialized");
-            console.log("✅ TaskModal.openTask method:", typeof window.taskModal.openTask);
+            console.log(" TaskModal already initialized");
+            console.log(" TaskModal.openTask method:", typeof window.taskModal.openTask);
         }
     }, 1500);
     
@@ -4121,7 +4121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Check if TaskModal is available
         if (typeof window.TaskModal !== 'undefined') {
-            console.log('✅ TaskModal found, opening...');
+            console.log(' TaskModal found, opening...');
             const modal = new window.TaskModal();
             modal.openTask(taskId);  // Correct method name is openTask
         } else {
@@ -4144,7 +4144,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 window.nodeJSEnhancedKanbanBoard.loadStatuses();
                 refreshed = true;
-                console.log('✅ Node.js Enhanced Kanban refreshed');
+                console.log(' Node.js Enhanced Kanban refreshed');
             } catch (error) {
                 console.error('❌ Error refreshing Node.js Enhanced Kanban:', error);
             }
@@ -4153,7 +4153,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 window.enhancedKanbanBoard.loadStatuses();
                 refreshed = true;
-                console.log('✅ Enhanced Kanban refreshed');
+                console.log(' Enhanced Kanban refreshed');
             } catch (error) {
                 console.error('❌ Error refreshing Enhanced Kanban:', error);
             }
@@ -4162,7 +4162,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 kanbanBoard.loadTasks();
                 refreshed = true;
-                console.log('✅ Basic Kanban refreshed');
+                console.log(' Basic Kanban refreshed');
             } catch (error) {
                 console.error('❌ Error refreshing basic Kanban:', error);
             }
@@ -4262,7 +4262,7 @@ window.testBoardLoading = function() {
         console.log("🚀 Testing Simple Local Kanban initialization...");
         try {
             const result = window.initializeSimpleLocalKanban(projectId);
-            console.log("✅ Simple Local Kanban test result:", result);
+            console.log(" Simple Local Kanban test result:", result);
             return;
         } catch (error) {
             console.error("❌ Simple Local Kanban test failed:", error);
@@ -4274,7 +4274,7 @@ window.testBoardLoading = function() {
         console.log("🚀 Testing NodeJS Enhanced Kanban initialization...");
         try {
             const result = window.initializeNodeJSEnhancedKanban(projectId);
-            console.log("✅ NodeJS Enhanced Kanban test result:", result);
+            console.log(" NodeJS Enhanced Kanban test result:", result);
         } catch (error) {
             console.error("❌ NodeJS Enhanced Kanban test failed:", error);
         }
@@ -4306,7 +4306,7 @@ window.autoInitializeBoard = function() {
                       container.innerHTML.length > 200;
     
     if (hasContent) {
-        console.log("✅ Board already has content, skipping initialization");
+        console.log(" Board already has content, skipping initialization");
         return false;
     }
     
@@ -4330,7 +4330,7 @@ window.resetBoard = function() {
         container.innerHTML = '<div style="padding: 20px; text-align: center;">Board reset. Click the Board tab to reload.</div>';
     }
     
-    console.log("✅ Board reset complete");
+    console.log(" Board reset complete");
 };
 
 // Debug function for TaskModal
@@ -4393,7 +4393,7 @@ window.testAPIIntegration = async function() {
         });
         
         const localResult = await localResponse.json();
-        console.log("✅ Local API result:", localResult);
+        console.log(" Local API result:", localResult);
         
         if (!localResult.success) {
             throw new Error(`Local API failed: ${localResult.error}`);
@@ -4419,10 +4419,10 @@ window.testAPIIntegration = async function() {
         });
         
         const nodeResult = await nodeResponse.json();
-        console.log("✅ Node.js API result:", nodeResult);
+        console.log(" Node.js API result:", nodeResult);
         
         if (nodeResult.success) {
-            alert(`✅ API Integration Test Successful!\n\nLocal API: ✅\nNode.js API: ✅\nUser: ${currentUser.full_name} (ID: ${currentUser.id})\nComment added to task ${testTaskId}`);
+            alert(` API Integration Test Successful!\n\nLocal API: \nNode.js API: \nUser: ${currentUser.full_name} (ID: ${currentUser.id})\nComment added to task ${testTaskId}`);
         } else {
             throw new Error(`Node.js API failed: ${nodeResult.error}`);
         }

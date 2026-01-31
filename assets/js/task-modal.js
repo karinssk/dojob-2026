@@ -23,7 +23,7 @@ class TaskModal {
     try {
       this.init();
       console.log(
-        "✅ TaskModal initialized successfully, instance:",
+        " TaskModal initialized successfully, instance:",
         this.instanceId
       );
     } catch (error) {
@@ -529,7 +529,7 @@ class TaskModal {
       }
 
       console.log(
-        "✅ Event listeners set up for instance:",
+        " Event listeners set up for instance:",
         modalInstance.instanceId
       );
     }, 100);
@@ -631,7 +631,7 @@ class TaskModal {
       const result = await response.json();
 
       if (result.success) {
-        console.log("✅ Activity logged successfully via local API");
+        console.log(" Activity logged successfully via local API");
       } else {
         console.warn("⚠️ Activity logging failed:", result.error);
       }
@@ -696,7 +696,7 @@ class TaskModal {
         taskModal.setAttribute("data-task-id", taskId);
       }
 
-      console.log("✅ Showing modal...");
+      console.log(" Showing modal...");
       // Show modal with proper configuration
       const modal = new bootstrap.Modal(document.getElementById("taskModal"), {
         backdrop: false,
@@ -743,7 +743,7 @@ class TaskModal {
       });
 
       if (this.currentTask && this.currentTask.id) {
-        console.log("✅ Task loaded successfully, populating modal...");
+        console.log(" Task loaded successfully, populating modal...");
         await this.populateModal();
 
         // Load comments and subtasks sequentially to avoid race conditions
@@ -813,7 +813,7 @@ class TaskModal {
 
       if (result.success && result.authenticated) {
         this.currentUser = result.data;
-        console.log("✅ Current user loaded from local API:", {
+        console.log(" Current user loaded from local API:", {
           id: this.currentUser.id,
           first_name: this.currentUser.first_name,
           last_name: this.currentUser.last_name,
@@ -841,7 +841,7 @@ class TaskModal {
         if (externalResult.success) {
           this.currentUser = externalResult.data || externalResult.user;
           console.log(
-            "✅ Current user loaded from external API:",
+            " Current user loaded from external API:",
             this.currentUser
           );
         } else {
@@ -880,7 +880,7 @@ class TaskModal {
 
         if (result.success && result.data) {
           this.currentTask = result.data;
-          console.log("✅ Task data loaded from local API:", {
+          console.log(" Task data loaded from local API:", {
             id: this.currentTask.id,
             title: this.currentTask.title,
             status_id: this.currentTask.status_id,
@@ -935,7 +935,7 @@ class TaskModal {
 
         if (externalResult.success && externalResult.data) {
           this.currentTask = externalResult.data;
-          console.log("✅ Task data loaded from external API:", {
+          console.log(" Task data loaded from external API:", {
             id: this.currentTask.id,
             title: this.currentTask.title,
             status_id: this.currentTask.status_id,
@@ -1359,7 +1359,7 @@ class TaskModal {
           await this.loadTaskData(parseInt(taskIdFromModal));
           if (this.currentTask && this.currentTask.id) {
             console.log(
-              "✅ Task reloaded successfully, retrying image deletion"
+              " Task reloaded successfully, retrying image deletion"
             );
             return this.deleteImage(filename);
           }
@@ -1834,7 +1834,7 @@ class TaskModal {
         try {
           await this.loadTaskData(taskIdFromModal);
           if (this.currentTask && this.currentTask.id) {
-            console.log("✅ Task reloaded successfully, retrying comment");
+            console.log(" Task reloaded successfully, retrying comment");
             // Retry the comment operation
             return this.addComment();
           }
@@ -1859,7 +1859,7 @@ class TaskModal {
         console.log("🔄 Attempting to reload current user...");
         await this.loadCurrentUser();
         if (this.currentUser && this.currentUser.id) {
-          console.log("✅ User reloaded successfully, retrying comment");
+          console.log(" User reloaded successfully, retrying comment");
           // Retry the comment operation
           return this.addComment();
         }
@@ -2025,7 +2025,7 @@ class TaskModal {
       if (result.success && result.data) {
         this.currentTask = result.data;
         this.displayImages();
-        console.log("✅ Task reloaded successfully");
+        console.log(" Task reloaded successfully");
       } else {
         console.error("❌ Failed to reload task:", result.error);
       }
@@ -2102,7 +2102,7 @@ class TaskModal {
           await this.loadTaskData(parseInt(taskIdFromModal));
           if (this.currentTask && this.currentTask.id) {
             console.log(
-              "✅ Successfully loaded task data, retrying subtasks load"
+              " Successfully loaded task data, retrying subtasks load"
             );
             // Retry the subtasks loading now that we have task data
             return this.loadSubtasks();
@@ -2145,7 +2145,7 @@ class TaskModal {
 
       if (result.success) {
         this.displaySubtasks(result.data);
-        console.log("✅ Subtasks loaded:", result.data.length);
+        console.log(" Subtasks loaded:", result.data.length);
       } else {
         console.warn("⚠️ Failed to load subtasks:", result.error);
         this.displaySubtasks([]);
@@ -2166,7 +2166,7 @@ class TaskModal {
 
     subtasksList.innerHTML = subtasks
       .map((subtask, index) => {
-        const statusIcon = subtask.status_id === 3 ? "✅" : "⭕";
+        const statusIcon = subtask.status_id === 3 ? "" : "⭕";
         const statusClass =
           subtask.status_id === 3 ? "line-through text-gray-500" : "";
 
@@ -2260,7 +2260,7 @@ class TaskModal {
       form.style.display = "block";
       input.focus();
       input.value = "";
-      console.log("✅ Add subtask form shown");
+      console.log(" Add subtask form shown");
     } else {
       console.error("❌ Add subtask form elements not found");
     }
@@ -2307,7 +2307,7 @@ class TaskModal {
           await this.loadTaskData(parseInt(taskIdFromModal));
           if (this.currentTask && this.currentTask.id) {
             console.log(
-              "✅ Successfully loaded task data, retrying subtask creation"
+              " Successfully loaded task data, retrying subtask creation"
             );
             // Retry the subtask creation now that we have task data
             return this.saveNewSubtask();
@@ -2945,7 +2945,7 @@ class TaskModal {
         await this.updateSubtaskField(update.id, "sort", update.sort);
       }
 
-      console.log("✅ Subtask order updated successfully");
+      console.log(" Subtask order updated successfully");
 
       // Log reorder activity
       await this.logActivity("SUBTASKS_REORDERED", {
@@ -3064,7 +3064,7 @@ window.getTaskModalInstance = function () {
     console.log("🔧 Creating single global TaskModal instance");
     try {
       window._taskModalInstance = new TaskModal();
-      console.log("✅ Global TaskModal instance created successfully");
+      console.log(" Global TaskModal instance created successfully");
     } catch (error) {
       console.error("❌ Error creating global TaskModal instance:", error);
       throw error;
@@ -3078,10 +3078,10 @@ window.taskModal = null;
 
 // TaskModal class is now available globally as window.TaskModal
 // Initialize manually when needed to prevent conflicts
-console.log("✅ TaskModal class loaded and available globally");
-console.log("✅ window.TaskModal:", typeof window.TaskModal);
+console.log(" TaskModal class loaded and available globally");
+console.log(" window.TaskModal:", typeof window.TaskModal);
 console.log(
-  "✅ window.getTaskModalInstance:",
+  " window.getTaskModalInstance:",
   typeof window.getTaskModalInstance
 );
 
@@ -3091,7 +3091,7 @@ if (document.readyState === "loading") {
     console.log("🔄 DOM ready, initializing global TaskModal instance");
     try {
       window.taskModal = window.getTaskModalInstance();
-      console.log("✅ Global TaskModal instance ready");
+      console.log(" Global TaskModal instance ready");
     } catch (error) {
       console.error(
         "❌ Error initializing global TaskModal on DOM ready:",
@@ -3104,7 +3104,7 @@ if (document.readyState === "loading") {
   console.log("🔄 DOM already ready, initializing global TaskModal instance");
   try {
     window.taskModal = window.getTaskModalInstance();
-    console.log("✅ Global TaskModal instance ready");
+    console.log(" Global TaskModal instance ready");
   } catch (error) {
     console.error("❌ Error initializing global TaskModal:", error);
   }

@@ -1141,7 +1141,7 @@
                 return;
             }
             
-            console.log('✅ Form found:', form);
+            console.log(' Form found:', form);
             const formData = new FormData(form);
             
             // Add edited image if available

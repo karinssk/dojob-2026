@@ -622,7 +622,7 @@ async function logActivity(
 // Create flex message for expense confirmation
 function createExpenseConfirmationFlexMessage(expenseData, result, userDisplayName) {
   const statusColor = result.success ? "#22c55e" : "#ef4444";
-  const statusIcon = result.success ? "✅" : "❌";
+  const statusIcon = result.success ? "" : "❌";
   const statusText = result.success ? "บันทึกเรียบร้อย" : "เกิดข้อผิดพลาด";
   
   // Create VAT details if applicable
@@ -1173,7 +1173,7 @@ async function processExpenseData(userId, expenseData, files = []) {
 - รวม (หลัง VAT): ${formatNumberWithCommas(vatCalculation.postVat)} บาท`;
     }
 
-    const responseMessage = `✅ บันทึกค่าใช้จ่ายของ ${userProfile.displayName || 'คุณ'} เรียบร้อยแล้ว
+    const responseMessage = ` บันทึกค่าใช้จ่ายของ ${userProfile.displayName || 'คุณ'} เรียบร้อยแล้ว
 
 📋 รายละเอียด:
 - ชื่อรายการ: ${title}
@@ -1591,7 +1591,7 @@ async function sendDailySummaryReportScheduled() {
     );
     
     if (result.success) {
-      console.log('✅ Scheduled daily flex summary sent successfully');
+      console.log(' Scheduled daily flex summary sent successfully');
     } else {
       console.error('❌ Error sending scheduled daily summary:', result.error);
     }
@@ -1610,7 +1610,7 @@ function scheduleDailyReport() {
     console.log('� Scheduled task triggered: Sending daily flex report at 20:00');
     try {
       await sendDailySummaryReportScheduled();
-      console.log('✅ Scheduled daily flex report sent successfully at 20:00');
+      console.log(' Scheduled daily flex report sent successfully at 20:00');
     } catch (error) {
       console.error('❌ Error sending scheduled daily report:', error.message);
     }
@@ -1700,7 +1700,7 @@ app.get('/api/test-send-monthly-summary', async (req, res) => {
     if (result.success) {
       res.json({
         success: true,
-        message: '✅ Monthly flex messages sent to LINE successfully!',
+        message: ' Monthly flex messages sent to LINE successfully!',
         messageCount: result.messageCount,
         successCount: result.successCount,
         failCount: result.failCount,
@@ -1781,7 +1781,7 @@ app.get('/api/test-flex-preview', async (req, res) => {
     
     res.json({
       success: true,
-      message: '✅ Flex message preview generated successfully!',
+      message: ' Flex message preview generated successfully!',
       monthData: monthData,
       flexMessages: messages,
       messageCount: messages.length,
@@ -1810,7 +1810,7 @@ function scheduleMonthlyReports() {
     console.log('� Scheduled task triggered: Sending monthly summary on Monday at 20:01');
     try {
       const response = await axios.get(`http://localhost:${port}/api/test-send-monthly-summary`);
-      console.log('✅ Monday monthly summary sent successfully:', response.data);
+      console.log(' Monday monthly summary sent successfully:', response.data);
     } catch (error) {
       console.error('❌ Error sending Monday monthly summary:', error.message);
     }
@@ -1823,7 +1823,7 @@ function scheduleMonthlyReports() {
     console.log('📅 Scheduled task triggered: Sending monthly summary on Saturday at 20:01');
     try {
       const response = await axios.get(`http://localhost:${port}/api/test-send-monthly-summary`);
-      console.log('✅ Saturday monthly summary sent successfully:', response.data);
+      console.log(' Saturday monthly summary sent successfully:', response.data);
     } catch (error) {
       console.error('❌ Error sending Saturday monthly summary:', error.message);
     }
@@ -1838,7 +1838,7 @@ function scheduleMonthlyReports() {
     console.log('📅 Scheduled task triggered: Sending monthly summary on 1st day of month at 20:01');
     try {
       const response = await axios.get(`http://localhost:${port}/api/test-send-monthly-summary`);
-      console.log('✅ First-day-of-month monthly summary sent successfully:', response.data);
+      console.log(' First-day-of-month monthly summary sent successfully:', response.data);
     } catch (error) {
       console.error('❌ Error sending first-day monthly summary:', error.message);
     }

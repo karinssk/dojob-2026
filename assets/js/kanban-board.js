@@ -36,7 +36,7 @@ class KanbanBoard {
       console.log("📊 API Result:", result);
 
       if (result.success) {
-        console.log("✅ API data received:", result.data);
+        console.log(" API data received:", result.data);
 
         // Use the API data directly (it's already in the right format)
         this.boardData = result.data;
@@ -216,7 +216,7 @@ class KanbanBoard {
               </div>
           `;
 
-      console.log("✅ Board rendered successfully");
+      console.log(" Board rendered successfully");
       this.setupDragAndDrop();
     } catch (error) {
       console.error("❌ Error rendering board:", error);
@@ -675,7 +675,7 @@ class KanbanBoard {
       const result = await response.json();
 
       if (result.success) {
-        console.log("✅ Task reordered to position successfully");
+        console.log(" Task reordered to position successfully");
         this.showSuccess(`Task moved to position ${targetPosition + 1}`);
         // Reload board to show changes
         setTimeout(() => this.loadTasks(), 300);
@@ -727,7 +727,7 @@ class KanbanBoard {
       const result = await response.json();
 
       if (result.success) {
-        console.log("✅ Task reordered successfully");
+        console.log(" Task reordered successfully");
         this.showSuccess(`Task moved ${direction}`);
         // Reload board to show changes
         setTimeout(() => this.loadTasks(), 300);
@@ -790,7 +790,7 @@ class KanbanBoard {
       const result = await response.json();
 
       if (result.success) {
-        console.log("✅ Status updated successfully via Node.js API");
+        console.log(" Status updated successfully via Node.js API");
         this.showSuccess(
           "Task moved to " + newStatus.replace("_", " ").toUpperCase()
         );

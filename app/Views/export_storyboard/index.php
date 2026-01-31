@@ -569,7 +569,7 @@ $(document).ready(function () {
             type: 'GET',
             timeout: 5000,
             success: function(result) {
-                console.log('✅ CORS test passed:', result);
+                console.log(' CORS test passed:', result);
                 
                 // Then test health endpoint
                 $.ajax({
@@ -577,7 +577,7 @@ $(document).ready(function () {
                     type: 'GET',
                     timeout: 5000,
                     success: function(healthResult) {
-                        console.log('✅ Node.js API health check passed:', healthResult);
+                        console.log(' Node.js API health check passed:', healthResult);
                     },
                     error: function(xhr, status, error) {
                         console.error('❌ Node.js API health check failed:', {status, error, xhr});
@@ -621,7 +621,7 @@ $(document).ready(function () {
             success: function (result) {
                 $("#loading-indicator").hide();
                 
-                console.log('✅ Storyboard data response received:', result);
+                console.log(' Storyboard data response received:', result);
                 
                 if (result.success) {
                     displayStoryboardData(result.data);
@@ -770,7 +770,7 @@ $(document).ready(function () {
             selectedScenes.push(parseInt($(this).val()));
         });
         
-        console.log('✅ Selected scenes:', selectedScenes);
+        console.log(' Selected scenes:', selectedScenes);
         
         if (selectedScenes.length === 0) {
             appAlert.error("<?php echo app_lang('please_select_items_to_export'); ?>");
@@ -835,9 +835,9 @@ $(document).ready(function () {
                 updateExportProgress(50, "Processing export...");
             },
             success: function (data, status, xhr) {
-                console.log('✅ Export completed successfully via Node.js API');
-                console.log('✅ Response data type:', typeof data);
-                console.log('✅ Response content type:', xhr.getResponseHeader('Content-Type'));
+                console.log(' Export completed successfully via Node.js API');
+                console.log(' Response data type:', typeof data);
+                console.log(' Response content type:', xhr.getResponseHeader('Content-Type'));
                 updateExportProgress(90, "Preparing download...");
                 
                 // Handle file download

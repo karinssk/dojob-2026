@@ -909,7 +909,7 @@ $(document).ready(function() {
         return;
     }
     
-    console.log("✅ All modular functions loaded successfully!");
+    console.log(" All modular functions loaded successfully!");
     
     // Debug: Check what's actually in the DOM
     setTimeout(function() {
@@ -956,20 +956,20 @@ $(document).ready(function() {
         // Initialize feather icons
         if (typeof feather !== 'undefined') {
             feather.replace();
-            console.log('✅ Feather icons initialized');
+            console.log(' Feather icons initialized');
         }
         
         // Global test functions for debugging
         window.testModularSystem = function() {
             console.log('🧪 Testing modular system...');
             
-            console.log('✅ Available test functions:');
+            console.log(' Available test functions:');
             console.log('  - testTaskListFunctions()');
             console.log('  - testEventHandlers()'); 
             console.log('  - testAllFunctionality()');
             console.log('  - testHierarchicalView()');
             
-            console.log('✅ Available modules loaded:');
+            console.log(' Available modules loaded:');
             console.log('  - Core:', typeof initTaskList);
             console.log('  - Drag Drop:', typeof initDragDrop);
             console.log('  - Inline Creation:', typeof initInlineTaskCreation);
@@ -981,7 +981,7 @@ $(document).ready(function() {
             console.log('  - Deadlines:', typeof showDeadlinePicker);
             console.log('  - Utils:', typeof initCheckboxes);
             
-            return "✅ Modular system test complete!";
+            return " Modular system test complete!";
         };
         
         // Add test function for add buttons
@@ -1023,7 +1023,7 @@ $(document).ready(function() {
                 $addRootButtons.first().click();
             }
             
-            alert(`✅ Add Buttons Test Complete!\n\nRoot buttons: ${$addRootButtons.length}\nSubtask buttons: ${$addSubtaskButtons.length}\n\nCheck console for details.`);
+            alert(` Add Buttons Test Complete!\n\nRoot buttons: ${$addRootButtons.length}\nSubtask buttons: ${$addSubtaskButtons.length}\n\nCheck console for details.`);
         };
         
         // Add test function for expand/collapse
@@ -1049,7 +1049,7 @@ $(document).ready(function() {
                 $expandButtons.first().click();
             }
             
-            alert(`✅ Expand/Collapse Test Complete!\n\nExpand buttons: ${$expandButtons.length}\n\nCheck console for details.`);
+            alert(` Expand/Collapse Test Complete!\n\nExpand buttons: ${$expandButtons.length}\n\nCheck console for details.`);
         };
         
         // Add test function for inline editing
@@ -1076,7 +1076,7 @@ $(document).ready(function() {
                 $titleDisplays.first().click();
             }
             
-            alert(`✅ Inline Editing Test Complete!\n\nTitle displays: ${$titleDisplays.length}\n\nCheck console for details.`);
+            alert(` Inline Editing Test Complete!\n\nTitle displays: ${$titleDisplays.length}\n\nCheck console for details.`);
         };
         
         console.log('🎯 Available test functions:');
@@ -1115,7 +1115,7 @@ $(document).ready(function() {
             },
             dataType: 'html', // Expect HTML response
             success: function(response) {
-                console.log('✅ Kanban board loaded successfully');
+                console.log(' Kanban board loaded successfully');
                 
                 try {
                     // Clean the response to prevent JavaScript conflicts
@@ -1187,7 +1187,7 @@ $(document).ready(function() {
         // For now, let's just add mock images to test the display
         setTimeout(function() {
             addMockPreviewImages();
-            console.log('✅ Mock images added for testing');
+            console.log(' Mock images added for testing');
         }, 500);
     };
     
@@ -1230,7 +1230,7 @@ $(document).ready(function() {
                 const $title = $card.find('.kanban-task-title, .task-title, .card-title, h5, h6').first();
                 if ($title.length) {
                     $title.after($previewImage);
-                    console.log(`✅ Used existing image for task ${taskId}`);
+                    console.log(` Used existing image for task ${taskId}`);
                 }
             }
         }
@@ -1274,7 +1274,7 @@ $(document).ready(function() {
                      style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 3px; margin: 8px 0; border: 1px solid #dfe1e6;"
                      onerror="handleImageError(this, ${JSON.stringify(possibleUrls)})">
             `);
-            console.log(`✅ Added preview image for task ${$card.data('task-id')} with URL: ${primaryUrl}`);
+            console.log(` Added preview image for task ${$card.data('task-id')} with URL: ${primaryUrl}`);
         }
     };
     
@@ -1340,7 +1340,7 @@ $(document).ready(function() {
                                  style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 3px; border: 1px solid #dfe1e6;">
                         </div>
                     `);
-                    console.log(`✅ Added mock image to card ${index}`);
+                    console.log(` Added mock image to card ${index}`);
                 } else {
                     // Fallback: prepend to card
                     $card.prepend(`
@@ -1351,13 +1351,13 @@ $(document).ready(function() {
                                  style="width: 100%; max-height: 120px; object-fit: cover; border-radius: 3px; border: 1px solid #dfe1e6;">
                         </div>
                     `);
-                    console.log(`✅ Added mock image to card ${index} (prepended)`);
+                    console.log(` Added mock image to card ${index} (prepended)`);
                 }
             }
         });
         
         const addedCount = $('.kanban-task-preview-image.mock-image').length;
-        console.log(`✅ Added ${addedCount} mock preview images`);
+        console.log(` Added ${addedCount} mock preview images`);
         
         return addedCount;
     };
@@ -1487,7 +1487,7 @@ $(document).ready(function() {
                     id: taskId // Some endpoints might expect 'id' instead
                 },
                 success: function(response) {
-                    console.log('✅ Task status updated successfully');
+                    console.log(' Task status updated successfully');
                     // Optionally show success message
                     if (response && response.success === false) {
                         tryUpdate(index + 1);
@@ -1537,7 +1537,7 @@ $(document).ready(function() {
                     console.log('🔄 Started dragging column:', evt.item.dataset.column);
                 },
                 onEnd: function(evt) {
-                    console.log('✅ Finished dragging column');
+                    console.log(' Finished dragging column');
                     reorderTableColumns(evt.oldIndex, evt.newIndex);
                 }
             });
@@ -1693,7 +1693,7 @@ $(document).ready(function() {
             console.log('Columns found:', $('.kanban-column, [data-status]').length);
             console.log('Preview images:', $('.kanban-task-preview-image').length);
             
-            alert('✅ Kanban test complete! Check console for details.');
+            alert(' Kanban test complete! Check console for details.');
         }, 2000);
     };
     
@@ -1722,7 +1722,7 @@ $(document).ready(function() {
                 console.log(`Total images now: ${totalImages}`);
                 
                 // Show results
-                alert(`✅ Image test complete!\n\nTask cards found: ${$allCards.length}\nMock images added: ${mockCount}\nTotal images: ${totalImages}\n\nCheck console for details.`);
+                alert(` Image test complete!\n\nTask cards found: ${$allCards.length}\nMock images added: ${mockCount}\nTotal images: ${totalImages}\n\nCheck console for details.`);
             }, 1000);
         }, 2000);
     };
@@ -1786,7 +1786,7 @@ $(document).ready(function() {
             }
         });
         
-        console.log('✅ Image upload capability added');
+        console.log(' Image upload capability added');
     };
     
     // Handle image upload
@@ -1822,9 +1822,9 @@ $(document).ready(function() {
         // Simulate upload (replace with actual upload logic)
         setTimeout(function() {
             const $status = $(`[data-task-id="${taskId}"] .image-status`);
-            $status.html('✅ Uploaded').css('color', '#28a745');
+            $status.html(' Uploaded').css('color', '#28a745');
             
-            console.log(`✅ Image uploaded for task ${taskId}`);
+            console.log(` Image uploaded for task ${taskId}`);
         }, 2000);
     };
     
@@ -1840,7 +1840,7 @@ $(document).ready(function() {
             addImageUploadToCards();
             
             const uploadButtons = $('.image-upload-btn').length;
-            alert(`✅ Upload test ready!\n\nUpload buttons added: ${uploadButtons}\n\nClick any "Add Image" button to test!`);
+            alert(` Upload test ready!\n\nUpload buttons added: ${uploadButtons}\n\nClick any "Add Image" button to test!`);
         }, 2000);
     };
     
@@ -1864,7 +1864,7 @@ $(document).ready(function() {
             },
             dataType: 'html',
             success: function(response) {
-                console.log('✅ Kanban board loaded successfully (fast mode)');
+                console.log(' Kanban board loaded successfully (fast mode)');
                 
                 try {
                     // Clean the response to prevent JavaScript conflicts
@@ -1884,7 +1884,7 @@ $(document).ready(function() {
                             feather.replace();
                         }
                         
-                        console.log('✅ Kanban board ready (images disabled for performance)');
+                        console.log(' Kanban board ready (images disabled for performance)');
                     }, 100);
                     
                 } catch (error) {
@@ -1941,7 +1941,7 @@ $(document).ready(function() {
                     console.log('🔄 Started dragging column:', evt.item.dataset.column);
                 },
                 onEnd: function(evt) {
-                    console.log('✅ Finished dragging column');
+                    console.log(' Finished dragging column');
                     reorderTableColumns(evt.oldIndex, evt.newIndex);
                 }
             });
@@ -2118,7 +2118,7 @@ $(document).ready(function() {
                         $(`#task-table tbody tr td:nth-child(${columnIndex + 1})`).addClass('table-column-hidden').hide();
                     }
                 });
-                console.log('✅ Loaded hidden columns from localStorage:', hidden);
+                console.log(' Loaded hidden columns from localStorage:', hidden);
             } catch (e) {
                 console.error('Error loading hidden columns from localStorage:', e);
             }
@@ -2215,7 +2215,7 @@ $(document).ready(function() {
                 dragClass: 'dragging',
                 filter: 'th:first-child, .column-resizer',
                 onEnd: function(evt) {
-                    console.log('✅ Column reordered');
+                    console.log(' Column reordered');
                     reorderTableColumns(evt.oldIndex, evt.newIndex);
                 }
             });
@@ -2284,7 +2284,7 @@ $(document).ready(function() {
             const columnName = currentColumn.data('column');
             const newWidth = currentColumn.outerWidth();
             
-            console.log('✅ Finished resizing column:', columnName, 'to', newWidth + 'px');
+            console.log(' Finished resizing column:', columnName, 'to', newWidth + 'px');
             
             // Save the new width
             saveColumnWidth(columnName, newWidth + 'px');
@@ -2420,7 +2420,7 @@ $(document).ready(function() {
                 });
             });
             
-            console.log('✅ Column order applied successfully - headers and data moved together');
+            console.log(' Column order applied successfully - headers and data moved together');
             
         } catch (error) {
             console.error('❌ Error applying column order:', error);
@@ -2450,13 +2450,13 @@ $(document).ready(function() {
                                 $(`#task-table tbody tr td:nth-child(${columnIndex + 1})`).addClass('table-column-hidden').hide();
                             }
                         });
-                        console.log('✅ Applied hidden columns:', prefs.column_visibility.hidden_columns);
+                        console.log(' Applied hidden columns:', prefs.column_visibility.hidden_columns);
                     }
                     
                     // Apply column order
                     if (prefs.column_order && prefs.column_order.column_order) {
                         applyColumnOrder(prefs.column_order.column_order);
-                        console.log('✅ Applied column order:', prefs.column_order.column_order);
+                        console.log(' Applied column order:', prefs.column_order.column_order);
                     }
                     
                     // Apply column widths
@@ -2467,7 +2467,7 @@ $(document).ready(function() {
                                 $column.css('width', width);
                             }
                         });
-                        console.log('✅ Applied column widths:', prefs.column_width.column_widths);
+                        console.log(' Applied column widths:', prefs.column_width.column_widths);
                     }
                 } else {
                     console.log('No saved preferences found');

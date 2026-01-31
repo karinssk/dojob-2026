@@ -9,7 +9,7 @@ function initTaskDataDisplay() {
   
   // Get users list to populate assignee and collaborator displays
   getUsersList(function(users) {
-    console.log("✅ Users loaded for data display:", users.length);
+    console.log(" Users loaded for data display:", users.length);
     
     // Update all assignee displays
     $('.task-assignee-container').each(function() {
@@ -136,7 +136,7 @@ function initTaskDataDisplay() {
     }
   });
   
-  console.log("✅ Task data display initialization complete");
+  console.log(" Task data display initialization complete");
 }
 
 // Initialize search functionality
@@ -171,7 +171,7 @@ function initSearch() {
     }
   });
 
-  console.log("✅ Search initialized");
+  console.log(" Search initialized");
 }
 
 // Show all parent tasks up the hierarchy for a given task
@@ -255,7 +255,7 @@ function initFilters() {
     }
   });
 
-  console.log("✅ Filters initialized");
+  console.log(" Filters initialized");
 }
 
 // Initialize checkbox functionality
@@ -304,7 +304,7 @@ function initCheckboxes() {
     }
   }
 
-  console.log("✅ Checkboxes initialized");
+  console.log(" Checkboxes initialized");
 }
 
 // Helper functions
@@ -500,11 +500,11 @@ function fixExistingAddButtons() {
             `);
       }
 
-      console.log("   ✅ Button styling fixed (preserved functionality)");
+      console.log("    Button styling fixed (preserved functionality)");
     }
   );
 
-  console.log("✅ Fixed existing add buttons without breaking functionality");
+  console.log(" Fixed existing add buttons without breaking functionality");
 }
 
 // Save inline task
@@ -542,9 +542,9 @@ function saveInlineTask($input) {
       inline_creation: 1, // Flag for inline creation
     },
     success: function (response) {
-      console.log("✅ AJAX Response:", response);
+      console.log(" AJAX Response:", response);
       if (response && response.success) {
-        console.log("✅ Task data:", response.data);
+        console.log(" Task data:", response.data);
         // Create new task element
         var newTaskHtml = createTaskElement(response.data, level);
         $form.replaceWith(newTaskHtml);
@@ -672,12 +672,12 @@ window.testTaskListFunctions = function () {
 
   // Test event handlers
   if (expandButtons.length > 0) {
-    console.log("✅ Testing expand/collapse click...");
+    console.log(" Testing expand/collapse click...");
     expandButtons.first().click();
   }
 
   if (addButtons.length > 0) {
-    console.log("✅ Testing add button click...");
+    console.log(" Testing add button click...");
     addButtons.first().click();
 
     // Check if form was created
@@ -686,7 +686,7 @@ window.testTaskListFunctions = function () {
       console.log("📝 Inline forms created:", forms.length);
 
       if (forms.length > 0) {
-        console.log("✅ Form created successfully");
+        console.log(" Form created successfully");
 
         // Test save button
         const saveButtons = $(".btn-save-task");
@@ -699,7 +699,7 @@ window.testTaskListFunctions = function () {
 
         if (inputs.length > 0) {
           inputs.first().val("Test Task Title");
-          console.log("✅ Set test title in input");
+          console.log(" Set test title in input");
 
           if (saveButtons.length > 0) {
             console.log("🔥 Testing save button click...");
@@ -717,7 +717,7 @@ window.testTaskListFunctions = function () {
   console.log("Title displays found:", titleDisplays.length);
 
   if (titleDisplays.length > 0) {
-    console.log("✅ Testing inline editing click...");
+    console.log(" Testing inline editing click...");
     titleDisplays.first().click();
 
     // Check if editor appeared
@@ -771,7 +771,7 @@ window.testEventHandlers = function () {
 
   $("#sortable-tasks").prepend(testForm);
 
-  console.log("✅ Test form added. Try clicking Save/Cancel buttons.");
+  console.log(" Test form added. Try clicking Save/Cancel buttons.");
 };
 
 // Test function for comprehensive functionality check - run this in console
@@ -876,7 +876,7 @@ function testAllFunctionality() {
     console.log("- No click events found on document");
   }
 
-  console.log("\n✅ Test complete! Check above for any issues.");
+  console.log("\n Test complete! Check above for any issues.");
 
   return {
     tasks: $(".task-row").length,
@@ -960,7 +960,7 @@ function testHierarchicalView() {
   });
 
   if (expandableButtons.length > 0) {
-    console.log("✅ Hierarchical view is working properly");
+    console.log(" Hierarchical view is working properly");
     console.log("💡 Click an expand button to test showing subtasks");
   } else {
     console.log("⚠️ No expand buttons found in visible tasks");
@@ -998,7 +998,7 @@ function fixExpandButtons() {
         $expandIcon.css("transform", "rotate(0deg)");
         $row.removeClass("expanded");
 
-        console.log("✅ Fixed expand button for task:", taskId);
+        console.log(" Fixed expand button for task:", taskId);
       }
     }
   });

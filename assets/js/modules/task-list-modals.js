@@ -24,12 +24,12 @@ function ensureTaskModal() {
     try {
       if (window.getTaskModalInstance) {
         window.taskModal = window.getTaskModalInstance();
-        console.log("✅ Got single TaskModal instance:", window.taskModal.instanceId);
+        console.log(" Got single TaskModal instance:", window.taskModal.instanceId);
       } else if (window.TaskModal) {
         window.taskModal = new window.TaskModal();
-        console.log("✅ Created new TaskModal instance:", window.taskModal.instanceId);
+        console.log(" Created new TaskModal instance:", window.taskModal.instanceId);
       }
-      console.log("✅ TaskModal.openTask method:", typeof window.taskModal.openTask);
+      console.log(" TaskModal.openTask method:", typeof window.taskModal.openTask);
     } catch (error) {
       console.error("❌ Error initializing TaskModal:", error);
       return false;
@@ -54,7 +54,7 @@ function openTaskModal(taskId) {
   }
   
   try {
-    console.log("✅ Opening task with TaskModal");
+    console.log(" Opening task with TaskModal");
     window.taskModal.openTask(taskId);
   } catch (error) {
     console.error("❌ Error opening task modal:", error);
@@ -78,7 +78,7 @@ function loadTaskModal(taskId) {
 }
 
 function initTaskModalTriggers() {
-  console.log("✅ Task modal triggers initialized for TaskModal system");
+  console.log(" Task modal triggers initialized for TaskModal system");
 }
 
 // Make functions globally accessible

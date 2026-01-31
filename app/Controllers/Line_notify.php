@@ -215,7 +215,7 @@ class Line_notify extends Security_Controller {
                     $this->save_button_click_log($event_id, 'paid', $user_id);
                     
                     // Send reply message using reply token
-                    $reply_message = "✅ ยืนยันการชำระเงิน\n\nรายการ: {$event_obj->title}\nรายละเอียด: {$event_obj->description}\n\nได้เปลี่ยนสถานะเป็น ชำระแล้ว";
+                    $reply_message = " ยืนยันการชำระเงิน\n\nรายการ: {$event_obj->title}\nรายละเอียด: {$event_obj->description}\n\nได้เปลี่ยนสถานะเป็น ชำระแล้ว";
                     $confirmation_success = $Line_webhook->send_reply_message($reply_token, $reply_message);
                     
                     
@@ -374,7 +374,7 @@ class Line_notify extends Security_Controller {
 
     private function send_test_response($user_id) {
         $Line_webhook = new \App\Libraries\Line_webhook();
-        $message = "✅ Test Successful!\n\n";
+        $message = " Test Successful!\n\n";
         $message .= "🤖 Bot is working correctly\n";
         $message .= "📡 Connection established\n";
         $message .= "⏰ Time: " . date('Y-m-d H:i:s') . "\n\n";
@@ -921,7 +921,7 @@ class Line_notify extends Security_Controller {
                 $event_date = date('Y-m-d', strtotime($event->start_date));
                 if ($event_date === $today) {
                     $filtered_today_events[] = $event;
-                    echo "✅ Including event: {$event->title} (Date: {$event_date})\n";
+                    echo " Including event: {$event->title} (Date: {$event_date})\n";
                 } else {
                     echo "❌ EXCLUDING event: {$event->title} (Date: {$event_date}) - Not today ({$today})\n";
                 }
@@ -974,7 +974,7 @@ class Line_notify extends Security_Controller {
                     }
                     
                     if ($has_paid_record) {
-                        echo "✅ Found paid record - SKIPPING message (already paid)\n";
+                        echo " Found paid record - SKIPPING message (already paid)\n";
                         $should_send_message = false;
                     } else {
                         echo "💰 All records have paid_status = 0 - Checking daily limit...\n";
@@ -1032,7 +1032,7 @@ class Line_notify extends Security_Controller {
                         'status' => 'sent',
                         'daily_count' => ($Line_logs_model->count_todays_notifications($event->id, $today) + 1)
                     ];
-                    echo "✅ Payment status flex message sent successfully\n";
+                    echo " Payment status flex message sent successfully\n";
                 } else {
                     $errors[] = [
                         'event_id' => $event->id,
@@ -1052,7 +1052,7 @@ class Line_notify extends Security_Controller {
             // Summary
             echo "\n=== SUMMARY ===\n";
             echo "📊 Total events processed: " . count($today_events) . "\n";
-            echo "✅ Messages sent successfully: " . count($sent_messages) . "\n";
+            echo " Messages sent successfully: " . count($sent_messages) . "\n";
             echo "❌ Errors encountered: " . count($errors) . "\n";
 
             if (!empty($sent_messages)) {

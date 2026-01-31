@@ -36,7 +36,7 @@ function initExpandCollapse() {
       // Rotate icon to collapsed state (pointing right)
       $icon.css("transform", "rotate(0deg)");
 
-      console.log("✅ Collapsed task:", taskId);
+      console.log(" Collapsed task:", taskId);
     } else {
       // Expand: show direct children only
       showDirectChildren(taskId);
@@ -45,14 +45,14 @@ function initExpandCollapse() {
       // Rotate icon to expanded state (pointing down)
       $icon.css("transform", "rotate(90deg)");
 
-      console.log("✅ Expanded task:", taskId);
+      console.log(" Expanded task:", taskId);
     }
   });
 
   // Initialize hierarchical view: Show only main tasks, hide all subtasks
   initializeHierarchicalView();
 
-  console.log("✅ Expand/collapse initialized");
+  console.log(" Expand/collapse initialized");
 }
 
 // Initialize hierarchical view: Show only main tasks, hide subtasks
@@ -105,7 +105,7 @@ function initializeHierarchicalView() {
     }
   });
 
-  console.log("✅ Hierarchical view initialized:");
+  console.log(" Hierarchical view initialized:");
   console.log("   - Main tasks shown:", mainTasksShown);
   console.log("   - Subtasks hidden:", subtasksHidden);
 
@@ -315,7 +315,7 @@ function testHierarchicalView() {
   });
 
   if (expandableButtons.length > 0) {
-    console.log("✅ Hierarchical view is working properly");
+    console.log(" Hierarchical view is working properly");
     console.log("💡 Click an expand button to test showing subtasks");
   } else {
     console.log("⚠️ No expand buttons found in visible tasks");
@@ -353,7 +353,7 @@ function fixExpandButtons() {
         $expandIcon.css("transform", "rotate(0deg)");
         $row.removeClass("expanded");
 
-        console.log("✅ Fixed expand button for task:", taskId);
+        console.log(" Fixed expand button for task:", taskId);
       }
     }
   });

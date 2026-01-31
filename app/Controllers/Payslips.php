@@ -1006,7 +1006,7 @@ class Payslips extends Security_Controller
                 $query = $this->db->query("SHOW TABLES LIKE '$table'");
                 if ($query->getNumRows() > 0) {
                     $count = $this->db->table($table)->countAllResults();
-                    echo "<p>✅ Table '$table' exists with $count records</p>";
+                    echo "<p> Table '$table' exists with $count records</p>";
                 } else {
                     echo "<p>❌ Table '$table' does not exist</p>";
                 }

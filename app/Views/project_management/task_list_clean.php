@@ -236,11 +236,11 @@ $(document).ready(function() {
             chosenClass: 'sortable-chosen',
             filter: 'th:first-child', // Don't drag checkbox column
             onEnd: function(evt) {
-                console.log('✅ Column moved from', evt.oldIndex, 'to', evt.newIndex);
+                console.log(' Column moved from', evt.oldIndex, 'to', evt.newIndex);
                 reorderTableColumns(evt.oldIndex, evt.newIndex);
             }
         });
-        console.log('✅ Drag and drop initialized');
+        console.log(' Drag and drop initialized');
     }
     
     // Reorder table columns
@@ -329,7 +329,7 @@ $(document).ready(function() {
                 column_order: columnOrder
             },
             success: function(response) {
-                console.log('✅ Column order saved');
+                console.log(' Column order saved');
             },
             error: function() {
                 console.log('❌ Error saving column order');
@@ -353,7 +353,7 @@ $(document).ready(function() {
                 hidden_columns: hiddenColumns
             },
             success: function(response) {
-                console.log('✅ Column visibility saved');
+                console.log(' Column visibility saved');
             },
             error: function() {
                 console.log('❌ Error saving column visibility');
@@ -370,6 +370,6 @@ $(document).ready(function() {
         alert('Check console for test results');
     };
     
-    console.log('✅ Clean table customization ready!');
+    console.log(' Clean table customization ready!');
 });
 </script>

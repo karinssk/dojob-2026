@@ -917,7 +917,7 @@
             return;
         }
         
-        console.log('✅ All dependencies loaded successfully');
+        console.log(' All dependencies loaded successfully');
         console.log('🚀 Inline export functionality ready');
         
         // Add global error handler for export functions
@@ -1168,7 +1168,7 @@ URL parameters: ${window.location.search}
             type: 'GET',
             timeout: 5000,
             success: function(healthResponse) {
-                console.log('✅ API server is accessible:', healthResponse);
+                console.log(' API server is accessible:', healthResponse);
                 updateSwalProgress(40, 'API server connected. Processing export...');
                 proceedWithExport();
             },

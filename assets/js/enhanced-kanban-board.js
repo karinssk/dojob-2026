@@ -35,7 +35,7 @@ class NodeJSEnhancedKanban {
       return;
     }
 
-    console.log("✅ Board container found, proceeding with initialization...");
+    console.log(" Board container found, proceeding with initialization...");
     this.init();
   }
 
@@ -91,7 +91,7 @@ class NodeJSEnhancedKanban {
       mainContent.classList.add("kanban-active");
     }
 
-    console.log("✅ Kanban scrollbar mode enabled");
+    console.log(" Kanban scrollbar mode enabled");
   }
 
   disableKanbanScrollbarMode() {
@@ -113,7 +113,7 @@ class NodeJSEnhancedKanban {
       mainContent.classList.remove("kanban-active");
     }
 
-    console.log("✅ Kanban scrollbar mode disabled");
+    console.log(" Kanban scrollbar mode disabled");
   }
 
   addTaskMenuStyles() {
@@ -198,7 +198,7 @@ class NodeJSEnhancedKanban {
 
     // Add new styles
     document.head.insertAdjacentHTML("beforeend", styles);
-    console.log("✅ Task menu styles added");
+    console.log(" Task menu styles added");
   }
 
   async loadStatuses() {
@@ -230,7 +230,7 @@ class NodeJSEnhancedKanban {
 
       if (result && result.success) {
         this.statuses = result.data;
-        console.log("✅ Statuses loaded:", this.statuses);
+        console.log(" Statuses loaded:", this.statuses);
         this.loadTasks();
       } else {
         console.error(
@@ -283,7 +283,7 @@ class NodeJSEnhancedKanban {
       },
     ];
 
-    console.log("✅ Using fallback statuses:", this.statuses);
+    console.log(" Using fallback statuses:", this.statuses);
     this.loadTasks();
   }
 
@@ -314,7 +314,7 @@ class NodeJSEnhancedKanban {
       const result = await response.json();
 
       if (result.success) {
-        console.log("✅ API data received:", result.data);
+        console.log(" API data received:", result.data);
         this.boardData = result.data;
         this.renderBoard();
       } else {
@@ -677,7 +677,7 @@ class NodeJSEnhancedKanban {
       const result = await response.json();
 
       if (result.success) {
-        console.log("✅ Columns reordered successfully");
+        console.log(" Columns reordered successfully");
         this.showSuccess(result.message);
         // Reload to reflect new order
         setTimeout(() => this.loadStatuses(), 500);
@@ -991,7 +991,7 @@ class NodeJSEnhancedKanban {
       const result = await response.json();
 
       if (result.success) {
-        console.log("✅ Status updated successfully");
+        console.log(" Status updated successfully");
         const status = this.statuses.find((s) => s.id == statusId);
         this.showSuccess(
           `Task moved to ${status ? status.title : "new status"}`
@@ -1079,7 +1079,7 @@ class NodeJSEnhancedKanban {
       const result = await response.json();
 
       if (result.success) {
-        console.log("✅ Status and position updated successfully");
+        console.log(" Status and position updated successfully");
         const status = this.statuses.find((s) => s.id == statusId);
         this.showSuccess(
           `Task moved to ${status ? status.title : "new status"} at position ${
@@ -1224,7 +1224,7 @@ class NodeJSEnhancedKanban {
   }
 
   showSuccess(message) {
-    console.log("✅ Success:", message);
+    console.log(" Success:", message);
     this.showToast(message, "success");
   }
 
@@ -1339,26 +1339,26 @@ class NodeJSEnhancedKanban {
     try {
       // Check if TaskModal is available
       if (window.TaskModal) {
-        console.log("✅ Using custom TaskModal class");
+        console.log(" Using custom TaskModal class");
 
         // Get or create TaskModal instance
         if (!window.taskModalInstance) {
           window.taskModalInstance = new window.TaskModal();
-          console.log("✅ Created new TaskModal instance");
+          console.log(" Created new TaskModal instance");
         }
 
         // Open the task using your custom modal
         window.taskModalInstance.openTask(taskId);
-        console.log("✅ Custom task modal opened for task:", taskId);
+        console.log(" Custom task modal opened for task:", taskId);
       } else if (window.getTaskModalInstance) {
-        console.log("✅ Using getTaskModalInstance function");
+        console.log(" Using getTaskModalInstance function");
         const taskModal = window.getTaskModalInstance();
         taskModal.openTask(taskId);
       } else if (
         window.taskModal &&
         typeof window.taskModal.openTask === "function"
       ) {
-        console.log("✅ Using existing taskModal instance");
+        console.log(" Using existing taskModal instance");
         window.taskModal.openTask(taskId);
       } else {
         console.error("❌ Custom TaskModal not available");
@@ -1684,7 +1684,7 @@ class NodeJSEnhancedKanban {
     );
 
     if (createButton) {
-      console.log("✅ Found create button, showing inline form");
+      console.log(" Found create button, showing inline form");
       // Trigger the existing inline task form
       this.showInlineTaskForm(createButton, status);
 
@@ -1790,7 +1790,7 @@ class NodeJSEnhancedKanban {
     this.recentCreations.add(creationKey);
     window.globalTaskCreationLock.add(creationKey);
 
-    console.log("✅ Starting task creation:", creationKey);
+    console.log(" Starting task creation:", creationKey);
 
     // Clean up recent creations after 3 seconds (shorter window)
     setTimeout(() => {
@@ -2035,7 +2035,7 @@ class NodeJSEnhancedKanban {
         const localResult = await localResponse.json();
         if (localResult.success && localResult.data && localResult.data.id) {
           console.log(
-            "✅ Current user ID from local API:",
+            " Current user ID from local API:",
             localResult.data.id
           );
           return localResult.data.id;
@@ -2054,7 +2054,7 @@ class NodeJSEnhancedKanban {
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data && result.data.id) {
-          console.log("✅ Current user ID from external API:", result.data.id);
+          console.log(" Current user ID from external API:", result.data.id);
           return result.data.id;
         }
       }
@@ -2062,7 +2062,7 @@ class NodeJSEnhancedKanban {
       // Try to get from global variables or DOM
       if (window.login_user_id) {
         console.log(
-          "✅ Current user ID from window.login_user_id:",
+          " Current user ID from window.login_user_id:",
           window.login_user_id
         );
         return window.login_user_id;
@@ -2070,7 +2070,7 @@ class NodeJSEnhancedKanban {
 
       if (window.currentUserId) {
         console.log(
-          "✅ Current user ID from window.currentUserId:",
+          " Current user ID from window.currentUserId:",
           window.currentUserId
         );
         return window.currentUserId;
@@ -2081,7 +2081,7 @@ class NodeJSEnhancedKanban {
       if (userElement) {
         const userId = parseInt(userElement.dataset.userId);
         if (userId) {
-          console.log("✅ Current user ID from DOM element:", userId);
+          console.log(" Current user ID from DOM element:", userId);
           return userId;
         }
       }
@@ -2114,7 +2114,7 @@ class NodeJSEnhancedKanban {
         const result = await response.json();
         if (result.success && typeof result.maxSort === "number") {
           const nextSort = result.maxSort + 1000; // Add 1000 for spacing
-          console.log(`✅ Next sort value for status ${statusId}: ${nextSort}`);
+          console.log(` Next sort value for status ${statusId}: ${nextSort}`);
           return nextSort;
         }
       }
@@ -2174,7 +2174,7 @@ class NodeJSEnhancedKanban {
 
       const result = await response.json();
       if (result.success) {
-        console.log("✅ Task reordered successfully");
+        console.log(" Task reordered successfully");
         this.showSuccess(`Task moved ${direction}`);
         setTimeout(() => this.loadTasks(), 300);
       } else {
@@ -2651,7 +2651,7 @@ class NodeJSEnhancedKanban {
     // (Note: Most event listeners are attached to document, so they'll persist
     // but that's okay since they check for element existence)
 
-    console.log("✅ NodeJS Enhanced Kanban cleanup completed");
+    console.log(" NodeJS Enhanced Kanban cleanup completed");
   }
 
   // Simplified status and task management using existing system
@@ -2676,7 +2676,7 @@ window.initializeNodeJSEnhancedKanban = function (projectId) {
     }
 
     window.nodeJSEnhancedKanbanBoard = new NodeJSEnhancedKanban(projectId);
-    console.log("✅ NodeJS Enhanced Kanban instance created successfully");
+    console.log(" NodeJS Enhanced Kanban instance created successfully");
     return true;
   } catch (error) {
     console.error("❌ Error creating NodeJS Enhanced Kanban instance:", error);
@@ -2689,6 +2689,6 @@ window.cleanupNodeJSEnhancedKanban = function () {
   if (window.nodeJSEnhancedKanbanBoard) {
     window.nodeJSEnhancedKanbanBoard.cleanup();
     window.nodeJSEnhancedKanbanBoard = null;
-    console.log("✅ NodeJS Enhanced Kanban cleaned up");
+    console.log(" NodeJS Enhanced Kanban cleaned up");
   }
 };

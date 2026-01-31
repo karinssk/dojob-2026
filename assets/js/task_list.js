@@ -123,7 +123,7 @@ function initTaskList() {
     // Add CSS for task key links
   addTaskKeyStyles();
 
-  console.log("✅ Task List initialized successfully");
+  console.log(" Task List initialized successfully");
 }
 
 // Initialize drag and drop
@@ -163,7 +163,7 @@ function initDragDrop() {
     },
   });
 
-  console.log("✅ Drag & Drop initialized");
+  console.log(" Drag & Drop initialized");
 }
 
 // Initialize inline task creation
@@ -177,7 +177,7 @@ function initInlineTaskCreation() {
   // Handle add root task button
   $(document).on("click", ".add-root-task", function (e) {
     e.preventDefault();
-    console.log("✅ Add root task clicked!");
+    console.log(" Add root task clicked!");
     var parentId = $(this).data("parent-id") || 0;
     showInlineTaskForm(parentId, 0);
   });
@@ -189,7 +189,7 @@ function initInlineTaskCreation() {
     function (e) {
       e.preventDefault();
       e.stopPropagation();
-      console.log("✅ Add subtask clicked!");
+      console.log(" Add subtask clicked!");
 
       // IMMEDIATE ALERT FOR DEBUGGING - Remove this in production
       console.log("BUTTON CLICKED! Classes: " + this.className);
@@ -260,7 +260,7 @@ function initInlineTaskCreation() {
       $(".btn-save-task").prop("disabled", false).text("Save");
 
       if (success) {
-        console.log("✅ Task saved successfully! Creating row dynamically...");
+        console.log(" Task saved successfully! Creating row dynamically...");
 
         // Create new task row dynamically instead of refreshing
         createNewTaskRow(taskData, parentId, level, $form);
@@ -269,7 +269,7 @@ function initInlineTaskCreation() {
         $form.remove();
 
         // Show success message
-        console.log("✅ New task added to DOM without refresh!");
+        console.log(" New task added to DOM without refresh!");
       } else {
         console.error("❌ Failed to save task");
         Swal.fire({
@@ -289,7 +289,7 @@ function initInlineTaskCreation() {
 
     var $form = $(this).closest(".inline-task-form");
     $form.remove();
-    console.log("✅ Form removed");
+    console.log(" Form removed");
   });
 
   // Handle Enter key in task title input
@@ -305,7 +305,7 @@ function initInlineTaskCreation() {
     }
   });
 
-  console.log("✅ Inline task creation initialized");
+  console.log(" Inline task creation initialized");
 }
 
 // Show inline task form
@@ -380,7 +380,7 @@ function showInlineTaskForm(parentId, level, $insertAfter) {
   // Focus the input
   $form.find(".new-task-title").focus();
 
-  console.log("✅ Inline form created and inserted");
+  console.log(" Inline form created and inserted");
 }
 
 // Save new task to server
@@ -428,9 +428,9 @@ function saveNewTask(title, parentId, callback) {
       console.log("📡 Sending AJAX request to:", baseUrl + "tasks/save");
     },
     success: function (response) {
-      console.log("✅ AJAX Success - Raw response:", response);
+      console.log(" AJAX Success - Raw response:", response);
       if (response && response.success) {
-        console.log("✅ Task saved successfully:", response);
+        console.log(" Task saved successfully:", response);
         callback(true, response.data);
       } else {
         console.error(
@@ -509,7 +509,7 @@ function createNewTaskRow(taskData, parentId, level, $form) {
   // Re-initialize any JavaScript functionality for the new row
   initializeNewTaskRow(taskData.id);
 
-  console.log("✅ New task row created and inserted!");
+  console.log(" New task row created and inserted!");
 }
 
 // Create priority dropdown HTML with placeholder that will be replaced with real data
@@ -873,7 +873,7 @@ function saveTaskTitle(taskId, title, callback) {
     },
     dataType: "json",
     success: function (response) {
-      console.log("✅ Task title saved successfully:", response);
+      console.log(" Task title saved successfully:", response);
       if (response && response.success) {
         callback(true);
       } else {
@@ -925,7 +925,7 @@ function saveTaskDescription(taskId, description, callback) {
     },
     dataType: "json",
     success: function (response) {
-      console.log("✅ Task description saved successfully:", response);
+      console.log(" Task description saved successfully:", response);
       if (response && response.success) {
         callback(true);
       } else {
@@ -968,7 +968,7 @@ function saveTaskAssignee(taskId, assigneeId, callback) {
       assignee_id: assigneeId,
     }),
     success: function (response) {
-      console.log("✅ Task assignee saved successfully:", response);
+      console.log(" Task assignee saved successfully:", response);
       if (response.success) {
         callback(true, response.assignee);
       } else {
@@ -1003,9 +1003,9 @@ function getUsersList(callback) {
     dataType: "json",
     timeout: 10000,
     success: function (response) {
-      console.log("✅ Direct users response:", response);
+      console.log(" Direct users response:", response);
       if (response && response.success && response.users) {
-        console.log("✅ Direct users list:", response.users);
+        console.log(" Direct users list:", response.users);
         callback(response.users);
       } else {
         console.warn("⚠️ Direct endpoint failed, using fallback users");
@@ -1174,7 +1174,7 @@ function showAssigneeDropdown($container, taskId, currentAssignee) {
       // Update assignee
       saveTaskAssignee(taskId, newAssigneeId, function (success, assigneeData) {
         if (success) {
-          console.log("✅ Assignee updated successfully");
+          console.log(" Assignee updated successfully");
           updateAssigneeDisplay($container, newAssigneeId, assigneeData, users);
         } else {
           console.error("❌ Failed to update assignee");
@@ -1401,7 +1401,7 @@ function showCollaboratorsDropdown($container, taskId, currentCollaborators) {
       // Save collaborators
       saveTaskCollaborators(taskId, selectedIds, function (success) {
         if (success) {
-          console.log("✅ Collaborators updated successfully");
+          console.log(" Collaborators updated successfully");
           updateCollaboratorsDisplay($container, selectedIds, users);
         } else {
           console.error("❌ Failed to update collaborators");
@@ -1456,7 +1456,7 @@ function saveTaskCollaborators(taskId, collaboratorIds, callback) {
       collaborators: collaboratorsString,
     }),
     success: function (response) {
-      console.log("✅ Task collaborators saved successfully:", response);
+      console.log(" Task collaborators saved successfully:", response);
       if (response.success) {
         callback(true);
       } else {
@@ -1736,7 +1736,7 @@ function renderLabelsDropdown(
   $container.css("position", "relative");
   $container.append(dropdownHtml);
 
-  console.log("✅ Dropdown appended to container");
+  console.log(" Dropdown appended to container");
 
   // Use setTimeout to ensure events are bound after DOM update
   setTimeout(function () {
@@ -1763,7 +1763,7 @@ function renderLabelsDropdown(
           var labelId = parseInt(
             $(this).closest(".label-option").data("label-id")
           );
-          console.log("✅ Selected label ID:", labelId);
+          console.log(" Selected label ID:", labelId);
           if (!isNaN(labelId)) {
             selectedLabelIds.push(labelId);
           }
@@ -1802,7 +1802,7 @@ function renderLabelsDropdown(
           console.log("📤 Sending AJAX request...");
         },
         success: function (response) {
-          console.log("✅ AJAX Success:", response);
+          console.log(" AJAX Success:", response);
 
           if (response && response.success) {
             Swal.fire({
@@ -1878,7 +1878,7 @@ function renderLabelsDropdown(
       }
     );
 
-    console.log("✅ Event handlers bound with unique namespace");
+    console.log(" Event handlers bound with unique namespace");
 
     // Test if button exists and is clickable
     var saveBtn = $(".labels-dropdown .save-labels-btn");
@@ -1969,7 +1969,7 @@ window.handleSaveLabels = function (taskId) {
         saveTaskLabels(taskId, selectedLabelIds, function (success) {
           console.log("💾 Save callback result:", success);
           if (success) {
-            console.log("✅ Labels updated successfully");
+            console.log(" Labels updated successfully");
             // Convert IDs back to display data
             var selectedLabels = [];
             selectedLabelIds.forEach(function (id) {
@@ -2050,7 +2050,7 @@ function saveTaskLabels(taskId, labelIds, callback) {
       console.log("🚀 Sending AJAX request...");
     },
     success: function (response) {
-      console.log("✅ Task labels saved successfully:", response);
+      console.log(" Task labels saved successfully:", response);
       if (response && response.success) {
         callback(true);
       } else {
@@ -2324,7 +2324,7 @@ function showDeadlinePicker($container, taskId, currentDeadline) {
     // Save deadline
     saveTaskDeadline(taskId, selectedDate, function (success) {
       if (success) {
-        console.log("✅ Deadline updated successfully");
+        console.log(" Deadline updated successfully");
         updateDeadlineDisplay($container, selectedDate);
       } else {
         console.error("❌ Failed to update deadline");
@@ -2354,7 +2354,7 @@ function showDeadlinePicker($container, taskId, currentDeadline) {
 
     saveTaskDeadline(taskId, todayDate, function (success) {
       if (success) {
-        console.log("✅ Deadline set to today");
+        console.log(" Deadline set to today");
         updateDeadlineDisplay($container, todayDate);
       } else {
         console.error("❌ Failed to set deadline");
@@ -2376,7 +2376,7 @@ function showDeadlinePicker($container, taskId, currentDeadline) {
 
     saveTaskDeadline(taskId, "", function (success) {
       if (success) {
-        console.log("✅ Deadline cleared successfully");
+        console.log(" Deadline cleared successfully");
         updateDeadlineDisplay($container, "");
       } else {
         console.error("❌ Failed to clear deadline");
@@ -2431,7 +2431,7 @@ function saveTaskDeadline(taskId, deadline, callback) {
       deadline: deadline,
     }),
     success: function (response) {
-      console.log("✅ Task deadline saved successfully:", response);
+      console.log(" Task deadline saved successfully:", response);
       if (response.success) {
         callback(true);
       } else {
@@ -2528,7 +2528,7 @@ function initTaskDataDisplay() {
 
   // Get users list to populate assignee and collaborator displays
   getUsersList(function (users) {
-    console.log("✅ Users loaded for data display:", users.length);
+    console.log(" Users loaded for data display:", users.length);
 
     // Update all assignee displays
     $(".task-assignee-container").each(function () {
@@ -2685,7 +2685,7 @@ function initTaskDataDisplay() {
     }
   });
 
-  console.log("✅ Task data display initialization complete");
+  console.log(" Task data display initialization complete");
 }
 
 // Initialize status dropdowns
@@ -2770,7 +2770,7 @@ function initStatusDropdowns() {
             .text(statusText);
 
           showNotification(
-            "✅ Task status updated to " + statusText,
+            " Task status updated to " + statusText,
             "success"
           );
         } else {
@@ -2789,7 +2789,7 @@ function initStatusDropdowns() {
     });
   });
 
-  console.log("✅ Status dropdowns initialized");
+  console.log(" Status dropdowns initialized");
 }
 
 // Initialize priority dropdowns
@@ -2841,7 +2841,7 @@ function initPriorityDropdowns() {
           $badge.find("span").text(response.priority_text);
 
           showNotification(
-            "✅ Task priority updated to " + response.priority_text,
+            " Task priority updated to " + response.priority_text,
             "success"
           );
         } else {
@@ -2860,7 +2860,7 @@ function initPriorityDropdowns() {
     });
   });
 
-  console.log("✅ Priority dropdowns initialized");
+  console.log(" Priority dropdowns initialized");
 }
 
 // Convert static status badges to clickable dropdowns
@@ -2921,7 +2921,7 @@ function convertStatusBadgesToDropdowns() {
     $badge.replaceWith(dropdownHtml);
     $badge.data("dropdown-converted", true);
 
-    console.log("✅ Converted badge for task:", taskId);
+    console.log(" Converted badge for task:", taskId);
   });
 
   console.log("🎉 Status badge conversion complete!");
@@ -2957,7 +2957,7 @@ function convertPriorityIconsToDropdowns() {
         // Replace with loading placeholder that will be updated with real data
         $cell.html(createPriorityDropdownHtml(taskId, 2));
 
-        console.log("✅ Converted priority icon for task:", taskId);
+        console.log(" Converted priority icon for task:", taskId);
       }
     });
   }
@@ -2998,7 +2998,7 @@ function initExpandCollapse() {
       // Rotate icon to collapsed state (pointing right)
       $icon.css("transform", "rotate(0deg)");
 
-      console.log("✅ Collapsed task:", taskId);
+      console.log(" Collapsed task:", taskId);
     } else {
       // Expand: show direct children only
       showDirectChildren(taskId);
@@ -3007,7 +3007,7 @@ function initExpandCollapse() {
       // Rotate icon to expanded state (pointing down)
       $icon.css("transform", "rotate(90deg)");
 
-      console.log("✅ Expanded task:", taskId);
+      console.log(" Expanded task:", taskId);
     }
     
     // Refresh pagination after expand/collapse
@@ -3019,7 +3019,7 @@ function initExpandCollapse() {
   // Initialize hierarchical view: Show only main tasks, hide all subtasks
   initializeHierarchicalView();
 
-  console.log("✅ Expand/collapse initialized");
+  console.log(" Expand/collapse initialized");
 }
 
 // Initialize hierarchical view: Show only main tasks, hide subtasks
@@ -3072,7 +3072,7 @@ function initializeHierarchicalView() {
     }
   });
 
-  console.log("✅ Hierarchical view initialized:");
+  console.log(" Hierarchical view initialized:");
   console.log("   - Main tasks shown:", mainTasksShown);
   console.log("   - Subtasks hidden:", subtasksHidden);
 
@@ -3238,7 +3238,7 @@ function initInlineEditing() {
         $editor.prop("disabled", false);
 
         if (success) {
-          console.log("✅ Title saved successfully!");
+          console.log(" Title saved successfully!");
           $display.text(newTitle);
         } else {
           console.error("❌ Failed to save title");
@@ -3298,7 +3298,7 @@ function initInlineEditing() {
           console.log("📤 Saving changes via click outside...");
           saveTaskTitle(taskId, newTitle, function (success) {
             if (success) {
-              console.log("✅ Title saved via click outside!");
+              console.log(" Title saved via click outside!");
               $display.text(newTitle);
             } else {
               console.error("❌ Failed to save title via click outside");
@@ -3464,7 +3464,7 @@ function initInlineEditing() {
       var textLength = $editor.val().length;
       $editor[0].setSelectionRange(textLength, textLength);
 
-      console.log("✅ Description editor focused with full text");
+      console.log(" Description editor focused with full text");
     }, 50);
   });
 
@@ -3507,7 +3507,7 @@ function initInlineEditing() {
       $editor.prop("disabled", false);
 
       if (success) {
-        console.log("✅ Description saved successfully!");
+        console.log(" Description saved successfully!");
 
         // Update display with truncated text but store full description
         if (newDescription === "") {
@@ -3568,7 +3568,7 @@ function initInlineEditing() {
     }
   });
 
-  console.log("✅ Inline editing initialized");
+  console.log(" Inline editing initialized");
 }
 
 // Initialize checkbox functionality
@@ -3617,7 +3617,7 @@ function initCheckboxes() {
     }
   }
 
-  console.log("✅ Checkboxes initialized");
+  console.log(" Checkboxes initialized");
 }
 
 // Global test function for debugging
@@ -3640,12 +3640,12 @@ window.testTaskListFunctions = function () {
 
   // Test event handlers
   if (expandButtons.length > 0) {
-    console.log("✅ Testing expand/collapse click...");
+    console.log(" Testing expand/collapse click...");
     expandButtons.first().click();
   }
 
   if (addButtons.length > 0) {
-    console.log("✅ Testing add button click...");
+    console.log(" Testing add button click...");
     addButtons.first().click();
 
     // Check if form was created
@@ -3654,7 +3654,7 @@ window.testTaskListFunctions = function () {
       console.log("📝 Inline forms created:", forms.length);
 
       if (forms.length > 0) {
-        console.log("✅ Form created successfully");
+        console.log(" Form created successfully");
 
         // Test save button
         const saveButtons = $(".btn-save-task");
@@ -3667,7 +3667,7 @@ window.testTaskListFunctions = function () {
 
         if (inputs.length > 0) {
           inputs.first().val("Test Task Title");
-          console.log("✅ Set test title in input");
+          console.log(" Set test title in input");
 
           if (saveButtons.length > 0) {
             console.log("🔥 Testing save button click...");
@@ -3685,7 +3685,7 @@ window.testTaskListFunctions = function () {
   console.log("Title displays found:", titleDisplays.length);
 
   if (titleDisplays.length > 0) {
-    console.log("✅ Testing inline editing click...");
+    console.log(" Testing inline editing click...");
     titleDisplays.first().click();
 
     // Check if editor appeared
@@ -3739,7 +3739,7 @@ window.testEventHandlers = function () {
 
   $("#sortable-tasks").prepend(testForm);
 
-  console.log("✅ Test form added. Try clicking Save/Cancel buttons.");
+  console.log(" Test form added. Try clicking Save/Cancel buttons.");
 };
 
 // Initialize search functionality
@@ -3779,7 +3779,7 @@ function initSearch() {
     }, 100);
   });
 
-  console.log("✅ Search initialized");
+  console.log(" Search initialized");
 }
 
 // Show all parent tasks up the hierarchy for a given task
@@ -3942,7 +3942,7 @@ function addTaskKeyStyles() {
   `;
 
   $('head').append(styles);
-  console.log("✅ Task key and scrolling styles added");
+  console.log(" Task key and scrolling styles added");
 }
 
 // Initialize task key modal functionality
@@ -3981,7 +3981,7 @@ function initTaskKeyModal() {
     openTaskModal(taskId);
   });
 
-  console.log("✅ Task key modal functionality initialized");
+  console.log(" Task key modal functionality initialized");
   
   // Debug: Test if click handlers are working
   setTimeout(function() {
@@ -4006,7 +4006,7 @@ function openTaskModal(taskId) {
   
   // Use the complete TaskModal class from task-modal.js
   if (window.taskModal && typeof window.taskModal.openTask === 'function') {
-    console.log("✅ Using existing TaskModal instance");
+    console.log(" Using existing TaskModal instance");
     try {
       window.taskModal.openTask(taskId);
     } catch (error) {
@@ -4019,7 +4019,7 @@ function openTaskModal(taskId) {
       });
     }
   } else if (typeof TaskModal !== 'undefined') {
-    console.log("✅ Creating new TaskModal instance");
+    console.log(" Creating new TaskModal instance");
     try {
       // Initialize the complete TaskModal class
       window.taskModal = new TaskModal();
@@ -4076,7 +4076,7 @@ function initCommentModal() {
     openTaskModalWithComments(taskId);
   });
 
-  console.log("✅ Comment modal functionality initialized");
+  console.log(" Comment modal functionality initialized");
 }
 
 // Open task modal with comments section focused
@@ -4092,14 +4092,14 @@ function openTaskModalWithComments(taskId) {
     var $commentsTab = $('.nav-link[href="#comments"], .tab-link[data-tab="comments"], [data-target="#comments"]');
     if ($commentsTab.length > 0) {
       $commentsTab.click();
-      console.log("✅ Clicked on comments tab");
+      console.log(" Clicked on comments tab");
     }
     
     // Try to focus on comment input
     var $commentInput = $('#comment-input, .comment-input, textarea[name="comment"]');
     if ($commentInput.length > 0) {
       $commentInput.focus();
-      console.log("✅ Focused on comment input");
+      console.log(" Focused on comment input");
     }
   }, 500);
 }
@@ -4115,7 +4115,7 @@ function refreshPagination() {
   if (typeof updatePaginationInfo === 'function' && typeof showCurrentPage === 'function') {
     paginationCurrentPage = 1; // Reset to first page when refreshing
     showCurrentPage();
-    console.log("✅ Pagination refreshed");
+    console.log(" Pagination refreshed");
   } else {
     console.error("❌ Pagination functions not available");
   }
@@ -4269,7 +4269,7 @@ function initPagination() {
     if ($taskRows.length > 0) {
       updatePaginationInfo();
       showCurrentPage();
-      console.log("✅ Pagination initialized with", $taskRows.length, "tasks");
+      console.log(" Pagination initialized with", $taskRows.length, "tasks");
     } else {
       console.warn("⚠️ No task rows found, retrying pagination in 1 second...");
       setTimeout(function() {
@@ -4277,7 +4277,7 @@ function initPagination() {
         if ($retryRows.length > 0) {
           updatePaginationInfo();
           showCurrentPage();
-          console.log("✅ Pagination initialized on retry with", $retryRows.length, "tasks");
+          console.log(" Pagination initialized on retry with", $retryRows.length, "tasks");
         } else {
           console.error("❌ Still no task rows found for pagination");
           // Even if no rows, show pagination with 0 tasks
@@ -4287,7 +4287,7 @@ function initPagination() {
     }
   }, 500);
   
-  console.log("✅ Pagination initialized");
+  console.log(" Pagination initialized");
   
   // Add global debug function
   window.debugPagination = function() {
@@ -4303,7 +4303,7 @@ function initPagination() {
     if (typeof updatePaginationInfo === 'function') {
       updatePaginationInfo();
       showCurrentPage();
-      console.log("✅ Pagination manually refreshed");
+      console.log(" Pagination manually refreshed");
     } else {
       console.error("❌ Pagination functions not available");
     }
@@ -4377,7 +4377,7 @@ function initFilters() {
     }, 100);
   });
 
-  console.log("✅ Filters initialized");
+  console.log(" Filters initialized");
 }
 
 // Helper functions
@@ -4569,11 +4569,11 @@ function fixExistingAddButtons() {
             `);
       }
 
-      console.log("   ✅ Button styling fixed (preserved functionality)");
+      console.log("    Button styling fixed (preserved functionality)");
     }
   );
 
-  console.log("✅ Fixed existing add buttons without breaking functionality");
+  console.log(" Fixed existing add buttons without breaking functionality");
 }
 
 // Initialize when DOM is ready
@@ -4613,9 +4613,9 @@ function saveInlineTask($input) {
       inline_creation: 1, // Flag for inline creation
     },
     success: function (response) {
-      console.log("✅ AJAX Response:", response);
+      console.log(" AJAX Response:", response);
       if (response && response.success) {
-        console.log("✅ Task data:", response.data);
+        console.log(" Task data:", response.data);
         // Create new task element
         var newTaskHtml = createTaskElement(response.data, level);
         $form.replaceWith(newTaskHtml);
@@ -4825,7 +4825,7 @@ function testAllFunctionality() {
     console.log("- No click events found on document");
   }
 
-  console.log("\n✅ Test complete! Check above for any issues.");
+  console.log("\n Test complete! Check above for any issues.");
 
   return {
     tasks: $(".task-row").length,
@@ -4909,7 +4909,7 @@ function testHierarchicalView() {
   });
 
   if (expandableButtons.length > 0) {
-    console.log("✅ Hierarchical view is working properly");
+    console.log(" Hierarchical view is working properly");
     console.log("💡 Click an expand button to test showing subtasks");
   } else {
     console.log("⚠️ No expand buttons found in visible tasks");
@@ -4947,7 +4947,7 @@ function fixExpandButtons() {
         $expandIcon.css("transform", "rotate(0deg)");
         $row.removeClass("expanded");
 
-        console.log("✅ Fixed expand button for task:", taskId);
+        console.log(" Fixed expand button for task:", taskId);
       }
     }
   });
@@ -4989,4 +4989,4 @@ function getCSRFToken() {
 window.getCookie = getCookie;
 window.getCSRFToken = getCSRFToken;
 
-console.log("✅ Task List with CSRF support loaded!");
+console.log(" Task List with CSRF support loaded!");

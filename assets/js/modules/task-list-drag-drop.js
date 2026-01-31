@@ -38,7 +38,7 @@ function initDragDrop() {
     },
   });
 
-  console.log("✅ Drag & Drop initialized");
+  console.log(" Drag & Drop initialized");
 }
 
 // Update task hierarchy after drag and drop

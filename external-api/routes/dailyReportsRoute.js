@@ -670,7 +670,7 @@ async function sendDailySummaryFlexReport(dbPool, client_and_project, formatNumb
       }
     });
     
-    console.log('✅ Daily flex messages sent successfully to LINE');
+    console.log(' Daily flex messages sent successfully to LINE');
     
     return {
       success: true,
@@ -1028,7 +1028,7 @@ router.get('/test-flex-summary', async (req, res) => {
     if (result.success) {
       res.json({
         success: true,
-        message: '✅ Daily flex messages sent to LINE successfully!',
+        message: ' Daily flex messages sent to LINE successfully!',
         messageCount: result.messageCount,
         sentTo: result.sentTo,
         timestamp: new Date().toLocaleString('th-TH'),
@@ -1111,7 +1111,7 @@ router.get('/test-flex-preview', async (req, res) => {
     
     res.json({
       success: true,
-      message: '✅ Daily flex message preview generated successfully!',
+      message: ' Daily flex message preview generated successfully!',
       dailyData: dailyData,
       flexMessages: messages,
       messageCount: messages.length,

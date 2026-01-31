@@ -43,7 +43,7 @@ function initInlineEditing() {
       // Select all text for easy editing
       $editor.select();
 
-      console.log("✅ Title editor focused and text selected");
+      console.log(" Title editor focused and text selected");
     }, 50);
   });
 
@@ -89,7 +89,7 @@ function initInlineEditing() {
       $editor.prop("disabled", false);
 
       if (success) {
-        console.log("✅ Title saved successfully!");
+        console.log(" Title saved successfully!");
         $display.text(newTitle);
         Swal.fire({
           icon: 'success',
@@ -160,7 +160,7 @@ function initInlineEditing() {
           console.log("📤 Saving changes via click outside...");
           saveTaskTitle(taskId, newTitle, function (success) {
             if (success) {
-              console.log("✅ Title saved via click outside!");
+              console.log(" Title saved via click outside!");
               $display.text(newTitle);
             } else {
               console.error("❌ Failed to save title via click outside");
@@ -322,7 +322,7 @@ function initInlineEditing() {
       var textLength = $editor.val().length;
       $editor[0].setSelectionRange(textLength, textLength);
 
-      console.log("✅ Description editor focused with full text");
+      console.log(" Description editor focused with full text");
     }, 50);
   });
 
@@ -365,7 +365,7 @@ function initInlineEditing() {
       $editor.prop("disabled", false);
 
       if (success) {
-        console.log("✅ Description saved successfully!");
+        console.log(" Description saved successfully!");
         Swal.fire({
           icon: 'success',
           title: 'Success!',
@@ -436,7 +436,7 @@ function initInlineEditing() {
     }
   });
 
-  console.log("✅ Inline editing initialized");
+  console.log(" Inline editing initialized");
 }
 
 // Save task title to server
@@ -459,7 +459,7 @@ function saveTaskTitle(taskId, title, callback) {
     },
     dataType: "json",
     success: function (response) {
-      console.log("✅ Task title saved successfully:", response);
+      console.log(" Task title saved successfully:", response);
       if (response && response.success) {
         callback(true);
       } else {
@@ -510,7 +510,7 @@ function saveTaskDescription(taskId, description, callback) {
     },
     dataType: "json",
     success: function (response) {
-      console.log("✅ Task description saved successfully:", response);
+      console.log(" Task description saved successfully:", response);
       if (response && response.success) {
         callback(true);
       } else {
@@ -547,7 +547,7 @@ function saveTaskAssignee(taskId, assigneeId, callback) {
     },
     dataType: "json",
     success: function (response) {
-      console.log("✅ Task assignee saved successfully:", response);
+      console.log(" Task assignee saved successfully:", response);
       if (response && response.success) {
         callback(true);
       } else {

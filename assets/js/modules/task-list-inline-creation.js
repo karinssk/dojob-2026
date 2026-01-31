@@ -14,7 +14,7 @@ function initInlineTaskCreation() {
   // Handle add root task button
   $(document).on("click", ".add-root-task", function (e) {
     e.preventDefault();
-    console.log("✅ Add root task clicked!");
+    console.log(" Add root task clicked!");
     var parentId = $(this).data("parent-id") || 0;
     showInlineTaskForm(parentId, 0);
   });
@@ -26,7 +26,7 @@ function initInlineTaskCreation() {
     function (e) {
       e.preventDefault();
       e.stopPropagation();
-      console.log("✅ Add subtask clicked!");
+      console.log(" Add subtask clicked!");
 
       var parentId = $(this).data("parent-id");
       var $parentRow = $(this).closest("tr");
@@ -94,7 +94,7 @@ function initInlineTaskCreation() {
       $(".btn-save-task").prop("disabled", false).text("Save");
 
       if (success) {
-        console.log("✅ Task saved successfully! Creating row dynamically...");
+        console.log(" Task saved successfully! Creating row dynamically...");
 
         // Create new task row dynamically instead of refreshing
         createNewTaskRow(taskData, parentId, level, $form);
@@ -103,7 +103,7 @@ function initInlineTaskCreation() {
         $form.remove();
 
         // Show success message
-        console.log("✅ New task added to DOM without refresh!");
+        console.log(" New task added to DOM without refresh!");
       } else {
         console.error("❌ Failed to save task");
         Swal.fire({
@@ -123,7 +123,7 @@ function initInlineTaskCreation() {
 
     var $form = $(this).closest(".inline-task-form");
     $form.remove();
-    console.log("✅ Form removed");
+    console.log(" Form removed");
   });
 
   // Handle Enter key in task title input
@@ -139,7 +139,7 @@ function initInlineTaskCreation() {
     }
   });
 
-  console.log("✅ Inline task creation initialized");
+  console.log(" Inline task creation initialized");
 }
 
 // Show inline task form
@@ -214,7 +214,7 @@ function showInlineTaskForm(parentId, level, $insertAfter) {
   // Focus the input
   $form.find(".new-task-title").focus();
 
-  console.log("✅ Inline form created and inserted");
+  console.log(" Inline form created and inserted");
 }
 
 // Save new task to server
@@ -251,9 +251,9 @@ function saveNewTask(title, parentId, callback) {
       console.log("📡 Sending AJAX request to:", baseUrl + "tasks/save");
     },
     success: function (response) {
-      console.log("✅ AJAX Success - Raw response:", response);
+      console.log(" AJAX Success - Raw response:", response);
       if (response && response.success) {
-        console.log("✅ Task saved successfully:", response);
+        console.log(" Task saved successfully:", response);
         callback(true, response.data);
       } else {
         console.error(
@@ -332,7 +332,7 @@ function createNewTaskRow(taskData, parentId, level, $form) {
   // Re-initialize any JavaScript functionality for the new row
   initializeNewTaskRow(taskData.id);
 
-  console.log("✅ New task row created and inserted!");
+  console.log(" New task row created and inserted!");
 }
 
 // Create HTML for a new task row

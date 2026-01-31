@@ -2688,7 +2688,7 @@ function loadFieldOptionsFromDB() {
           window.fieldOptionsData[fieldType] = response.options;
 
           console.log(
-            `✅ Successfully loaded ${response.options.length} options for ${fieldType} from database:`,
+            ` Successfully loaded ${response.options.length} options for ${fieldType} from database:`,
             response.options
           );
         } else {

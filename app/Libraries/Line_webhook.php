@@ -563,7 +563,7 @@ class Line_webhook {
             ];
         }
 
-        $test_message = "🧪 Test Message\n\nThis is a test message from your Task Management System.\n\n✅ LINE Messaging API is working correctly!";
+        $test_message = "🧪 Test Message\n\nThis is a test message from your Task Management System.\n\n LINE Messaging API is working correctly!";
         
         $success = $this->send_notification($test_message, ['type' => 'test']);
         
@@ -775,7 +775,7 @@ class Line_webhook {
      * @return bool Success status
      */
     public function send_event_payment_status_flex($event, $paid_status = 0) {
-        $status_text = $paid_status ? '✅ ชำระแล้ว' : '⏳ รอชำระ';
+        $status_text = $paid_status ? ' ชำระแล้ว' : '⏳ รอชำระ';
         
         // Build flex contents dynamically
         $flex_contents = [

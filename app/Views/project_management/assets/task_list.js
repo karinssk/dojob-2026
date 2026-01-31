@@ -35,7 +35,7 @@
 //     initSearch();
 //     initFilters();
     
-//     console.log('✅ Task List initialized successfully');
+//     console.log(' Task List initialized successfully');
 // }
 
 // // Initialize drag and drop
@@ -75,7 +75,7 @@
 //         }
 //     });
     
-//     console.log('✅ Drag & Drop initialized');
+//     console.log(' Drag & Drop initialized');
 // }
 
 // // Initialize status dropdowns
@@ -145,7 +145,7 @@
 //         });
 //     });
     
-//     console.log('✅ Status dropdowns initialized');
+//     console.log(' Status dropdowns initialized');
 // }
 
 // // Initialize expand/collapse functionality
@@ -178,7 +178,7 @@
 //         $(this).find('.expand-icon').addClass('rotated');
 //     });
     
-//     console.log('✅ Expand/collapse initialized');
+//     console.log(' Expand/collapse initialized');
 // }
 
 // // Initialize search functionality
@@ -212,7 +212,7 @@
 //         }
 //     });
     
-//     console.log('✅ Search initialized');
+//     console.log(' Search initialized');
 // }
 
 // // Initialize filters
@@ -253,7 +253,7 @@
 //         }
 //     });
     
-//     console.log('✅ Filters initialized');
+//     console.log(' Filters initialized');
 // }
 
 // // Helper functions

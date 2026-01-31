@@ -115,7 +115,7 @@ function initStatusDropdowns() {
     });
   });
 
-  console.log("✅ Status dropdowns initialized");
+  console.log(" Status dropdowns initialized");
 }
 
 // Initialize priority dropdowns
@@ -199,7 +199,7 @@ function initPriorityDropdowns() {
     });
   });
 
-  console.log("✅ Priority dropdowns initialized");
+  console.log(" Priority dropdowns initialized");
 }
 
 // Fetch status data from database and create dropdown
@@ -327,7 +327,7 @@ function convertStatusBadgesToDropdowns() {
     $badge.replaceWith(dropdownHtml);
     $badge.data("dropdown-converted", true);
 
-    console.log("✅ Converted badge for task:", taskId);
+    console.log(" Converted badge for task:", taskId);
   });
 
   console.log("🎉 Status badge conversion complete!");
@@ -348,7 +348,7 @@ function convertPriorityIconsToDropdowns() {
     success: function(response) {
       console.log("📋 Priorities API response:", response);
       if (response && response.success && response.priorities) {
-        console.log("✅ Using real database priorities:", response.priorities);
+        console.log(" Using real database priorities:", response.priorities);
         
         // Set up global priority mapping for other parts of the system
         setupGlobalPriorityMapping(response.priorities);
@@ -383,7 +383,7 @@ function setupGlobalPriorityMapping(priorities) {
     };
   });
   
-  console.log("✅ Global priority mapping set up:", window.priorityMapping);
+  console.log(" Global priority mapping set up:", window.priorityMapping);
 }
 
 // Render priority dropdowns with real database data
@@ -445,7 +445,7 @@ function renderPriorityDropdowns(priorities) {
       // Replace the cell content
       $cell.html(dropdownHtml);
 
-      console.log("✅ Converted priority icon for task:", taskId);
+      console.log(" Converted priority icon for task:", taskId);
     }
   });
 
@@ -537,7 +537,7 @@ function renderPriorityDropdownsFallback() {
       // Replace the cell content
       $cell.html(dropdownHtml);
 
-      console.log("✅ Converted priority icon for task:", taskId);
+      console.log(" Converted priority icon for task:", taskId);
     }
   });
 

@@ -101,7 +101,7 @@ function initTaskList() {
   // Initialize task data display from database values
   initTaskDataDisplay();
 
-  console.log("✅ Task List initialized successfully");
+  console.log(" Task List initialized successfully");
 }
 
 // Initialize task data display from database values
@@ -150,7 +150,7 @@ function initTaskDataDisplay() {
   // Initialize labels displays with actual data
   initLabelsDisplay(); // From task-list-labels.js
 
-  console.log("✅ Task data display initialized");
+  console.log(" Task data display initialized");
 }
 
 // Initialize click handlers for interactive containers
@@ -214,7 +214,7 @@ function initContainerClickHandlers() {
     }
   });
 
-  console.log("✅ Container click handlers initialized");
+  console.log(" Container click handlers initialized");
 }
 
 // Initialize checkbox functionality
@@ -265,7 +265,7 @@ function initCheckboxes() {
     }
   }
 
-  console.log("✅ Checkboxes initialized");
+  console.log(" Checkboxes initialized");
 }
 
 // Initialize search functionality
@@ -294,7 +294,7 @@ function initSearch() {
     }
   });
 
-  console.log("✅ Search initialized");
+  console.log(" Search initialized");
 }
 
 // Show all parent tasks up the hierarchy for a given task
@@ -343,7 +343,7 @@ function initFilters() {
     }
   });
 
-  console.log("✅ Filters initialized");
+  console.log(" Filters initialized");
 }
 
 // Initialize when DOM is ready

@@ -50,7 +50,7 @@ foreach ($db_configs as $name => $config) {
         $pdo = new PDO($dsn, $config['username'], $config['password']);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        echo "✅ Connection successful<br>";
+        echo " Connection successful<br>";
         
         // Test query
         $stmt = $pdo->query("SELECT VERSION() as version");
@@ -72,7 +72,7 @@ foreach ($db_configs as $name => $config) {
 echo "<h2>4. PHP Extensions</h2>";
 $required_extensions = ['mysqli', 'pdo', 'pdo_mysql', 'curl', 'gd', 'mbstring', 'xml', 'zip', 'intl', 'bcmath'];
 foreach ($required_extensions as $ext) {
-    $status = extension_loaded($ext) ? '✅' : '❌';
+    $status = extension_loaded($ext) ? '' : '❌';
     echo "$status $ext<br>";
 }
 echo "<br>";
@@ -90,7 +90,7 @@ $paths = [
 foreach ($paths as $path) {
     if (file_exists($path)) {
         $perms = substr(sprintf('%o', fileperms($path)), -4);
-        $writable = is_writable($path) ? '✅' : '❌';
+        $writable = is_writable($path) ? '' : '❌';
         echo "$writable $path (permissions: $perms)<br>";
     } else {
         echo "❌ $path (not found)<br>";

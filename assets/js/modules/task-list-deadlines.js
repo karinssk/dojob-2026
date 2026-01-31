@@ -128,7 +128,7 @@ function showDeadlinePicker($container, taskId, currentDeadline) {
     // Save deadline
     saveTaskDeadline(taskId, selectedDate, function (success) {
       if (success) {
-        console.log("✅ Deadline updated successfully");
+        console.log(" Deadline updated successfully");
         updateDeadlineDisplay($container, selectedDate);
       } else {
         console.error("❌ Failed to update deadline");
@@ -158,7 +158,7 @@ function showDeadlinePicker($container, taskId, currentDeadline) {
     
     saveTaskDeadline(taskId, todayDate, function (success) {
       if (success) {
-        console.log("✅ Deadline set to today");
+        console.log(" Deadline set to today");
         updateDeadlineDisplay($container, todayDate);
       } else {
         console.error("❌ Failed to set deadline");
@@ -180,7 +180,7 @@ function showDeadlinePicker($container, taskId, currentDeadline) {
     
     saveTaskDeadline(taskId, "", function (success) {
       if (success) {
-        console.log("✅ Deadline cleared successfully");
+        console.log(" Deadline cleared successfully");
         updateDeadlineDisplay($container, "");
       } else {
         console.error("❌ Failed to clear deadline");
@@ -242,7 +242,7 @@ function saveTaskDeadline(taskId, deadline, callback) {
       deadline: deadline,
     }),
     success: function (response) {
-      console.log("✅ Task deadline saved successfully:", response);
+      console.log(" Task deadline saved successfully:", response);
       if (response.success) {
         callback(true);
       } else {

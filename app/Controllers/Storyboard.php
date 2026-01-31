@@ -266,7 +266,7 @@ class Storyboard extends Security_Controller {
             $db = \Config\Database::connect();
             $query = $db->query("SHOW TABLES LIKE 'rise_sub_storyboard_projects'");
             if ($query->getNumRows() > 0) {
-                echo "<p>✅ rise_sub_storyboard_projects table exists</p>";
+                echo "<p> rise_sub_storyboard_projects table exists</p>";
             } else {
                 echo "<p>❌ rise_sub_storyboard_projects table does NOT exist</p>";
                 echo "<p>Run: complete_hierarchical_storyboard_setup.sql</p>";
@@ -289,7 +289,7 @@ class Storyboard extends Security_Controller {
             }
             
             if ($has_sub_project_column) {
-                echo "<p>✅ rise_storyboards has sub_storyboard_project_id column</p>";
+                echo "<p> rise_storyboards has sub_storyboard_project_id column</p>";
             } else {
                 echo "<p>❌ rise_storyboards missing sub_storyboard_project_id column</p>";
                 echo "<p>Run: complete_hierarchical_storyboard_setup.sql</p>";
@@ -300,12 +300,12 @@ class Storyboard extends Security_Controller {
         
         echo "<h2>Model Loading Check</h2>";
         if (isset($this->Sub_storyboard_projects_model)) {
-            echo "<p>✅ Sub_storyboard_projects_model is loaded</p>";
+            echo "<p> Sub_storyboard_projects_model is loaded</p>";
             
             // Test model method
             try {
                 $result = $this->Sub_storyboard_projects_model->get_details(array("rise_story_id" => 133));
-                echo "<p>✅ Model get_details() works</p>";
+                echo "<p> Model get_details() works</p>";
             } catch (Exception $e) {
                 echo "<p>❌ Model method error: " . $e->getMessage() . "</p>";
             }
@@ -372,7 +372,7 @@ class Storyboard extends Security_Controller {
             echo "<p>is_storyboard: {$project->is_storyboard}</p>";
             
             if ($this->can_view_project($project_id)) {
-                echo "<p>✅ Can access project $project_id</p>";
+                echo "<p> Can access project $project_id</p>";
             } else {
                 echo "<p>❌ Cannot access project $project_id</p>";
             }
@@ -541,7 +541,7 @@ class Storyboard extends Security_Controller {
             try {
                 $project = $this->Projects_model->get_one($project_id);
                 if ($project->id) {
-                    echo "<p>✅ Project $project_id exists</p>";
+                    echo "<p> Project $project_id exists</p>";
                     echo "<p>Title: {$project->title}</p>";
                     echo "<p>Description: " . ($project->description ?: 'NULL') . "</p>";
                     echo "<p>is_storyboard: {$project->is_storyboard}</p>";
@@ -549,7 +549,7 @@ class Storyboard extends Security_Controller {
                     echo "<p>Created by: {$project->created_by}</p>";
                     
                     if ($project->is_storyboard == 1) {
-                        echo "<p>✅ Project is correctly marked as storyboard project</p>";
+                        echo "<p> Project is correctly marked as storyboard project</p>";
                     } else {
                         echo "<p>❌ Project is NOT marked as storyboard project</p>";
                     }
@@ -584,11 +584,11 @@ class Storyboard extends Security_Controller {
         echo "<h1>Storyboard Model Test</h1>";
         
         if (isset($this->Storyboards_model)) {
-            echo "<p>✅ Storyboards_model is loaded</p>";
+            echo "<p> Storyboards_model is loaded</p>";
             
             try {
                 $result = $this->Storyboards_model->get_details(array());
-                echo "<p>✅ get_details() method works</p>";
+                echo "<p> get_details() method works</p>";
                 echo "<p>Found " . count($result->getResult()) . " storyboard records</p>";
             } catch (Exception $e) {
                 echo "<p>❌ Error calling get_details(): " . $e->getMessage() . "</p>";
@@ -598,7 +598,7 @@ class Storyboard extends Security_Controller {
         }
         
         if (isset($this->Projects_model)) {
-            echo "<p>✅ Projects_model is loaded</p>";
+            echo "<p> Projects_model is loaded</p>";
         } else {
             echo "<p>❌ Projects_model is not loaded</p>";
         }
@@ -933,7 +933,7 @@ class Storyboard extends Security_Controller {
                 
                 try {
                     $result = $this->Sub_storyboard_projects_model->ci_save($test_data, $test_record->id);
-                    echo "<p>Update result: " . ($result ? "✅ Success (ID: $result)" : "❌ Failed") . "</p>";
+                    echo "<p>Update result: " . ($result ? " Success (ID: $result)" : "❌ Failed") . "</p>";
                 } catch (Exception $e) {
                     echo "<p>❌ Update error: " . $e->getMessage() . "</p>";
                 }
@@ -1253,10 +1253,10 @@ class Storyboard extends Security_Controller {
         echo "<h1>Debug Models</h1>";
         
         echo "<h2>Model Status:</h2>";
-        echo "<p>Storyboards_model: " . (isset($this->Storyboards_model) ? "✅ Loaded" : "❌ Not loaded") . "</p>";
-        echo "<p>Sub_storyboard_projects_model: " . (isset($this->Sub_storyboard_projects_model) ? "✅ Loaded" : "❌ Not loaded") . "</p>";
-        echo "<p>Project_members_model: " . (isset($this->Project_members_model) ? "✅ Loaded" : "❌ Not loaded") . "</p>";
-        echo "<p>Users_model: " . (isset($this->Users_model) ? "✅ Loaded" : "❌ Not loaded") . "</p>";
+        echo "<p>Storyboards_model: " . (isset($this->Storyboards_model) ? " Loaded" : "❌ Not loaded") . "</p>";
+        echo "<p>Sub_storyboard_projects_model: " . (isset($this->Sub_storyboard_projects_model) ? " Loaded" : "❌ Not loaded") . "</p>";
+        echo "<p>Project_members_model: " . (isset($this->Project_members_model) ? " Loaded" : "❌ Not loaded") . "</p>";
+        echo "<p>Users_model: " . (isset($this->Users_model) ? " Loaded" : "❌ Not loaded") . "</p>";
         
         echo "<h2>Test User Data:</h2>";
         try {
@@ -1490,8 +1490,8 @@ class Storyboard extends Security_Controller {
                 
                 // Verify file actually exists
                 if (file_exists($file_path)) {
-                    error_log("✅ File verification: File exists at " . $file_path);
-                    error_log("✅ File is readable: " . (is_readable($file_path) ? 'YES' : 'NO'));
+                    error_log(" File verification: File exists at " . $file_path);
+                    error_log(" File is readable: " . (is_readable($file_path) ? 'YES' : 'NO'));
                 } else {
                     error_log("❌ File verification: File NOT found at " . $file_path);
                 }

@@ -12,7 +12,7 @@ window.testDragDrop = function() {
     console.log('Task rows found:', $('.task-item').length);
     console.log('Drag handles found:', $('.jira-drag-handle').length);
     
-    var summary = '✅ Drag & Drop Test Results:\n\n' +
+    var summary = ' Drag & Drop Test Results:\n\n' +
                  '• SortableJS: ' + (typeof Sortable !== 'undefined' ? 'Available' : 'Missing') + '\n' +
                  '• jQuery: ' + (typeof $ !== 'undefined' ? 'Available' : 'Missing') + '\n' +
                  '• Task table: ' + ($('#sortable-tasks').length > 0 ? 'Found' : 'Missing') + '\n' +
@@ -57,7 +57,7 @@ window.debugCurrentState = function() {
         console.log('Task ' + taskId + ': "' + title + '" (Level: ' + level + ', Parent: ' + parentId + ')');
     });
     
-    var summary = '✅ Current State Analysis:\n\n' +
+    var summary = ' Current State Analysis:\n\n' +
                  '• Task rows: ' + $taskRows.length + '\n' +
                  '• Status badges: ' + $statusBadges.length + '\n' +
                  '• Expand toggles: ' + $expandToggles.length + '\n' +
@@ -94,7 +94,7 @@ window.testStatusDropdown = function() {
             var $visibleDropdowns = $('.dropdown-menu:visible');
             console.log('Visible dropdowns after click:', $visibleDropdowns.length);
             
-            alert('✅ Status Dropdown Test:\n\n' +
+            alert(' Status Dropdown Test:\n\n' +
                  '• Status badges: ' + $statusBadges.length + '\n' +
                  '• Status options: ' + $statusOptions.length + '\n' +
                  '• Test badge ID: ' + taskId + '\n' +
@@ -129,7 +129,7 @@ window.debugJiraHierarchy = function() {
     
     console.log('Tasks by level:', levelCounts);
     
-    var summary = '✅ Jira Hierarchy Analysis:\n\n' +
+    var summary = ' Jira Hierarchy Analysis:\n\n' +
                  '• Total tasks: ' + $jiraRows.length + '\n' +
                  '• Level 0 (Epics): ' + $level0Tasks.length + '\n' +
                  '• Tasks with children: ' + $tasksWithChildren.length + '\n' +
@@ -169,7 +169,7 @@ window.testJiraExpandCollapse = function() {
             $firstToggle.trigger('click');
             
             setTimeout(function() {
-                alert('✅ Expand/Collapse Test:\n\n' +
+                alert(' Expand/Collapse Test:\n\n' +
                      '• Expand toggles: ' + $expandToggles.length + '\n' +
                      '• Test task ID: ' + taskId + '\n\n' +
                      'Expand/collapse should have been tested.\nCheck console for details.');
@@ -198,7 +198,7 @@ window.testInlineTaskCreation = function() {
             var $inputs = $('.task-title-input');
             console.log('Task input fields created:', $inputs.length);
             
-            alert('✅ Inline Task Creation Test:\n\n' +
+            alert(' Inline Task Creation Test:\n\n' +
                  '• Create button: ' + ($createBtn.length > 0 ? 'Found' : 'Missing') + '\n' +
                  '• Add subtask buttons: ' + $addButtons.length + '\n' +
                  '• Input fields created: ' + $inputs.length + '\n\n' +
@@ -255,7 +255,7 @@ window.createTestHierarchy = function() {
                             console.log('Subtask created');
                             
                             setTimeout(function() {
-                                alert('✅ Test hierarchy creation completed!\n\nCheck the task list for the new hierarchy.');
+                                alert(' Test hierarchy creation completed!\n\nCheck the task list for the new hierarchy.');
                             }, 2000);
                         }
                     }, 1000);
@@ -293,7 +293,7 @@ window.checkTaskHierarchy = function() {
         console.log('Task ' + taskId + ': "' + title + '" (Level: ' + level + ', Parent: ' + parentId + ')');
     });
     
-    var summary = '✅ Task Hierarchy Analysis:\n\n' +
+    var summary = ' Task Hierarchy Analysis:\n\n' +
                  '• Total tasks: ' + totalTasks + '\n' +
                  '• Root tasks: ' + rootTasks.length + '\n' +
                  '• Parent-child groups: ' + Object.keys(hierarchyMap).length + '\n\n' +
@@ -316,7 +316,7 @@ window.reinitializeTaskList = function() {
     
     setTimeout(function() {
         initTaskList();
-        alert('✅ Task list reinitialized!\n\nAll functionality should be working now.');
+        alert(' Task list reinitialized!\n\nAll functionality should be working now.');
     }, 500);
 };
 
@@ -334,7 +334,7 @@ window.debugClickHandlers = function() {
         'Filter Options': $('.filter-option').length
     };
     
-    var summary = '✅ Click Handlers Analysis:\n\n';
+    var summary = ' Click Handlers Analysis:\n\n';
     for (var handler in handlers) {
         summary += '• ' + handler + ': ' + handlers[handler] + '\n';
         console.log(handler + ':', handlers[handler]);
@@ -363,7 +363,7 @@ setTimeout(function() {
         }
     });
     
-    console.log('✅ Debug functions available: ' + available + '/' + debugFunctions.length);
+    console.log(' Debug functions available: ' + available + '/' + debugFunctions.length);
     
     if (available === debugFunctions.length) {
         console.log('🎯 All debug functions are ready!');

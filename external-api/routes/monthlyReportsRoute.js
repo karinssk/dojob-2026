@@ -349,11 +349,11 @@ router.get('/send-other-projects-to-line', async (req, res) => {
       }
     });
     
-    console.log('✅ Other projects flex message sent to LINE successfully');
+    console.log(' Other projects flex message sent to LINE successfully');
     
     res.json({
       success: true,
-      message: '✅ Other projects sent to LINE successfully!',
+      message: ' Other projects sent to LINE successfully!',
       sentTo: REPORT_LINE_USER_ID,
       projectsCount: result.summary.totalProjects,
       totalAmount: result.summary.formattedTotalAmount,
@@ -1239,7 +1239,7 @@ async function sendMonthlySummaryReport(dbPool, client_and_project, formatNumber
         }
       });
       
-      console.log(`✅ Monthly carousel flex message sent successfully`);
+      console.log(` Monthly carousel flex message sent successfully`);
       return {
         success: true,
         messageCount: messages.length,

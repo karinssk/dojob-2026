@@ -73,7 +73,7 @@ function loadAndDisplayLabels($container, taskId, labelIds) {
           }
         });
 
-        console.log("✅ Loaded labels for task", taskId, ":", taskLabels);
+        console.log(" Loaded labels for task", taskId, ":", taskLabels);
         updateLabelsDisplay($container, taskLabels);
       } else {
         console.error("Failed to load labels:", response);
@@ -273,7 +273,7 @@ function renderLabelsDropdown(
   $container.css("position", "relative");
   $container.append(dropdownHtml);
 
-  console.log("✅ Dropdown appended to container");
+  console.log(" Dropdown appended to container");
 
   // Adjust dropdown position if it goes off-screen
   setTimeout(function () {
@@ -317,7 +317,7 @@ function renderLabelsDropdown(
           var labelId = parseInt(
             $(this).closest(".label-option").data("label-id")
           );
-          console.log("✅ Selected label ID:", labelId);
+          console.log(" Selected label ID:", labelId);
           if (!isNaN(labelId)) {
             selectedLabelIds.push(labelId);
           }
@@ -353,7 +353,7 @@ function renderLabelsDropdown(
           console.log("📤 Sending AJAX request...");
         },
         success: function (response) {
-          console.log("✅ AJAX Success:", response);
+          console.log(" AJAX Success:", response);
 
           if (response && response.success) {
             if (selectedLabelIds.length === 0) {
@@ -412,7 +412,7 @@ function renderLabelsDropdown(
 
             if ($targetContainer && $targetContainer.length > 0) {
               updateLabelsDisplay($targetContainer, selectedLabels);
-              console.log("✅ Labels display updated successfully");
+              console.log(" Labels display updated successfully");
             } else {
               console.error(
                 "❌ Could not find labels container for task:",
@@ -506,7 +506,7 @@ function renderLabelsDropdown(
                 label_ids: [], // Empty array to clear all labels
               }),
               success: function (response) {
-                console.log("✅ Labels cleared successfully:", response);
+                console.log(" Labels cleared successfully:", response);
 
                 if (response && response.success) {
                   Swal.fire({
@@ -538,7 +538,7 @@ function renderLabelsDropdown(
 
                   if ($targetContainer && $targetContainer.length > 0) {
                     updateLabelsDisplay($targetContainer, []); // Empty array
-                    console.log("✅ Labels cleared and display updated");
+                    console.log(" Labels cleared and display updated");
                   } else {
                     console.error(
                       "❌ Could not find labels container for task:",
@@ -697,7 +697,7 @@ window.handleSaveLabels = function (taskId) {
         saveTaskLabels(taskId, selectedLabelIds, function (success) {
           console.log("💾 Save callback result:", success);
           if (success) {
-            console.log("✅ Labels updated successfully");
+            console.log(" Labels updated successfully");
             // Convert IDs back to display data
             var selectedLabels = [];
             selectedLabelIds.forEach(function (id) {
@@ -776,7 +776,7 @@ function saveTaskLabels(taskId, labelIds, callback) {
       console.log("🚀 Sending AJAX request...");
     },
     success: function (response) {
-      console.log("✅ Task labels saved successfully:", response);
+      console.log(" Task labels saved successfully:", response);
       if (response && response.success) {
         callback(true);
       } else {
