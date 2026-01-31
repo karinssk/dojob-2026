@@ -191,13 +191,13 @@ class Line_expenses_model extends Crud_model {
             return null;
         }
 
-        $table = $this->db->table($table_name);
-        $row = $table->where('line_user_id', $line_user_id)->get()->getRow();
+        // Use raw query - $this->db->table() adds prefix automatically which breaks non-prefixed tables
+        $row = $this->db->query("SELECT * FROM `{$table_name}` WHERE `line_user_id` = ?", array($line_user_id))->getRow();
         if ($row && isset($row->rise_user_id) && intval($row->rise_user_id)) {
             return $row->rise_user_id;
         }
 
-        $rows = $table->select('rise_user_id, line_user_ids')->where('line_user_ids IS NOT NULL', null, false)->get()->getResult();
+        $rows = $this->db->query("SELECT rise_user_id, line_user_ids FROM `{$table_name}` WHERE line_user_ids IS NOT NULL")->getResult();
         foreach ($rows as $r) {
             $ids = $this->_parse_line_user_ids($r->line_user_ids ?? "");
             if (in_array($line_user_id, $ids, true) && intval($r->rise_user_id)) {
@@ -227,8 +227,8 @@ class Line_expenses_model extends Crud_model {
         }
 
         $last_reason = "";
-        $table = $this->db->table($table_name);
-        $row = $table->where('line_user_id', $line_user_id)->get()->getRow();
+        // Use raw query - $this->db->table() adds prefix automatically which breaks non-prefixed tables
+        $row = $this->db->query("SELECT * FROM `{$table_name}` WHERE `line_user_id` = ?", array($line_user_id))->getRow();
         if ($row && isset($row->rise_user_id) && intval($row->rise_user_id)) {
             return array(
                 "rise_user_id" => $row->rise_user_id,
@@ -239,7 +239,7 @@ class Line_expenses_model extends Crud_model {
             $last_reason = "user_mappings_arr.line_user_id_missing_rise_user_id";
         }
 
-        $rows = $table->select('rise_user_id, line_user_ids')->where('line_user_ids IS NOT NULL', null, false)->get()->getResult();
+        $rows = $this->db->query("SELECT rise_user_id, line_user_ids FROM `{$table_name}` WHERE line_user_ids IS NOT NULL")->getResult();
         foreach ($rows as $r) {
             $ids = $this->_parse_line_user_ids($r->line_user_ids ?? "");
             if (in_array($line_user_id, $ids, true)) {
@@ -276,12 +276,13 @@ class Line_expenses_model extends Crud_model {
             return false;
         }
 
-        $fields = $this->db->getFieldNames($table_name);
+        // Use raw query for field names - getFieldNames may also add prefix
+        $fields_result = $this->db->query("SHOW COLUMNS FROM `{$table_name}`")->getResultArray();
+        $fields = array_column($fields_result, 'Field');
         if (!in_array('line_user_id', $fields, true) || !in_array('rise_user_id', $fields, true)) {
             return false;
         }
 
-        $table = $this->db->table($table_name);
         $data = array(
             'line_user_id' => $line_user_id,
             'rise_user_id' => $rise_user_id
@@ -296,16 +297,31 @@ class Line_expenses_model extends Crud_model {
             $data['updated_at'] = date('Y-m-d H:i:s');
         }
 
-        $existing = $table->where('line_user_id', $line_user_id)->get()->getRow();
+        // Use raw queries to avoid prefix issues
+        $existing = $this->db->query("SELECT id FROM `{$table_name}` WHERE `line_user_id` = ?", array($line_user_id))->getRow();
         if ($existing) {
-            $table->where('line_user_id', $line_user_id);
-            return $table->update($data);
+            $set_parts = array();
+            $params = array();
+            foreach ($data as $col => $val) {
+                $set_parts[] = "`{$col}` = ?";
+                $params[] = $val;
+            }
+            $params[] = $line_user_id;
+            return $this->db->query("UPDATE `{$table_name}` SET " . implode(', ', $set_parts) . " WHERE `line_user_id` = ?", $params);
         }
 
         if (in_array('created_at', $fields, true)) {
             $data['created_at'] = date('Y-m-d H:i:s');
         }
-        return $table->insert($data);
+        $cols = array();
+        $placeholders = array();
+        $params = array();
+        foreach ($data as $col => $val) {
+            $cols[] = "`{$col}`";
+            $placeholders[] = "?";
+            $params[] = $val;
+        }
+        return $this->db->query("INSERT INTO `{$table_name}` (" . implode(', ', $cols) . ") VALUES (" . implode(', ', $placeholders) . ")", $params);
     }
 
     private function _resolve_user_mappings_arr_table() {
