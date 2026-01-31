@@ -397,6 +397,7 @@ class Line_notify extends Security_Controller {
         $formatted_message = "📢 Manual Notification\n\n" . $message;
 
         $success = $Line_webhook->send_notification($formatted_message, ['type' => $type]);
+        log_message('info', 'LINE Notify: manual notification result=' . ($success ? 'success' : 'fail') . ' error=' . ($Line_webhook->last_error ?? ''));
 
         $response = [
             'success' => $success,
@@ -405,6 +406,7 @@ class Line_notify extends Security_Controller {
 
         if (!$success) {
             $response['error_detail'] = $Line_webhook->last_error;
+            log_message('error', 'LINE Notify: manual notification failed. ' . ($Line_webhook->last_error ?? 'unknown'));
             $response['debug'] = [
                 'enabled' => get_setting('enable_line_notifications'),
                 'has_token' => !empty(get_setting('line_channel_access_token')),

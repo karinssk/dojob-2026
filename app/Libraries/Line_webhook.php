@@ -112,6 +112,7 @@ class Line_webhook {
                         $result = $this->send_push_message($group_id, $message, 'group');
                         if (!$result['success']) {
                             $success = false;
+                            log_message('error', "LINE Notify: push to group failed. group_id={$group_id} error=" . ($result['error'] ?? 'unknown'));
                         }
                         $responses[] = "Group {$group_id}: " . ($result['success'] ? 'OK' : $result['error']);
                     }
@@ -127,6 +128,7 @@ class Line_webhook {
                         $result = $this->send_push_message($user_id, $message, 'user');
                         if (!$result['success']) {
                             $success = false;
+                            log_message('error', "LINE Notify: push to user failed. user_id={$user_id} error=" . ($result['error'] ?? 'unknown'));
                         }
                         $responses[] = "User {$user_id}: " . ($result['success'] ? 'OK' : $result['error']);
                     }

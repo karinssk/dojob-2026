@@ -265,7 +265,18 @@
         btn.innerHTML = '<i data-feather="loader" class="icon-16 spinning"></i> <?php echo app_lang("testing"); ?>...';
 
         fetch('<?php echo get_uri("line_notify/test_api"); ?>')
-        .then(response => response.json())
+        .then(async response => {
+            const text = await response.text();
+            if (!response.ok) {
+                console.error('[LINE Notify] test_api HTTP', response.status, text);
+            }
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('[LINE Notify] test_api JSON parse error', e, text);
+                throw e;
+            }
+        })
         .then(data => {
             if (data.bot_info && data.bot_info.success) {
                 appAlert.success('<?php echo app_lang("connection_test_successful"); ?>');
@@ -293,7 +304,18 @@
         fetch('<?php echo get_uri("line_notify/trigger_event_notifications"); ?>', {
             method: 'POST'
         })
-        .then(response => response.json())
+        .then(async response => {
+            const text = await response.text();
+            if (!response.ok) {
+                console.error('[LINE Notify] trigger_event_notifications HTTP', response.status, text);
+            }
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('[LINE Notify] trigger_event_notifications JSON parse error', e, text);
+                throw e;
+            }
+        })
         .then(data => {
             if (data.success) {
                 let message = data.message || '<?php echo app_lang("notifications_triggered_successfully"); ?>';
@@ -333,7 +355,18 @@
         fetch('<?php echo get_uri("line_notify/trigger_today_events_only"); ?>', {
             method: 'POST'
         })
-        .then(response => response.json())
+        .then(async response => {
+            const text = await response.text();
+            if (!response.ok) {
+                console.error('[LINE Notify] trigger_today_events_only HTTP', response.status, text);
+            }
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('[LINE Notify] trigger_today_events_only JSON parse error', e, text);
+                throw e;
+            }
+        })
         .then(data => {
             console.log('[LINE Notify Events] Full response:', JSON.stringify(data, null, 2));
             if (data.success) {
@@ -388,7 +421,18 @@
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(async response => {
+            const text = await response.text();
+            if (!response.ok) {
+                console.error('[LINE Notify] send_manual_notification HTTP', response.status, text);
+            }
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('[LINE Notify] send_manual_notification JSON parse error', e, text);
+                throw e;
+            }
+        })
         .then(data => {
             console.log('[LINE Notify] Full response:', JSON.stringify(data, null, 2));
             if (data.success) {
@@ -414,7 +458,18 @@
 
     function refreshLogs() {
         fetch('<?php echo get_uri("line_notify/get_notification_logs"); ?>?limit=20')
-        .then(response => response.json())
+        .then(async response => {
+            const text = await response.text();
+            if (!response.ok) {
+                console.error('[LINE Notify] get_notification_logs HTTP', response.status, text);
+            }
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('[LINE Notify] get_notification_logs JSON parse error', e, text);
+                throw e;
+            }
+        })
         .then(data => {
             if (data.success && data.logs) {
                 const tbody = document.getElementById('logs-tbody');
