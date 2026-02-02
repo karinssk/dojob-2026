@@ -106,7 +106,7 @@
                 return;
             }
 
-            setStatus("Downloading... please wait.");
+            setStatus("Starting download...");
             $downloadLink.addClass("hide");
 
             $.ajax({
@@ -120,9 +120,7 @@
                         setStatus(res && res.message ? res.message : "Download failed.", true);
                         return;
                     }
-                    $fileLink.attr("href", res.file_url);
-                    $downloadLink.removeClass("hide");
-                    setStatus("Download ready.");
+                    pollProgress(res.job_id, res.file_url);
                 },
                 error: function (xhr) {
                     console.log("[Tools] Download error", xhr.status, xhr.responseText);
@@ -130,5 +128,44 @@
                 }
             });
         });
+
+        function pollProgress(jobId, fileUrl) {
+            if (!jobId) {
+                setStatus("Missing job id.", true);
+                return;
+            }
+
+            setStatus("Downloading... 0%");
+            var timer = setInterval(function () {
+                $.ajax({
+                    url: "<?php echo get_uri('tools/progress'); ?>",
+                    type: "GET",
+                    dataType: "json",
+                    data: {job_id: jobId},
+                    success: function (res) {
+                        if (!res || !res.success) {
+                            setStatus("Progress check failed.", true);
+                            return;
+                        }
+                        if (res.last_line) {
+                            setStatus(res.last_line);
+                        }
+                        if (res.done) {
+                            clearInterval(timer);
+                            if (String(res.exit_code) === "0") {
+                                $fileLink.attr("href", fileUrl);
+                                $downloadLink.removeClass("hide");
+                                setStatus("Download ready.");
+                            } else {
+                                setStatus("Download failed. Check server log.", true);
+                            }
+                        }
+                    },
+                    error: function () {
+                        setStatus("Progress request failed.", true);
+                    }
+                });
+            }, 2000);
+        }
     })();
 </script>

@@ -70,31 +70,78 @@ class Tools extends App_Controller {
         }
 
         $target_dir = FCPATH . "files/general/tools/";
+        $jobs_dir = $target_dir . "jobs/";
         if (!is_dir($target_dir)) {
             @mkdir($target_dir, 0775, true);
+        }
+        if (!is_dir($jobs_dir)) {
+            @mkdir($jobs_dir, 0775, true);
         }
 
         $safe_name = $this->_make_safe_filename($this->request->getPost("title") ?: "video");
         $base_name = $safe_name . "_" . date("Ymd_His");
+        $job_id = $base_name . "_" . bin2hex(random_bytes(4));
         $output_template = $target_dir . $base_name . ".%(ext)s";
         $output_path = $target_dir . $base_name . ".mp4";
+        $log_path = $jobs_dir . $job_id . ".log";
+        $exit_path = $jobs_dir . $job_id . ".exit";
 
         set_time_limit(0);
 
-        $cmd = "yt-dlp --no-warnings --no-playlist -o " . escapeshellarg($output_template) . " --merge-output-format mp4 " . escapeshellarg($url);
-        $result = $this->_run_command($cmd);
+        $progress_template = "download:%(progress._percent_str)s|%(progress.speed)s|%(progress.eta)s";
+        $inner_cmd = "yt-dlp --no-warnings --no-playlist --newline --progress-template " . escapeshellarg($progress_template)
+            . " -o " . escapeshellarg($output_template)
+            . " --merge-output-format mp4 "
+            . escapeshellarg($url)
+            . " > " . escapeshellarg($log_path) . " 2>&1; echo $? > " . escapeshellarg($exit_path);
 
-        if ($result["exit_code"] !== 0 || !file_exists($output_path)) {
-            echo json_encode(array("success" => false, "message" => "Download failed", "error" => $result["stderr"]));
-            return;
+        $cmd = "bash -c " . escapeshellarg($inner_cmd . " & echo $!");
+        $pid = "";
+        exec($cmd, $out);
+        if ($out && isset($out[0])) {
+            $pid = trim($out[0]);
         }
-
-        $file_url = base_url("files/general/tools/" . $base_name . ".mp4");
 
         echo json_encode(array(
             "success" => true,
+            "job_id" => $job_id,
             "file_name" => $base_name . ".mp4",
-            "file_url" => $file_url
+            "file_url" => base_url("files/general/tools/" . $base_name . ".mp4"),
+            "pid" => $pid
+        ));
+    }
+
+    function progress() {
+        $job_id = trim($this->request->getGet("job_id"));
+        if (!$job_id) {
+            echo json_encode(array("success" => false, "message" => "Missing job_id"));
+            return;
+        }
+
+        $jobs_dir = FCPATH . "files/general/tools/jobs/";
+        $log_path = $jobs_dir . $job_id . ".log";
+        $exit_path = $jobs_dir . $job_id . ".exit";
+
+        $last_line = "";
+        if (is_file($log_path)) {
+            $lines = @file($log_path, FILE_IGNORE_NEW_LINES);
+            if ($lines && count($lines)) {
+                $last_line = $lines[count($lines) - 1];
+            }
+        }
+
+        $is_done = false;
+        $exit_code = null;
+        if (is_file($exit_path)) {
+            $exit_code = trim(@file_get_contents($exit_path));
+            $is_done = true;
+        }
+
+        echo json_encode(array(
+            "success" => true,
+            "done" => $is_done,
+            "exit_code" => $exit_code,
+            "last_line" => $last_line
         ));
     }
 
