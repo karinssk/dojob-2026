@@ -6,6 +6,7 @@
             <li><a role="presentation" data-bs-toggle="tab" href="<?php echo_uri("expenses/recurring/"); ?>" data-bs-target="#recurring-expenses"><?php echo app_lang('recurring'); ?></a></li>
             <div class="tab-title clearfix no-border expenses-page-title">
                 <div class="title-button-group">
+                    <?php echo modal_anchor(get_uri("expenses/export_modal_form"), "<i data-feather='download' class='icon-16'></i> Export", array("class" => "btn btn-default mb0", "title" => "Export")); ?>
                     <?php echo modal_anchor(get_uri("expenses/import_expenses_modal_form"), "<i data-feather='upload' class='icon-16'></i> " . app_lang('import_expense'), array("class" => "btn btn-default mb0", "title" => app_lang('import_expense'))); ?>
                     <?php echo modal_anchor(get_uri("expenses/modal_form"), "<i data-feather='plus-circle' class='icon-16'></i> " . app_lang('add_expense'), array("class" => "btn btn-default mb0", "title" => app_lang('add_expense'))); ?>
                 </div>
@@ -72,5 +73,18 @@
     };
     $(document).ready(function () {
     loadExpensesTable("#expense-table", "all");
+    $(document).on("click", "#expense-table [data-toggle='app-modal']", function () {
+        var $el = $(this);
+        console.log("[Expenses Files] Click", {
+            url: $el.attr("data-url"),
+            sidebar: $el.attr("data-sidebar"),
+            title: $el.attr("title")
+        });
+    });
+    $(document).ajaxError(function (event, xhr, settings, thrownError) {
+        if (settings && settings.url && settings.url.indexOf("expenses/file_preview") !== -1) {
+            console.log("[Expenses Files] Preview ajaxError", settings.url, xhr.status, xhr.responseText, thrownError);
+        }
+    });
     });
 </script>

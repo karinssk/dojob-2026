@@ -97,7 +97,6 @@
 
         $("#category-keyword-form").appForm({
             onSuccess: function (result) {
-                $("#ajaxModal").modal("hide");
                 if (typeof window.reloadCategoryKeywordsTable === "function") {
                     window.reloadCategoryKeywordsTable();
                 }

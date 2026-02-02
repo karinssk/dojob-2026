@@ -123,11 +123,22 @@
 
         $("#project-keyword-form").appForm({
             onSuccess: function (result) {
-                $("#ajaxModal").modal("hide");
+                console.log("[Project Keywords] Save success", result);
                 if (typeof window.reloadProjectKeywordsTable === "function") {
                     window.reloadProjectKeywordsTable();
                 }
                 appAlert.success(result.message, {duration: 5000});
+            },
+            onError: function () {
+                console.log("[Project Keywords] Save failed", arguments);
+            }
+        });
+        $form.on("submit", function () {
+            console.log("[Project Keywords] Save submit", $form.serialize());
+        });
+        $(document).ajaxError(function (event, xhr, settings, thrownError) {
+            if (settings && settings.url && settings.url.indexOf("line_bot_expenses/save_project_keyword") !== -1) {
+                console.log("[Project Keywords] Global ajaxError", settings.url, xhr.status, xhr.responseText, thrownError);
             }
         });
 

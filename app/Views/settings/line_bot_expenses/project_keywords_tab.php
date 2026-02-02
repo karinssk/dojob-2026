@@ -24,7 +24,10 @@
         var projectKeywordsTable = $("#project-keywords-table").DataTable({
             ajax: {
                 url: "<?php echo get_uri('line_bot_expenses/project_keywords_list_data'); ?>",
-                type: "POST"
+                type: "POST",
+                error: function (xhr) {
+                    console.log("[Project Keywords] List data failed", xhr.status, xhr.responseText);
+                }
             },
             columns: [
                 {data: 0},
@@ -45,10 +48,15 @@
                 type: "POST",
                 data: {id: 0},
                 success: function (response) {
+                    console.log("[Project Keywords] Add modal response", response);
                     appLoader.hide();
                     $("#ajaxModalContent").html(response);
                     $("#ajaxModalTitle").html("<?php echo app_lang('add_project_keyword'); ?>");
                     $("#ajaxModal").modal("show");
+                },
+                error: function (xhr) {
+                    console.log("[Project Keywords] Add modal failed", xhr.status, xhr.responseText);
+                    appLoader.hide();
                 }
             });
         });
@@ -61,10 +69,15 @@
                 type: "POST",
                 data: {id: id},
                 success: function (response) {
+                    console.log("[Project Keywords] Edit modal response", id, response);
                     appLoader.hide();
                     $("#ajaxModalContent").html(response);
                     $("#ajaxModalTitle").html("<?php echo app_lang('edit_project_keyword'); ?>");
                     $("#ajaxModal").modal("show");
+                },
+                error: function (xhr) {
+                    console.log("[Project Keywords] Edit modal failed", id, xhr.status, xhr.responseText);
+                    appLoader.hide();
                 }
             });
         });

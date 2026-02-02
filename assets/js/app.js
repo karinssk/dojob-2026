@@ -3729,7 +3729,7 @@ function replaceAll(find, replace, str) {
             function destroy() {
                 $(".app-modal").remove();
                 $(document).unbind("keyup", escKeyEvent);
-                if (typeof appModalXhr !== 'undefined') {
+                if (appModalXhr && appModalXhr.abort) {
                     appModalXhr.abort();
                 }
             }

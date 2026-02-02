@@ -6,17 +6,11 @@ class Line_bot_expenses extends Security_Controller {
 
     protected $db;
     private $Line_expenses_model;
-    public $Clients_model;
-    public $Projects_model;
-    public $Expense_categories_model;
 
     function __construct() {
         parent::__construct(false); // false = don't redirect for webhook
         $this->db = \Config\Database::connect();
         $this->Line_expenses_model = model('App\Models\Line_expenses_model');
-        $this->Clients_model = model('App\Models\Clients_model');
-        $this->Projects_model = model('App\Models\Projects_model');
-        $this->Expense_categories_model = model('App\Models\Expense_categories_model');
     }
 
     private function _require_auth() {
@@ -224,6 +218,22 @@ class Line_bot_expenses extends Security_Controller {
 
         $id = $this->request->getPost('id');
         $model_info = $this->Line_expenses_model->get_project_keyword($id);
+        // Ensure optional fields exist to avoid undefined property notices on new records.
+        if (!isset($model_info->project_id)) {
+            $model_info->project_id = 0;
+        }
+        if (!isset($model_info->project_name)) {
+            $model_info->project_name = "";
+        }
+        if (!isset($model_info->client_name)) {
+            $model_info->client_name = "";
+        }
+        if (!isset($model_info->is_monthly_project)) {
+            $model_info->is_monthly_project = 0;
+        }
+        if (!isset($model_info->sort)) {
+            $model_info->sort = 0;
+        }
         if (!$model_info->id) {
             $model_info->sort = $this->Line_expenses_model->get_next_project_sort();
         }
@@ -284,6 +294,8 @@ class Line_bot_expenses extends Security_Controller {
     function save_project_keyword() {
         $this->_require_auth();
 
+        error_log("[Line_bot_expenses] save_project_keyword start: " . json_encode($this->request->getPost()));
+
         $id = $this->request->getPost('id');
         $client_name = $this->request->getPost('client_name');
         $client_id = $this->request->getPost('client_id');
@@ -324,15 +336,25 @@ class Line_bot_expenses extends Security_Controller {
         );
 
         if (!$data['keyword'] || !$data['client_name']) {
+            error_log("[Line_bot_expenses] save_project_keyword validation failed: " . json_encode($data));
             echo json_encode(array("success" => false, 'message' => 'Keyword and client name are required'));
             return;
         }
 
-        $saved = $this->Line_expenses_model->save_project_keyword($data, $id);
+        try {
+            $saved = $this->Line_expenses_model->save_project_keyword($data, $id);
+        } catch (\Throwable $e) {
+            error_log("[Line_bot_expenses] save_project_keyword exception: " . $e->getMessage());
+            error_log($e->getTraceAsString());
+            echo json_encode(array("success" => false, 'message' => 'Error saving project keyword'));
+            return;
+        }
 
         if ($saved) {
+            error_log("[Line_bot_expenses] save_project_keyword success: id=" . $saved);
             echo json_encode(array("success" => true, 'message' => app_lang('record_saved')));
         } else {
+            error_log("[Line_bot_expenses] save_project_keyword failed");
             echo json_encode(array("success" => false, 'message' => app_lang('error_occurred')));
         }
     }

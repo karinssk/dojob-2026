@@ -97,6 +97,119 @@ class Expenses extends Security_Controller {
         return $this->template->view("expenses/recurring_expenses_list");
     }
 
+    function export_modal_form() {
+        $this->check_module_availability("module_expense");
+
+        return $this->template->view("expenses/export_modal_form");
+    }
+
+    function export() {
+        $this->check_module_availability("module_expense");
+
+        $this->validate_submitted_data(array(
+            "start_date" => "required",
+            "end_date" => "required"
+        ));
+
+        $start_date = $this->request->getPost("start_date");
+        $end_date = $this->request->getPost("end_date");
+        $vat_mode = $this->request->getPost("vat_mode");
+        $format = strtolower($this->request->getPost("export_format"));
+
+        if (!$format || !in_array($format, array("csv", "xlsx"))) {
+            echo "Invalid export format.";
+            return;
+        }
+
+        $options = array(
+            "start_date" => $start_date,
+            "end_date" => $end_date
+        );
+
+        $rows = $this->Expenses_model->get_details($options)->getResult();
+
+        $headers = array(
+            "Date",
+            "Category",
+            "Title",
+            "Description",
+            "Project",
+            "Client",
+            "Member",
+            "Amount",
+            "Tax",
+            "Second Tax",
+            "Total"
+        );
+
+        $export_rows = array();
+        $export_rows[] = $headers;
+
+        foreach ($rows as $row) {
+            $tax = $row->tax_percentage ? ($row->amount * ($row->tax_percentage / 100)) : 0;
+            $tax2 = $row->tax_percentage2 ? ($row->amount * ($row->tax_percentage2 / 100)) : 0;
+
+            if ($vat_mode === "no_tax") {
+                $tax = 0;
+                $tax2 = 0;
+            }
+            if ($vat_mode === "with_tax" && $tax == 0 && $tax2 == 0) {
+                continue;
+            }
+
+            $total = $row->amount + $tax + $tax2;
+
+            $description = $row->description;
+            if ($row->linked_client_name) {
+                $description .= ($description ? " | " : "") . "Client: " . $row->linked_client_name;
+            }
+            if ($row->project_title) {
+                $description .= ($description ? " | " : "") . "Project: " . $row->project_title;
+            }
+            if ($row->linked_user_name) {
+                $description .= ($description ? " | " : "") . "Member: " . $row->linked_user_name;
+            }
+
+            $export_rows[] = array(
+                $row->expense_date,
+                $row->category_title,
+                $row->title,
+                $description,
+                $row->project_title,
+                $row->linked_client_name,
+                $row->linked_user_name,
+                $row->amount,
+                $tax,
+                $tax2,
+                $total
+            );
+        }
+
+        $file_name = "expenses_export_" . date("Ymd_His") . "." . $format;
+
+        if ($format === "csv") {
+            header('Content-Type: text/csv; charset=utf-8');
+            header('Content-Disposition: attachment; filename="' . $file_name . '"');
+            $output = fopen('php://output', 'w');
+            foreach ($export_rows as $export_row) {
+                fputcsv($output, $export_row);
+            }
+            fclose($output);
+            exit;
+        }
+
+        require_once(APPPATH . "ThirdParty/PHPOffice-PhpSpreadsheet/vendor/autoload.php");
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray($export_rows, null, "A1");
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $file_name . '"');
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
     //load the add/edit expense form
     function modal_form() {
         $this->validate_submitted_data(array(

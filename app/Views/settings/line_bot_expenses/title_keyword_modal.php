@@ -116,7 +116,6 @@
             },
             onSuccess: function (result) {
                 console.log("[Title Keywords] Save success", result);
-                $("#ajaxModal").modal("hide");
                 if (typeof window.reloadTitleKeywordsTable === "function") {
                     window.reloadTitleKeywordsTable();
                 }
