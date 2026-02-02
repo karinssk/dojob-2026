@@ -132,67 +132,98 @@ class Line_expenses_webhook {
             throw new \Exception('Invalid input: text is required');
         }
 
-        // Normalize multi-line input from LINE:
-        // Replace \r\n and \r with \n, then \n- with -, then remaining \n with -
+        // Normalize line endings
         $text = str_replace(array("\r\n", "\r"), "\n", $text);
-        $text = str_replace("\n-", "-", $text);
-        $text = str_replace("\n", "-", $text);
-        $text = trim($text, "- \t");
 
-        $parts = explode('-', $text);
-
-        if (count($parts) < 5) {
-            throw new \Exception('Invalid input format. Expected at least: date-title-category-description-amount-project (optional: -vat)');
+        // Split into non-empty lines
+        $lines = array();
+        foreach (explode("\n", $text) as $line) {
+            $trimmed = trim($line);
+            if ($trimmed !== '') {
+                $lines[] = $trimmed;
+            }
         }
 
-        // Parse date
-        $date_input = trim($parts[0]);
-        if (empty($date_input)) {
+        // Helper: strip leading - or * prefix from a line
+        $strip_prefix = function($line) {
+            return trim(preg_replace('/^[-*]\s*/', '', trim($line)));
+        };
+
+        // Fallback: if single line, split by - (old format compatibility)
+        if (count($lines) <= 1) {
+            $flat = trim($text, "- \t\n");
+            $parts = explode('-', $flat);
+            $lines = array();
+            foreach ($parts as $part) {
+                $trimmed = trim($part);
+                if ($trimmed !== '') {
+                    $lines[] = $trimmed;
+                }
+            }
+            $strip_prefix = function($line) {
+                return trim($line);
+            };
+        }
+
+        if (count($lines) < 4) {
+            throw new \Exception('Invalid input format. Expected at least: title-category-description-amount-project (optional first line: date, optional last: vat)');
+        }
+
+        // Check VAT (last line)
+        $last_value = $strip_prefix($lines[count($lines) - 1]);
+        $has_vat = (strtolower($last_value) === 'vat' || strpos(strtolower($last_value), 'vat') !== false);
+        if ($has_vat) {
+            array_pop($lines);
+        }
+
+        if (count($lines) < 4) {
+            throw new \Exception('Invalid input format. Not enough fields after removing VAT.');
+        }
+
+        // Determine if first field is a date (dd/mm/yy or dd/mm/yyyy) or title
+        $first_value = $strip_prefix($lines[0]);
+        $is_date = preg_match('/^\d{1,2}\/\d{1,2}\/\d{2,4}$/', $first_value);
+
+        if ($is_date) {
+            $date_input = $first_value;
+            $title_keyword = $strip_prefix($lines[1]);
+            $category_input = $strip_prefix($lines[2]);
+            $desc_start = 3;
+        } else {
             $date_input = $this->get_current_thai_date();
+            $title_keyword = $first_value;
+            $category_input = $strip_prefix($lines[1]);
+            $desc_start = 2;
         }
 
-        // Parse title keyword (exact match)
-        $title_keyword = trim($parts[1]);
         if (empty($title_keyword)) {
             throw new \Exception('Title keyword is required');
         }
-
-        // Parse category
-        $category_input = trim($parts[2]);
         if (empty($category_input)) {
             throw new \Exception('Category is required');
         }
 
-        // Check VAT
-        $last_part = $parts[count($parts) - 1];
-        $has_vat = (strtolower(trim($last_part)) === 'vat' || strpos(strtolower(trim($last_part)), 'vat') !== false);
-
-        if ($has_vat) {
-            if (count($parts) < 6) {
-                throw new \Exception('Invalid input format with VAT');
-            }
-            $project_index = count($parts) - 2;
-            $amount_index = count($parts) - 3;
-            $desc_end_index = count($parts) - 3;
-        } else {
-            $project_index = count($parts) - 1;
-            $amount_index = count($parts) - 2;
-            $desc_end_index = count($parts) - 2;
-        }
-
-        // Parse amount
-        $amount = $this->parse_amount(trim($parts[$amount_index]));
-
-        // Parse project keyword (exact match)
-        $project_keyword = trim($parts[$project_index]);
+        // Project keyword = last line
+        $project_keyword = $strip_prefix(array_pop($lines));
         if (empty($project_keyword)) {
             throw new \Exception('Project keyword is required');
         }
 
-        // Parse description
-        $desc_parts = array_slice($parts, 3, $desc_end_index - 3);
-        $description = implode('-', array_map('trim', $desc_parts));
-        if (empty($description)) {
+        // Amount = last line after popping project
+        $amount_str = $strip_prefix(array_pop($lines));
+        $amount = $this->parse_amount($amount_str);
+
+        // Description = everything between category and amount
+        $desc_parts = array();
+        for ($i = $desc_start; $i < count($lines); $i++) {
+            $cleaned = $strip_prefix($lines[$i]);
+            if ($cleaned !== '') {
+                $desc_parts[] = $cleaned;
+            }
+        }
+        $description = implode("\n", $desc_parts);
+
+        if (empty(trim($description))) {
             throw new \Exception('Description is required');
         }
 
