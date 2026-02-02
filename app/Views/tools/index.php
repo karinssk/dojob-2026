@@ -7,6 +7,7 @@
                 <div class="col-md-8">
                     <label for="tools-url" class="form-label">Video URL</label>
                     <input id="tools-url" type="text" class="form-control" placeholder="Paste a video URL here">
+                    <small class="form-text text-muted">Example: https://www.facebook.com/reel/32476545395326584</small>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Actions</label>
