@@ -80,6 +80,7 @@
                 dataType: "json",
                 data: $.extend({url: url}, getCsrfData()),
                 success: function (res) {
+                    console.log("[Tools] Preview response", res);
                     if (!res || !res.success) {
                         setStatus(res && res.message ? res.message : "Preview failed.", true);
                         return;
@@ -91,7 +92,8 @@
                     $preview.removeClass("hide");
                     setStatus("Preview ready.");
                 },
-                error: function () {
+                error: function (xhr) {
+                    console.log("[Tools] Preview error", xhr.status, xhr.responseText);
                     setStatus("Preview request failed.", true);
                 }
             });
@@ -113,6 +115,7 @@
                 dataType: "json",
                 data: $.extend({url: url, title: $title.text()}, getCsrfData()),
                 success: function (res) {
+                    console.log("[Tools] Download response", res);
                     if (!res || !res.success) {
                         setStatus(res && res.message ? res.message : "Download failed.", true);
                         return;
@@ -121,7 +124,8 @@
                     $downloadLink.removeClass("hide");
                     setStatus("Download ready.");
                 },
-                error: function () {
+                error: function (xhr) {
+                    console.log("[Tools] Download error", xhr.status, xhr.responseText);
                     setStatus("Download request failed.", true);
                 }
             });
