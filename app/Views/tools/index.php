@@ -11,23 +11,15 @@
                 <div class="col-md-4">
                     <label class="form-label">Actions</label>
                     <div class="d-flex gap-2">
-                        <button id="tools-preview-btn" class="btn btn-default">Preview</button>
                         <button id="tools-download-btn" class="btn btn-primary">Download MP4</button>
                     </div>
                 </div>
             </div>
 
             <div id="tools-preview" class="mt20 hide">
-                <div class="row">
-                    <div class="col-md-3">
-                        <img id="tools-thumb" src="" alt="thumbnail" class="img-fluid rounded">
-                    </div>
-                    <div class="col-md-9">
-                        <div><strong>Title:</strong> <span id="tools-title"></span></div>
-                        <div><strong>Source:</strong> <span id="tools-extractor"></span></div>
-                        <div><strong>Duration:</strong> <span id="tools-duration"></span></div>
-                    </div>
-                </div>
+                <div><strong>Title:</strong> <span id="tools-title"></span></div>
+                <div><strong>Source:</strong> <span id="tools-extractor"></span></div>
+                <div><strong>Duration:</strong> <span id="tools-duration"></span></div>
             </div>
 
             <div id="tools-status" class="mt15 text-muted"></div>
@@ -37,7 +29,7 @@
 
             <div id="tools-result" class="mt20 hide">
                 <div class="mb10"><strong>Preview:</strong></div>
-                <video id="tools-video" controls class="w100p" preload="metadata"></video>
+                <video id="tools-video" controls class="w100p" preload="metadata" style="max-height:420px;"></video>
             </div>
         </div>
     </div>
@@ -48,7 +40,6 @@
         var $url = $("#tools-url");
         var $status = $("#tools-status");
         var $preview = $("#tools-preview");
-        var $thumb = $("#tools-thumb");
         var $title = $("#tools-title");
         var $extractor = $("#tools-extractor");
         var $duration = $("#tools-duration");
@@ -70,44 +61,6 @@
             return data;
         }
 
-        $("#tools-preview-btn").on("click", function () {
-            var url = $.trim($url.val());
-            if (!url) {
-                setStatus("Please enter a URL.", true);
-                return;
-            }
-
-            setStatus("Loading preview...");
-            $preview.addClass("hide");
-            $downloadLink.addClass("hide");
-            $result.addClass("hide");
-            $video.attr("src", "");
-
-            $.ajax({
-                url: "<?php echo get_uri('tools/preview'); ?>",
-                type: "POST",
-                dataType: "json",
-                data: $.extend({url: url}, getCsrfData()),
-                success: function (res) {
-                    console.log("[Tools] Preview response", res);
-                    if (!res || !res.success) {
-                        setStatus(res && res.message ? res.message : "Preview failed.", true);
-                        return;
-                    }
-                    $thumb.attr("src", res.thumbnail || "");
-                    $title.text(res.title || "-");
-                    $extractor.text(res.extractor || "-");
-                    $duration.text(res.duration ? (res.duration + " sec") : "-");
-                    $preview.removeClass("hide");
-                    setStatus("Preview ready.");
-                },
-                error: function (xhr) {
-                    console.log("[Tools] Preview error", xhr.status, xhr.responseText);
-                    setStatus("Preview request failed.", true);
-                }
-            });
-        });
-
         $("#tools-download-btn").on("click", function () {
             var url = $.trim($url.val());
             if (!url) {
@@ -119,6 +72,7 @@
             $downloadLink.addClass("hide");
             $result.addClass("hide");
             $video.attr("src", "");
+            $preview.addClass("hide");
 
             $.ajax({
                 url: "<?php echo get_uri('tools/download'); ?>",
