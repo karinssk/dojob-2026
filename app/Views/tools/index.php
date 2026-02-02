@@ -32,7 +32,12 @@
 
             <div id="tools-status" class="mt15 text-muted"></div>
             <div id="tools-download-link" class="mt10 hide">
-                <a id="tools-file-link" href="#" class="btn btn-success" target="_blank">Download File</a>
+                <a id="tools-file-link" href="#" class="btn btn-success" download>Download File</a>
+            </div>
+
+            <div id="tools-result" class="mt20 hide">
+                <div class="mb10"><strong>Preview:</strong></div>
+                <video id="tools-video" controls class="w100p" preload="metadata"></video>
             </div>
         </div>
     </div>
@@ -49,6 +54,8 @@
         var $duration = $("#tools-duration");
         var $downloadLink = $("#tools-download-link");
         var $fileLink = $("#tools-file-link");
+        var $result = $("#tools-result");
+        var $video = $("#tools-video");
 
         function setStatus(text, isError) {
             $status.text(text || "");
@@ -73,6 +80,8 @@
             setStatus("Loading preview...");
             $preview.addClass("hide");
             $downloadLink.addClass("hide");
+            $result.addClass("hide");
+            $video.attr("src", "");
 
             $.ajax({
                 url: "<?php echo get_uri('tools/preview'); ?>",
@@ -108,6 +117,8 @@
 
             setStatus("Starting download...");
             $downloadLink.addClass("hide");
+            $result.addClass("hide");
+            $video.attr("src", "");
 
             $.ajax({
                 url: "<?php echo get_uri('tools/download'); ?>",
@@ -154,7 +165,10 @@
                             clearInterval(timer);
                             if (String(res.exit_code) === "0") {
                                 $fileLink.attr("href", fileUrl);
+                                $fileLink.attr("download", "video.mp4");
                                 $downloadLink.removeClass("hide");
+                                $video.attr("src", fileUrl);
+                                $result.removeClass("hide");
                                 setStatus("Download ready.");
                             } else {
                                 setStatus("Download failed. Check server log.", true);
