@@ -75,12 +75,13 @@ class Tools extends App_Controller {
         }
 
         $safe_name = $this->_make_safe_filename($this->request->getPost("title") ?: "video");
-        $file_name = $safe_name . "_" . date("Ymd_His") . ".mp4";
-        $output_path = $target_dir . $file_name;
+        $base_name = $safe_name . "_" . date("Ymd_His");
+        $output_template = $target_dir . $base_name . ".%(ext)s";
+        $output_path = $target_dir . $base_name . ".mp4";
 
         set_time_limit(0);
 
-        $cmd = "yt-dlp -o - " . escapeshellarg($url) . " | ffmpeg -y -loglevel error -i - -c copy " . escapeshellarg($output_path);
+        $cmd = "yt-dlp --no-warnings --no-playlist -o " . escapeshellarg($output_template) . " --merge-output-format mp4 " . escapeshellarg($url);
         $result = $this->_run_command($cmd);
 
         if ($result["exit_code"] !== 0 || !file_exists($output_path)) {
@@ -88,11 +89,11 @@ class Tools extends App_Controller {
             return;
         }
 
-        $file_url = base_url("files/general/tools/" . $file_name);
+        $file_url = base_url("files/general/tools/" . $base_name . ".mp4");
 
         echo json_encode(array(
             "success" => true,
-            "file_name" => $file_name,
+            "file_name" => $base_name . ".mp4",
             "file_url" => $file_url
         ));
     }
