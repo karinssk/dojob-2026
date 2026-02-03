@@ -661,6 +661,8 @@ class Line_bot_expenses extends Security_Controller {
     private function _handle_text_message($event, $lib, $user_id, $reply_token) {
         $text = $event['message']['text'] ?? '';
 
+        $state_cleared = false;
+
         try {
             $expense_data = $lib->parse_expense_input($text);
 
@@ -682,6 +684,18 @@ class Line_bot_expenses extends Security_Controller {
 
             $result = $lib->process_expense($user_id, $expense_data, $files);
 
+        } catch (\Throwable $e) {
+            log_message('error', 'LINE Expenses: Error processing text: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
+            $lib->send_reply($reply_token, "รูปแบบข้อมูลไม่ถูกต้อง: {$e->getMessage()}");
+            $result = null;
+        } finally {
+            // Always clear image state after processing (success or error)
+            $state_cleared = $this->_clear_user_image_state($user_id);
+            log_message('info', "LINE Expenses: State cleared for user {$user_id}=" . ($state_cleared ? "yes" : "no"));
+        }
+
+        if ($result) {
+            $result['stateCleared'] = $state_cleared;
             if ($result['success'] && $result['flexData']) {
                 $flex = $lib->build_expense_confirmation_flex($result['flexData'], $result, $result['userDisplayName']);
                 $lib->send_flex_reply($reply_token, $flex);
@@ -689,16 +703,6 @@ class Line_bot_expenses extends Security_Controller {
                 $flex = $lib->build_expense_confirmation_flex(null, $result, $result['userDisplayName']);
                 $lib->send_flex_reply($reply_token, $flex);
             }
-
-        } catch (\Throwable $e) {
-            log_message('error', 'LINE Expenses: Error processing text: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
-            $lib->send_reply($reply_token, "รูปแบบข้อมูลไม่ถูกต้อง: {$e->getMessage()}");
-        } finally {
-            // Always clear image state after processing (success or error)
-            log_message('info', "LINE Expenses: Clearing state for user {$user_id}");
-            $this->_clear_user_image_rows($user_id);
-            $this->Settings_model->save_setting("line_expenses_session_{$user_id}", '');
-            log_message('info', "LINE Expenses: State cleared for user {$user_id}");
         }
     }
 
@@ -712,10 +716,11 @@ class Line_bot_expenses extends Security_Controller {
             $this->db->query("SELECT GET_LOCK(?, 10)", array($lock_name));
 
             try {
-                $image_key = "line_expenses_image_{$user_id}_{$message_id}";
+                $session_id = $this->_ensure_user_image_session($user_id);
+                $image_key = "line_expenses_image_{$user_id}_{$session_id}_{$message_id}";
                 $payload = array(
                     "file" => $image_data,
-                    "ts" => time(),
+                    "ts" => microtime(true),
                     "message_id" => $message_id
                 );
                 $this->Settings_model->save_setting($image_key, json_encode($payload));
@@ -724,16 +729,22 @@ class Line_bot_expenses extends Security_Controller {
                 $this->db->query("SELECT RELEASE_LOCK(?)", array($lock_name));
             }
 
-            $lib->send_reply($reply_token, "📷 รับรูปภาพแล้ว ({$count}/5)\nกรุณาส่งข้อมูลค่าใช้จ่าย");
+            $display_count = min(5, $count);
+            $lib->send_reply($reply_token, "📷 รับรูปภาพแล้ว ({$display_count}/5)\nกรุณาส่งข้อมูลค่าใช้จ่าย");
         } else {
             $lib->send_reply($reply_token, "เกิดข้อผิดพลาดในการบันทึกรูปภาพ");
         }
     }
 
     private function _get_user_image_rows($user_id) {
+        $session_id = $this->_get_user_image_session($user_id);
+        if (!$session_id) {
+            return array();
+        }
         $settings_table = $this->db->prefixTable('settings');
         $escaped_user_id = $this->db->escapeString($user_id);
-        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_%";
+        $escaped_session_id = $this->db->escapeString($session_id);
+        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_" . trim($escaped_session_id, "'") . "_%";
         $rows = $this->db->query("SELECT setting_value FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'")->getResult();
 
         $result = array();
@@ -747,19 +758,46 @@ class Line_bot_expenses extends Security_Controller {
     }
 
     private function _count_user_image_rows($user_id) {
+        $session_id = $this->_get_user_image_session($user_id);
+        if (!$session_id) {
+            return 0;
+        }
         $settings_table = $this->db->prefixTable('settings');
         $escaped_user_id = $this->db->escapeString($user_id);
-        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_%";
+        $escaped_session_id = $this->db->escapeString($session_id);
+        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_" . trim($escaped_session_id, "'") . "_%";
         $row = $this->db->query("SELECT COUNT(*) AS total FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'")->getRow();
         return $row && isset($row->total) ? intval($row->total) : 0;
     }
 
-    private function _clear_user_image_rows($user_id) {
+    private function _clear_user_image_state($user_id) {
+        $session_id = $this->_get_user_image_session($user_id);
         $settings_table = $this->db->prefixTable('settings');
         $escaped_user_id = $this->db->escapeString($user_id);
-        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_%";
+        if ($session_id) {
+            $escaped_session_id = $this->db->escapeString($session_id);
+            $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_" . trim($escaped_session_id, "'") . "_%";
+        } else {
+            $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_%";
+        }
         $this->db->query("DELETE FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'");
+        $this->Settings_model->save_setting("line_expenses_session_{$user_id}", '');
         log_message('info', "LINE Expenses: Cleared image rows for user {$user_id}, pattern: {$pattern}");
+        return true;
+    }
+
+    private function _get_user_image_session($user_id) {
+        return $this->Settings_model->get_setting("line_expenses_session_{$user_id}") ?: '';
+    }
+
+    private function _ensure_user_image_session($user_id) {
+        $session_id = $this->_get_user_image_session($user_id);
+        if ($session_id) {
+            return $session_id;
+        }
+        $session_id = uniqid("sess_", true);
+        $this->Settings_model->save_setting("line_expenses_session_{$user_id}", $session_id);
+        return $session_id;
     }
 
     private function _capture_room($event) {

@@ -670,6 +670,7 @@ class Line_expenses_webhook {
         $status_color = $result['success'] ? "#22c55e" : "#ef4444";
         $status_text = $result['success'] ? "บันทึกเรียบร้อย" : "เกิดข้อผิดพลาด";
         $bg_color = $result['success'] ? "#f0fdf4" : "#fef2f2";
+        $state_cleared = array_key_exists('stateCleared', $result) ? $result['stateCleared'] : null;
 
         $body_contents = array();
 
@@ -697,6 +698,15 @@ class Line_expenses_webhook {
                     array('type' => 'text', 'text' => '#' . $result['expenseId'], 'size' => 'xs', 'color' => '#aaaaaa', 'flex' => 1, 'align' => 'end')
                 )
             );
+            if ($state_cleared !== null) {
+                $body_contents[] = array(
+                    'type' => 'box', 'layout' => 'horizontal', 'margin' => 'sm',
+                    'contents' => array(
+                        array('type' => 'text', 'text' => 'State:', 'size' => 'xs', 'color' => '#aaaaaa', 'flex' => 1),
+                        array('type' => 'text', 'text' => $state_cleared ? 'Cleared' : 'Not cleared', 'size' => 'xs', 'color' => '#aaaaaa', 'flex' => 1, 'align' => 'end')
+                    )
+                );
+            }
         } else {
             $body_contents[] = array(
                 'type' => 'text',
