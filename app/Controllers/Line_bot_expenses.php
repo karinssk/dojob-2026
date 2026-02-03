@@ -666,21 +666,7 @@ class Line_bot_expenses extends Security_Controller {
         try {
             $expense_data = $lib->parse_expense_input($text);
 
-            // Get files from per-image settings (safe for concurrent images)
-            $files = array();
-            $image_rows = $this->_get_user_image_rows($user_id);
-            if ($image_rows) {
-                // keep order by created time and limit to last 5
-                usort($image_rows, function ($a, $b) {
-                    return ($a['ts'] ?? 0) <=> ($b['ts'] ?? 0);
-                });
-                $image_rows = array_slice($image_rows, -5);
-                foreach ($image_rows as $row) {
-                    if (isset($row['file'])) {
-                        $files[] = $row['file'];
-                    }
-                }
-            }
+            $files = $this->_get_user_session_files($user_id);
 
             $result = $lib->process_expense($user_id, $expense_data, $files);
 
@@ -716,24 +702,32 @@ class Line_bot_expenses extends Security_Controller {
             $this->db->query("SELECT GET_LOCK(?, 10)", array($lock_name));
 
             try {
-                $session_id = $this->_ensure_user_image_session($user_id);
-                $image_key = "line_expenses_image_{$user_id}_{$session_id}_{$message_id}";
-                $current_count = $this->_get_user_image_count($user_id, $session_id);
-                $already_saved = $this->Settings_model->get_setting($image_key) !== NULL;
-                if ($already_saved) {
-                    $count = $current_count;
-                } else if ($current_count >= 5) {
-                    // Cap at 5 images per session; do not save additional images.
-                    $count = $current_count;
-                } else {
-                    $payload = array(
+                $session = $this->_get_user_session($user_id);
+                $files = $session['files'] ?? array();
+                if (count($files) >= 5) {
+                    // If previous session is full, start a new session for fresh images.
+                    $files = array();
+                }
+                $already_saved = false;
+                foreach ($files as $f) {
+                    if (($f['message_id'] ?? '') === $message_id) {
+                        $already_saved = true;
+                        break;
+                    }
+                }
+
+                if (!$already_saved && count($files) < 5) {
+                    $files[] = array(
                         "file" => $image_data,
                         "ts" => microtime(true),
                         "message_id" => $message_id
                     );
-                    $this->Settings_model->save_setting($image_key, json_encode($payload));
-                    $count = $this->_increment_user_image_count($user_id, $session_id);
+                    $session['files'] = $files;
+                    $session['timestamp'] = time();
+                    $this->_save_user_session($user_id, $session);
                 }
+
+                $count = count($files);
             } finally {
                 $this->db->query("SELECT RELEASE_LOCK(?)", array($lock_name));
             }
@@ -745,50 +739,10 @@ class Line_bot_expenses extends Security_Controller {
         }
     }
 
-    private function _get_user_image_rows($user_id) {
-        $session_id = $this->_get_user_image_session($user_id);
-        if (!$session_id) {
-            return array();
-        }
-        $settings_table = $this->db->prefixTable('settings');
-        $escaped_user_id = $this->db->escapeString($user_id);
-        $escaped_session_id = $this->db->escapeString($session_id);
-        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_" . trim($escaped_session_id, "'") . "_%";
-        $rows = $this->db->query("SELECT setting_value FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'")->getResult();
-
-        $result = array();
-        foreach ($rows as $row) {
-            $decoded = json_decode($row->setting_value ?? "", true);
-            if (is_array($decoded)) {
-                $result[] = $decoded;
-            }
-        }
-        return $result;
-    }
-
-    private function _count_user_image_rows($user_id) {
-        $session_id = $this->_get_user_image_session($user_id);
-        if (!$session_id) {
-            return 0;
-        }
-        $settings_table = $this->db->prefixTable('settings');
-        $escaped_user_id = $this->db->escapeString($user_id);
-        $escaped_session_id = $this->db->escapeString($session_id);
-        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_" . trim($escaped_session_id, "'") . "_%";
-        $row = $this->db->query("SELECT COUNT(*) AS total FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'")->getRow();
-        return $row && isset($row->total) ? intval($row->total) : 0;
-    }
-
     private function _clear_user_image_state($user_id) {
-        $session_id = $this->_get_user_image_session($user_id);
         $settings_table = $this->db->prefixTable('settings');
         $escaped_user_id = $this->db->escapeString($user_id);
-        if ($session_id) {
-            $escaped_session_id = $this->db->escapeString($session_id);
-            $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_" . trim($escaped_session_id, "'") . "_%";
-        } else {
-            $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_%";
-        }
+        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_%";
         $this->db->query("DELETE FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'");
         $count_pattern = "line_expenses_image_count_" . trim($escaped_user_id, "'") . "_%";
         $this->db->query("DELETE FROM {$settings_table} WHERE setting_name LIKE '{$count_pattern}'");
@@ -797,32 +751,47 @@ class Line_bot_expenses extends Security_Controller {
         return true;
     }
 
-    private function _get_user_image_session($user_id) {
-        return $this->Settings_model->get_setting("line_expenses_session_{$user_id}") ?: '';
-    }
-
-    private function _ensure_user_image_session($user_id) {
-        $session_id = $this->_get_user_image_session($user_id);
-        if ($session_id) {
-            return $session_id;
+    private function _get_user_session($user_id) {
+        $raw = $this->Settings_model->get_setting("line_expenses_session_{$user_id}");
+        if (!$raw) {
+            return array();
         }
-        $session_id = uniqid("sess_", true);
-        $this->Settings_model->save_setting("line_expenses_session_{$user_id}", $session_id);
-        $this->Settings_model->save_setting("line_expenses_image_count_{$user_id}_{$session_id}", 0);
-        return $session_id;
+        $decoded = json_decode($raw, true);
+        if (!is_array($decoded)) {
+            return array();
+        }
+        if (isset($decoded['timestamp'])) {
+            $age = time() - intval($decoded['timestamp']);
+            if ($age > 3600) {
+                // Expire stale sessions (match Node.js behavior).
+                $this->_clear_user_image_state($user_id);
+                return array();
+            }
+        }
+        return $decoded;
     }
 
-    private function _get_user_image_count($user_id, $session_id) {
-        $count_key = "line_expenses_image_count_{$user_id}_{$session_id}";
-        return intval($this->Settings_model->get_setting($count_key) ?: 0);
+    private function _save_user_session($user_id, $session) {
+        $this->Settings_model->save_setting("line_expenses_session_{$user_id}", json_encode($session));
     }
 
-    private function _increment_user_image_count($user_id, $session_id) {
-        $count_key = "line_expenses_image_count_{$user_id}_{$session_id}";
-        $current = intval($this->Settings_model->get_setting($count_key) ?: 0);
-        $current++;
-        $this->Settings_model->save_setting($count_key, $current);
-        return $current;
+    private function _get_user_session_files($user_id) {
+        $session = $this->_get_user_session($user_id);
+        $files = $session['files'] ?? array();
+        if (!is_array($files)) {
+            return array();
+        }
+        // keep order and limit to last 5
+        if (count($files) > 5) {
+            $files = array_slice($files, -5);
+        }
+        $result = array();
+        foreach ($files as $row) {
+            if (isset($row['file'])) {
+                $result[] = $row['file'];
+            }
+        }
+        return $result;
     }
 
     private function _capture_room($event) {
