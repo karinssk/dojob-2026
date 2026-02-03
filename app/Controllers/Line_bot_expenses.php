@@ -724,7 +724,7 @@ class Line_bot_expenses extends Security_Controller {
                     "message_id" => $message_id
                 );
                 $this->Settings_model->save_setting($image_key, json_encode($payload));
-                $count = $this->_count_user_image_rows($user_id);
+                $count = $this->_increment_user_image_count($user_id, $session_id);
             } finally {
                 $this->db->query("SELECT RELEASE_LOCK(?)", array($lock_name));
             }
@@ -781,6 +781,8 @@ class Line_bot_expenses extends Security_Controller {
             $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_%";
         }
         $this->db->query("DELETE FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'");
+        $count_pattern = "line_expenses_image_count_" . trim($escaped_user_id, "'") . "_%";
+        $this->db->query("DELETE FROM {$settings_table} WHERE setting_name LIKE '{$count_pattern}'");
         $this->Settings_model->save_setting("line_expenses_session_{$user_id}", '');
         log_message('info', "LINE Expenses: Cleared image rows for user {$user_id}, pattern: {$pattern}");
         return true;
@@ -797,7 +799,16 @@ class Line_bot_expenses extends Security_Controller {
         }
         $session_id = uniqid("sess_", true);
         $this->Settings_model->save_setting("line_expenses_session_{$user_id}", $session_id);
+        $this->Settings_model->save_setting("line_expenses_image_count_{$user_id}_{$session_id}", 0);
         return $session_id;
+    }
+
+    private function _increment_user_image_count($user_id, $session_id) {
+        $count_key = "line_expenses_image_count_{$user_id}_{$session_id}";
+        $current = intval($this->Settings_model->get_setting($count_key) ?: 0);
+        $current++;
+        $this->Settings_model->save_setting($count_key, $current);
+        return $current;
     }
 
     private function _capture_room($event) {
