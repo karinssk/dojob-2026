@@ -746,7 +746,8 @@ class Line_bot_expenses extends Security_Controller {
         $this->db->query("DELETE FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'");
         $count_pattern = "line_expenses_image_count_" . trim($escaped_user_id, "'") . "_%";
         $this->db->query("DELETE FROM {$settings_table} WHERE setting_name LIKE '{$count_pattern}'");
-        $this->Settings_model->save_setting("line_expenses_session_{$user_id}", '');
+        $session_key = "line_expenses_session_" . trim($escaped_user_id, "'");
+        $this->db->query("DELETE FROM {$settings_table} WHERE setting_name = '{$session_key}'");
         log_message('info', "LINE Expenses: Cleared image rows for user {$user_id}, pattern: {$pattern}");
         return true;
     }
