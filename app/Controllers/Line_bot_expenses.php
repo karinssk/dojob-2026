@@ -718,13 +718,22 @@ class Line_bot_expenses extends Security_Controller {
             try {
                 $session_id = $this->_ensure_user_image_session($user_id);
                 $image_key = "line_expenses_image_{$user_id}_{$session_id}_{$message_id}";
-                $payload = array(
-                    "file" => $image_data,
-                    "ts" => microtime(true),
-                    "message_id" => $message_id
-                );
-                $this->Settings_model->save_setting($image_key, json_encode($payload));
-                $count = $this->_increment_user_image_count($user_id, $session_id);
+                $current_count = $this->_get_user_image_count($user_id, $session_id);
+                $already_saved = $this->Settings_model->get_setting($image_key) !== NULL;
+                if ($already_saved) {
+                    $count = $current_count;
+                } else if ($current_count >= 5) {
+                    // Cap at 5 images per session; do not save additional images.
+                    $count = $current_count;
+                } else {
+                    $payload = array(
+                        "file" => $image_data,
+                        "ts" => microtime(true),
+                        "message_id" => $message_id
+                    );
+                    $this->Settings_model->save_setting($image_key, json_encode($payload));
+                    $count = $this->_increment_user_image_count($user_id, $session_id);
+                }
             } finally {
                 $this->db->query("SELECT RELEASE_LOCK(?)", array($lock_name));
             }
@@ -801,6 +810,11 @@ class Line_bot_expenses extends Security_Controller {
         $this->Settings_model->save_setting("line_expenses_session_{$user_id}", $session_id);
         $this->Settings_model->save_setting("line_expenses_image_count_{$user_id}_{$session_id}", 0);
         return $session_id;
+    }
+
+    private function _get_user_image_count($user_id, $session_id) {
+        $count_key = "line_expenses_image_count_{$user_id}_{$session_id}";
+        return intval($this->Settings_model->get_setting($count_key) ?: 0);
     }
 
     private function _increment_user_image_count($user_id, $session_id) {
