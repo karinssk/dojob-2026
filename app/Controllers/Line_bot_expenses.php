@@ -664,10 +664,21 @@ class Line_bot_expenses extends Security_Controller {
         try {
             $expense_data = $lib->parse_expense_input($text);
 
-            // Get files from session
-            $session_key = "line_expenses_session_{$user_id}";
-            $session_json = get_setting($session_key);
-            $files = $session_json ? json_decode($session_json, true) : array();
+            // Get files from per-image settings (safe for concurrent images)
+            $files = array();
+            $image_rows = $this->_get_user_image_rows($user_id);
+            if ($image_rows) {
+                // keep order by created time and limit to last 5
+                usort($image_rows, function ($a, $b) {
+                    return ($a['ts'] ?? 0) <=> ($b['ts'] ?? 0);
+                });
+                $image_rows = array_slice($image_rows, -5);
+                foreach ($image_rows as $row) {
+                    if (isset($row['file'])) {
+                        $files[] = $row['file'];
+                    }
+                }
+            }
 
             $result = $lib->process_expense($user_id, $expense_data, $files);
 
@@ -679,12 +690,13 @@ class Line_bot_expenses extends Security_Controller {
                 $lib->send_flex_reply($reply_token, $flex);
             }
 
-            // Clear session
-            $this->Settings_model->save_setting($session_key, '');
-
         } catch (\Throwable $e) {
             log_message('error', 'LINE Expenses: Error processing text: ' . $e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
             $lib->send_reply($reply_token, "รูปแบบข้อมูลไม่ถูกต้อง: {$e->getMessage()}");
+        } finally {
+            // Always clear image state after processing (success or error)
+            $this->_clear_user_image_rows($user_id);
+            $this->Settings_model->save_setting("line_expenses_session_{$user_id}", '');
         }
     }
 
@@ -693,18 +705,55 @@ class Line_bot_expenses extends Security_Controller {
         $image_data = $lib->download_line_image($message_id);
 
         if ($image_data) {
-            $session_key = "line_expenses_session_{$user_id}";
-            $session_json = get_setting($session_key);
-            $files = $session_json ? json_decode($session_json, true) : array();
-            $files[] = $image_data;
+            // Use MySQL lock to prevent race condition when multiple images sent at same time
+            $lock_name = "line_exp_img_" . substr(md5($user_id), 0, 16);
+            $this->db->query("SELECT GET_LOCK(?, 10)", array($lock_name));
 
-            $this->Settings_model->save_setting($session_key, json_encode($files));
-            $count = count($files);
+            try {
+                $image_key = "line_expenses_image_{$user_id}_{$message_id}";
+                $payload = array(
+                    "file" => $image_data,
+                    "ts" => time(),
+                    "message_id" => $message_id
+                );
+                $this->Settings_model->save_setting($image_key, json_encode($payload));
+                $count = $this->_count_user_image_rows($user_id);
+            } finally {
+                $this->db->query("SELECT RELEASE_LOCK(?)", array($lock_name));
+            }
 
             $lib->send_reply($reply_token, "📷 รับรูปภาพแล้ว ({$count}/5)\nกรุณาส่งข้อมูลค่าใช้จ่าย");
         } else {
             $lib->send_reply($reply_token, "เกิดข้อผิดพลาดในการบันทึกรูปภาพ");
         }
+    }
+
+    private function _get_user_image_rows($user_id) {
+        $settings_table = $this->db->prefixTable('settings');
+        $prefix = "line_expenses_image_" . $user_id . "_";
+        $rows = $this->db->query("SELECT setting_value FROM $settings_table WHERE setting_name LIKE ?", array($prefix . "%"))->getResult();
+
+        $result = array();
+        foreach ($rows as $row) {
+            $decoded = json_decode($row->setting_value ?? "", true);
+            if (is_array($decoded)) {
+                $result[] = $decoded;
+            }
+        }
+        return $result;
+    }
+
+    private function _count_user_image_rows($user_id) {
+        $settings_table = $this->db->prefixTable('settings');
+        $prefix = "line_expenses_image_" . $user_id . "_";
+        $row = $this->db->query("SELECT COUNT(*) AS total FROM $settings_table WHERE setting_name LIKE ?", array($prefix . "%"))->getRow();
+        return $row && isset($row->total) ? intval($row->total) : 0;
+    }
+
+    private function _clear_user_image_rows($user_id) {
+        $settings_table = $this->db->prefixTable('settings');
+        $prefix = "line_expenses_image_" . $user_id . "_";
+        $this->db->query("DELETE FROM $settings_table WHERE setting_name LIKE ?", array($prefix . "%"));
     }
 
     private function _capture_room($event) {
