@@ -695,8 +695,10 @@ class Line_bot_expenses extends Security_Controller {
             $lib->send_reply($reply_token, "รูปแบบข้อมูลไม่ถูกต้อง: {$e->getMessage()}");
         } finally {
             // Always clear image state after processing (success or error)
+            log_message('info', "LINE Expenses: Clearing state for user {$user_id}");
             $this->_clear_user_image_rows($user_id);
             $this->Settings_model->save_setting("line_expenses_session_{$user_id}", '');
+            log_message('info', "LINE Expenses: State cleared for user {$user_id}");
         }
     }
 
@@ -730,8 +732,9 @@ class Line_bot_expenses extends Security_Controller {
 
     private function _get_user_image_rows($user_id) {
         $settings_table = $this->db->prefixTable('settings');
-        $prefix = "line_expenses_image_" . $user_id . "_";
-        $rows = $this->db->query("SELECT setting_value FROM $settings_table WHERE setting_name LIKE ?", array($prefix . "%"))->getResult();
+        $escaped_user_id = $this->db->escapeString($user_id);
+        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_%";
+        $rows = $this->db->query("SELECT setting_value FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'")->getResult();
 
         $result = array();
         foreach ($rows as $row) {
@@ -745,15 +748,18 @@ class Line_bot_expenses extends Security_Controller {
 
     private function _count_user_image_rows($user_id) {
         $settings_table = $this->db->prefixTable('settings');
-        $prefix = "line_expenses_image_" . $user_id . "_";
-        $row = $this->db->query("SELECT COUNT(*) AS total FROM $settings_table WHERE setting_name LIKE ?", array($prefix . "%"))->getRow();
+        $escaped_user_id = $this->db->escapeString($user_id);
+        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_%";
+        $row = $this->db->query("SELECT COUNT(*) AS total FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'")->getRow();
         return $row && isset($row->total) ? intval($row->total) : 0;
     }
 
     private function _clear_user_image_rows($user_id) {
         $settings_table = $this->db->prefixTable('settings');
-        $prefix = "line_expenses_image_" . $user_id . "_";
-        $this->db->query("DELETE FROM $settings_table WHERE setting_name LIKE ?", array($prefix . "%"));
+        $escaped_user_id = $this->db->escapeString($user_id);
+        $pattern = "line_expenses_image_" . trim($escaped_user_id, "'") . "_%";
+        $this->db->query("DELETE FROM {$settings_table} WHERE setting_name LIKE '{$pattern}'");
+        log_message('info', "LINE Expenses: Cleared image rows for user {$user_id}, pattern: {$pattern}");
     }
 
     private function _capture_room($event) {
