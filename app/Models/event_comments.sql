@@ -1,4 +1,4 @@
-CREATE TABLE `event_comments` (
+CREATE TABLE `rise_event_comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `event_id` int(11) NOT NULL,
   `description` text DEFAULT NULL,
