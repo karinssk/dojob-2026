@@ -154,7 +154,7 @@ class Liff_app extends Security_Controller {
         $activity = $this->db->query(
             "SELECT al.*, CONCAT(u.first_name,' ',u.last_name) AS user_name, u.image AS user_img
              FROM rise_activity_logs al
-             LEFT JOIN rise_users u ON u.id = al.log_for_user_id
+             LEFT JOIN rise_users u ON u.id = al.created_by
              WHERE al.log_for='task' AND al.log_for_id=?
              ORDER BY al.id DESC LIMIT 20",
             [$task_id]
@@ -312,7 +312,7 @@ class Liff_app extends Security_Controller {
         $activity = $this->db->query(
             "SELECT al.*, CONCAT(u.first_name,' ',u.last_name) AS user_name
              FROM rise_activity_logs al
-             LEFT JOIN rise_users u ON u.id=al.log_for_user_id
+             LEFT JOIN rise_users u ON u.id=al.created_by
              WHERE al.log_for='project' AND al.log_for_id=?
              ORDER BY al.id DESC LIMIT 15",
             [$project_id]
