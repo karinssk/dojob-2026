@@ -21,8 +21,9 @@
         <div style="font-size:15px;font-weight:700;color:#1E293B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
           <?= esc($p->title) ?>
         </div>
-        <?php if ($p->project_category): ?>
-        <div style="font-size:12px;color:#94A3B8;margin-top:2px"><?= esc($p->project_category) ?></div>
+        <?php $category = $p->project_category ?? ''; ?>
+        <?php if ($category): ?>
+        <div style="font-size:12px;color:#94A3B8;margin-top:2px"><?= esc($category) ?></div>
         <?php endif; ?>
       </div>
       <span class="chip" style="background:<?= esc($sc) ?>22;color:<?= esc($sc) ?>;flex-shrink:0;margin-left:8px">
