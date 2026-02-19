@@ -467,6 +467,9 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .dropdown-trigger .chev { color: var(--muted); font-size: 12px; }
 .custom-dropdown.open .dropdown-trigger { border-color: var(--blue); }
