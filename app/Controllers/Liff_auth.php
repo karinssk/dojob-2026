@@ -54,9 +54,13 @@ class Liff_auth extends App_Controller {
         // Server-side verify id_token with LINE
         $channel_id = get_setting('line_login_channel_id');
         if ($channel_id) {
-            $verified = $this->_verify_id_token($id_token, $channel_id, $line_uid);
-            if (!$verified) {
-                return $this->_json(['success' => false, 'message' => 'Invalid LINE token. Please try again.']);
+            $verify = $this->_verify_id_token($id_token, $channel_id, $line_uid);
+            if (!$verify['success']) {
+                return $this->_json([
+                    'success' => false,
+                    'message' => $verify['message'] ?? 'Invalid LINE token. Please try again.',
+                    'debug'   => $verify['debug'] ?? null,
+                ]);
             }
         }
 
@@ -227,6 +231,16 @@ class Liff_auth extends App_Controller {
     }
 
     private function _verify_id_token($id_token, $channel_id, $user_id) {
+        $debug = [
+            'endpoint'      => 'https://api.line.me/oauth2/v2.1/verify',
+            'channel_id'    => $channel_id,
+            'user_id'       => $user_id,
+            'token_present' => (bool)$id_token,
+            'token_length'  => $id_token ? strlen($id_token) : 0,
+            'token_preview' => $id_token ? (substr($id_token, 0, 8) . '...' . substr($id_token, -6)) : '',
+            'timestamp'     => date('c'),
+        ];
+
         $ch = curl_init();
         curl_setopt_array($ch, [
             CURLOPT_URL            => 'https://api.line.me/oauth2/v2.1/verify',
@@ -234,24 +248,54 @@ class Liff_auth extends App_Controller {
             CURLOPT_POSTFIELDS     => http_build_query([
                 'id_token'  => $id_token,
                 'client_id' => $channel_id,
-                'user_id'   => $user_id,
             ]),
             CURLOPT_HTTPHEADER     => ['Content-Type: application/x-www-form-urlencoded'],
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 10,
             CURLOPT_SSL_VERIFYPEER => true,
         ]);
+        $start = microtime(true);
         $response  = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $debug['curl_errno'] = curl_errno($ch);
+        $debug['curl_error'] = curl_error($ch);
+        $debug['http_code']  = $http_code;
+        $debug['elapsed_ms'] = (int)round((microtime(true) - $start) * 1000);
         curl_close($ch);
+
+        $debug['response_raw'] = $response;
+        $data = json_decode($response, true);
+        $debug['response_json'] = $data;
 
         if ($http_code !== 200) {
             log_message('error', 'LIFF id_token verify failed: ' . $response);
-            return false;
+            return [
+                'success' => false,
+                'message' => $data['error_description'] ?? $data['message'] ?? 'Invalid LINE token',
+                'debug'   => $debug,
+            ];
         }
 
-        $data = json_decode($response, true);
-        return isset($data['sub']) && $data['sub'] === $user_id;
+        if (!isset($data['sub'])) {
+            return [
+                'success' => false,
+                'message' => 'Invalid LINE token (missing sub)',
+                'debug'   => $debug,
+            ];
+        }
+
+        if ($data['sub'] !== $user_id) {
+            return [
+                'success' => false,
+                'message' => 'Invalid LINE token (sub mismatch)',
+                'debug'   => $debug,
+            ];
+        }
+
+        return [
+            'success' => true,
+            'debug'   => $debug,
+        ];
     }
 
     private function _get_linkable_users() {

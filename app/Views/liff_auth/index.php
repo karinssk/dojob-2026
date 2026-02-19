@@ -30,6 +30,7 @@
   <div class="spinner" id="spinner"></div>
   <p class="status" id="status-text">กำลังเชื่อมต่อ...</p>
   <div class="error-box" id="error-box"></div>
+  <pre class="error-box" id="debug-box" style="display:none;white-space:pre-wrap;word-break:break-all;background:#0F172A;color:#E2E8F0;border:none;"></pre>
 </div>
 
 <script>
@@ -63,7 +64,7 @@ async function init() {
     const data = await res.json();
 
     if (!data.success) {
-      showError(data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+      showError(data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่', data.debug || null);
       return;
     }
 
@@ -98,11 +99,16 @@ function setStatus(txt) {
   document.getElementById('status-text').textContent = txt;
 }
 
-function showError(msg) {
+function showError(msg, debug) {
   document.getElementById('spinner').style.display = 'none';
   const box = document.getElementById('error-box');
   box.textContent = msg;
   box.style.display = 'block';
+  if (debug) {
+    const dbg = document.getElementById('debug-box');
+    dbg.textContent = JSON.stringify(debug, null, 2);
+    dbg.style.display = 'block';
+  }
 }
 
 init();
