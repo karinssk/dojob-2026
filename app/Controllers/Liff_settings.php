@@ -28,8 +28,8 @@ class Liff_settings extends Security_Controller {
             'current_tab'   => $tab,
             'pending_count' => $this->Liff_pending_model->get_pending_count(),
             // credentials
-            'line_channel_access_token'  => get_setting('line_channel_access_token'),
-            'line_channel_secret'        => get_setting('line_channel_secret'),
+            'liff_line_channel_access_token'  => get_setting('liff_line_channel_access_token') ?: get_setting('line_channel_access_token'),
+            'liff_line_channel_secret'        => get_setting('liff_line_channel_secret') ?: get_setting('line_channel_secret'),
             'line_login_channel_id'      => get_setting('line_login_channel_id'),
             'line_login_channel_secret'  => get_setting('line_login_channel_secret'),
             'line_liff_id'               => get_setting('line_liff_id'),
@@ -37,6 +37,9 @@ class Liff_settings extends Security_Controller {
             'liff_notify_default_start'  => get_setting('liff_notify_default_start'),
             'liff_notify_default_end'    => get_setting('liff_notify_default_end'),
             'liff_notify_default_update' => get_setting('liff_notify_default_update'),
+            'liff_notify_mode'           => get_setting('liff_notify_mode') ?: 'user',
+            'liff_notify_rooms'          => $this->_decode_json_setting('liff_notify_rooms'),
+            'liff_line_rooms'            => $this->_decode_json_setting('liff_line_rooms'),
         ];
 
         return $this->template->rander('settings/approve_line_liff_users', $view_data);
@@ -47,8 +50,8 @@ class Liff_settings extends Security_Controller {
     // ──────────────────────────────────────────────────────────────
     public function save_liff_credentials() {
         $settings = [
-            'line_channel_access_token',
-            'line_channel_secret',
+            'liff_line_channel_access_token',
+            'liff_line_channel_secret',
             'line_login_channel_id',
             'line_login_channel_secret',
             'line_liff_id',
@@ -56,10 +59,22 @@ class Liff_settings extends Security_Controller {
             'liff_notify_default_start',
             'liff_notify_default_end',
             'liff_notify_default_update',
+            'liff_notify_mode',
+            'liff_notify_rooms',
         ];
 
         foreach ($settings as $key) {
             $val = $this->request->getPost($key);
+            if ($key === 'liff_notify_rooms') {
+                if (is_array($val)) {
+                    $val = json_encode(array_values($val));
+                } elseif ($val === null) {
+                    $val = json_encode([]);
+                }
+            }
+            if ($key === 'liff_notify_mode' && !$val) {
+                $val = 'user';
+            }
             if ($val !== null) {
                 $this->Settings_model->save_setting($key, $val);
             }
@@ -72,7 +87,7 @@ class Liff_settings extends Security_Controller {
     // Test Messaging API connection
     // ──────────────────────────────────────────────────────────────
     public function test_line_messaging_api() {
-        $token = get_setting('line_channel_access_token');
+        $token = get_setting('liff_line_channel_access_token') ?: get_setting('line_channel_access_token');
         $debug = [
             'endpoint'      => 'https://api.line.me/v2/bot/info',
             'token_present' => (bool)$token,
@@ -171,6 +186,34 @@ class Liff_settings extends Security_Controller {
             'message' => $msg,
             'debug'   => $debug,
         ]);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Toggle direct LIFF notifications per user
+    // ──────────────────────────────────────────────────────────────
+    public function toggle_liff_user_notify() {
+        $rise_user_id = (int)$this->request->getPost('rise_user_id');
+        $enabled      = $this->request->getPost('enabled') ? 1 : 0;
+
+        if (!$rise_user_id) {
+            echo json_encode(['success' => false, 'message' => 'Missing user']);
+            return;
+        }
+
+        $map_t = get_user_mappings_table();
+        $this->db->query(
+            "UPDATE $map_t SET liff_notify_user=? WHERE rise_user_id=?",
+            [$enabled, $rise_user_id]
+        );
+
+        echo json_encode(['success' => true, 'message' => 'อัปเดตการแจ้งเตือนสำเร็จ']);
+    }
+
+    private function _decode_json_setting($key) {
+        $raw = get_setting($key);
+        if (!$raw) { return []; }
+        $data = json_decode($raw, true);
+        return is_array($data) ? $data : [];
     }
 
     // ──────────────────────────────────────────────────────────────

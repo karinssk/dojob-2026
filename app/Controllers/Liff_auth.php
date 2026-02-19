@@ -345,7 +345,7 @@ class Liff_auth extends App_Controller {
                      . "Wants to link to: $rise_user_name\n"
                      . "➡️ Review: $approve_url";
 
-        $Line = new \App\Libraries\Line_webhook();
+        $Line = new \App\Libraries\Liff_line_webhook();
         foreach ($admin_uids as $uid) {
             $uid = trim($uid);
             if ($uid) {

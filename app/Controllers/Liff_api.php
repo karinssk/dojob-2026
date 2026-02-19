@@ -399,14 +399,31 @@ class Liff_api extends Security_Controller {
             [$assigned_to]
         )->getRow();
 
-        if (!$mapping || empty($mapping->line_liff_user_id)) { return; }
+        $mode = get_setting('liff_notify_mode') ?: 'user';
+        $rooms = $this->_get_liff_rooms();
 
         $msg  = "📋 คุณได้รับมอบหมายงานใหม่\n";
         $msg .= "งาน: $task_title\n";
         $msg .= "ดูรายละเอียด: " . get_uri("liff/app/tasks/$task_id");
 
-        $Line = new \App\Libraries\Line_webhook();
+        $Line = new \App\Libraries\Liff_line_webhook();
+
+        if ($mode === 'room' && !empty($rooms)) {
+            foreach ($rooms as $rid) {
+                $Line->send_push_message($rid, $msg, 'room');
+            }
+            return;
+        }
+
+        if (!$mapping || empty($mapping->line_liff_user_id)) { return; }
         $Line->send_push_message($mapping->line_liff_user_id, $msg, 'user');
+    }
+
+    private function _get_liff_rooms() {
+        $raw = get_setting('liff_notify_rooms');
+        $arr = $raw ? json_decode($raw, true) : [];
+        if (!is_array($arr)) { return []; }
+        return array_values(array_filter($arr));
     }
 
     private function _json($data, $code = 200) {

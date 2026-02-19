@@ -244,6 +244,8 @@ $routes->group('api', function($routes) {
 // LINE Webhook Routes (outside API group for security)
 $routes->post('line_webhook', 'Line_notify::webhook');
 $routes->post('line/v1/webhook', 'Line_notify::webhook');
+$routes->post('liff/line_webhook', 'Liff_notify_webhook::webhook');
+$routes->post('liff_settings/toggle_liff_user_notify', 'Liff_settings::toggle_liff_user_notify');
 $routes->post('line/v2/expenses/webhook', 'Line_bot_expenses::webhook');
 $routes->get('tasks-tracking', 'Tasks_tracking::index');
 $routes->post('tasks-tracking/save', 'Tasks_tracking::save');

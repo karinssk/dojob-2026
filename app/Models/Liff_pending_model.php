@@ -14,6 +14,7 @@ class Liff_pending_model extends Crud_model {
     function get_details($options = []) {
         $t = $this->db->prefixTable('liff_pending_registrations');
         $users_t = $this->db->prefixTable('users');
+        $map_t = get_user_mappings_table();
 
         $where = "";
 
@@ -44,9 +45,11 @@ class Liff_pending_model extends Crud_model {
         }
 
         $sql = "SELECT $t.*,
-                    CONCAT($users_t.first_name,' ',$users_t.last_name) AS approver_name
+                    CONCAT($users_t.first_name,' ',$users_t.last_name) AS approver_name,
+                    m.liff_notify_user, m.line_liff_user_id
                 FROM $t
                 LEFT JOIN $users_t ON $users_t.id = $t.approved_by
+                LEFT JOIN $map_t m ON m.rise_user_id = $t.rise_user_id
                 WHERE 1=1 $where
                 ORDER BY $t.created_at DESC";
 
@@ -84,14 +87,14 @@ class Liff_pending_model extends Crud_model {
 
         if ($existing) {
             $this->db->query(
-                "UPDATE $map_t SET line_liff_user_id=?, updated_at=NOW() WHERE id=?",
+                "UPDATE $map_t SET line_liff_user_id=?, liff_notify_user=1, updated_at=NOW() WHERE id=?",
                 [$line_uid, $existing->id]
             );
         } else {
             // line_user_id is NOT NULL in schema; use line_uid for first-time mapping
             $this->db->query(
-                "INSERT INTO $map_t (line_user_id, line_liff_user_id, rise_user_id, line_display_name, nick_name, is_active, line_user_ids, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, 1, ?, NOW(), NOW())",
+                "INSERT INTO $map_t (line_user_id, line_liff_user_id, rise_user_id, line_display_name, nick_name, is_active, liff_notify_user, line_user_ids, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, 1, 1, ?, NOW(), NOW())",
                 [$line_uid, $line_uid, $rise_user_id, $line_display_name, $line_display_name, json_encode([$line_uid])]
             );
         }
@@ -109,7 +112,7 @@ class Liff_pending_model extends Crud_model {
     function revoke_by_line_uid($line_uid) {
         $map_t = get_user_mappings_table();
         $this->db->query(
-            "UPDATE $map_t SET line_liff_user_id=NULL, updated_at=NOW() WHERE line_liff_user_id=?",
+            "UPDATE $map_t SET line_liff_user_id=NULL, liff_notify_user=0, updated_at=NOW() WHERE line_liff_user_id=?",
             [$line_uid]
         );
     }

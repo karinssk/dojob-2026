@@ -31,6 +31,7 @@ CREATE TABLE `user_mappings_arr` (
   `id` int(11) NOT NULL,
   `line_user_id` varchar(255) NOT NULL,
   `line_liff_user_id` varchar(255) DEFAULT NULL,
+  `liff_notify_user` tinyint(1) NOT NULL DEFAULT 1,
   `rise_user_id` int(11) NOT NULL,
   `nick_name` varchar(255) DEFAULT NULL,
   `line_display_name` varchar(255) DEFAULT NULL,
