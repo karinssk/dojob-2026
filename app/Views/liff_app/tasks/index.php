@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1>📋 Tasks</h1>
+  <h1>Tasks</h1>
 </div>
 
 <div class="tabs" data-tabs style="margin-top:0">
@@ -9,7 +9,6 @@
 
 <?php if (empty($tasks)): ?>
 <div class="empty-state">
-  <div class="empty-icon">📋</div>
   <p>ยังไม่มีงาน<br>กด + เพื่อสร้างงานใหม่</p>
 </div>
 <?php else: ?>
@@ -23,24 +22,24 @@
     <?php if ($t->priority_title): ?><span class="chip chip-orange"><?= esc($t->priority_title) ?></span><?php endif; ?>
     <span class="chip" style="background:<?= $bg ?>;color:<?= $color ?>"><?= esc($t->status_title) ?></span>
     <?php if ($is_overdue): ?><span class="chip chip-pink">เกินกำหนด</span><?php endif; ?>
-    <?php if ($t->line_notify_enabled): ?><span class="chip chip-blue" title="LINE แจ้งเตือน">🔔</span><?php endif; ?>
+    <?php if ($t->line_notify_enabled): ?><span class="chip chip-blue">LINE แจ้งเตือน</span><?php endif; ?>
   </div>
   <div class="task-title"><?= esc($t->title) ?></div>
   <div class="task-meta">
     <?php if ($t->start_date): ?>
     <span class="task-meta-item">
-      🗓 <?= date('j M', strtotime($t->start_date)) ?>
-      <?php if ($t->start_time): ?>⏰ <?= date('H:i', strtotime($t->start_time)) ?><?php endif; ?>
-      <?php if ($t->deadline): ?> → <?= date('j M', strtotime($t->deadline)) ?>
+      <?= date('j M', strtotime($t->start_date)) ?>
+      <?php if ($t->start_time): ?><?= date('H:i', strtotime($t->start_time)) ?><?php endif; ?>
+      <?php if ($t->deadline): ?> - <?= date('j M', strtotime($t->deadline)) ?>
         <?php if ($t->end_time): ?> <?= date('H:i', strtotime($t->end_time)) ?><?php endif; ?>
       <?php endif; ?>
     </span>
     <?php endif; ?>
     <?php if ($t->assigned_name && $filter === 'assigned_by_me'): ?>
-    <span class="task-meta-item">👤 <?= esc($t->assigned_name) ?></span>
+    <span class="task-meta-item"><?= esc($t->assigned_name) ?></span>
     <?php endif; ?>
     <?php if ($t->project_title): ?>
-    <span class="task-meta-item">📁 <?= esc($t->project_title) ?></span>
+    <span class="task-meta-item"><?= esc($t->project_title) ?></span>
     <?php endif; ?>
   </div>
   <?php if ($t->images): ?>

@@ -5,7 +5,6 @@ $rejected_items = model('App\Models\Liff_pending_model')
 
 <?php if (empty($rejected_items)): ?>
 <div style="text-align:center;padding:40px;color:#94A3B8">
-  <div style="font-size:32px;margin-bottom:8px">📋</div>
   <p>ยังไม่มีคำขอที่ถูกปฏิเสธ</p>
 </div>
 <?php else: ?>
@@ -29,7 +28,7 @@ $rejected_items = model('App\Models\Liff_pending_model')
       <td style="color:#C73060"><?= esc($p->rejection_note ?: '—') ?></td>
       <td style="white-space:nowrap"><?= date('d/m/Y H:i', strtotime($p->created_at)) ?></td>
       <td>
-        <button class="btn btn-default btn-sm" onclick="reopenRequest(<?= $p->id ?>)">🔄 เปิดใหม่</button>
+        <button class="btn btn-default btn-sm" onclick="reopenRequest(<?= $p->id ?>)">เปิดใหม่</button>
       </td>
     </tr>
     <?php endforeach; ?>

@@ -68,7 +68,7 @@
   <div class="form-group">
     <div class="toggle-wrap">
       <div>
-        <div class="toggle-label">🔔 LINE แจ้งเตือน</div>
+        <div class="toggle-label">LINE แจ้งเตือน</div>
         <div class="toggle-sub">ไม่บังคับ — ปล่อยว่างเพื่อปิด</div>
       </div>
       <label class="toggle">
@@ -100,7 +100,7 @@
     </div>
   </div>
 
-  <button type="submit" class="btn btn-primary btn-block btn-lg" id="submit-btn">💾 บันทึก</button>
+  <button type="submit" class="btn btn-primary btn-block btn-lg" id="submit-btn">บันทึก</button>
 </form>
 
 <script>
@@ -115,7 +115,7 @@ function selectColor(c, el) {
 async function submitEvent(e) {
   e.preventDefault();
   const btn = document.getElementById('submit-btn');
-  btn.textContent = '⏳ กำลังบันทึก...'; btn.disabled = true;
+  btn.textContent = 'กำลังบันทึก...'; btn.disabled = true;
   const form = new FormData(e.target);
   const params = {};
   for (const [k, v] of form.entries()) params[k] = v;
@@ -125,7 +125,7 @@ async function submitEvent(e) {
     setTimeout(() => location.href = res.redirect, 800);
   } else {
     document.getElementById('form-alert').innerHTML = `<div class="alert alert-danger">${res.message}</div>`;
-    btn.textContent = '💾 บันทึก'; btn.disabled = false;
+    btn.textContent = 'บันทึก'; btn.disabled = false;
   }
 }
 </script>

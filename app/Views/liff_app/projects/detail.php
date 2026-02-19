@@ -33,7 +33,7 @@
 <!-- Members -->
 <?php if (!empty($members)): ?>
 <div class="card" style="margin-bottom:12px">
-  <div style="font-size:13px;font-weight:600;color:#64748B;margin-bottom:10px">👥 สมาชิก (<?= count($members) ?> คน)</div>
+  <div style="font-size:13px;font-weight:600;color:#64748B;margin-bottom:10px">สมาชิก (<?= count($members) ?> คน)</div>
   <div class="d-flex" style="flex-wrap:wrap;gap:8px">
     <?php foreach ($members as $m): ?>
     <div style="text-align:center;width:52px">
@@ -69,7 +69,7 @@
             <?= esc($t->title) ?>
           </div>
           <?php if ($t->assigned_name): ?>
-          <div style="font-size:12px;color:#94A3B8;margin-top:2px">→ <?= esc($t->assigned_name) ?></div>
+          <div style="font-size:12px;color:#94A3B8;margin-top:2px"><?= esc($t->assigned_name) ?></div>
           <?php endif; ?>
         </div>
         <span class="chip" style="background:<?= esc($tc) ?>22;color:<?= esc($tc) ?>;margin-left:8px;flex-shrink:0;font-size:11px">
@@ -79,7 +79,7 @@
       <?php if ($t->deadline): ?>
       <div style="font-size:11px;color:#94A3B8;margin-top:6px">
         <?php $late = strtotime($t->deadline) < time() && ($t->status_key_name ?? '') !== 'closed'; ?>
-        <?= $late ? '<span style="color:#F97FA3">⚠️ ' : '' ?>กำหนด <?= date('d M', strtotime($t->deadline)) ?><?= $late ? '</span>' : '' ?>
+        <?= $late ? '<span style="color:#F97FA3">' : '' ?>กำหนด <?= date('d M', strtotime($t->deadline)) ?><?= $late ? '</span>' : '' ?>
       </div>
       <?php endif; ?>
     </div>

@@ -5,7 +5,6 @@ $approved_items = model('App\Models\Liff_pending_model')
 
 <?php if (empty($approved_items)): ?>
 <div style="text-align:center;padding:40px;color:#94A3B8">
-  <div style="font-size:32px;margin-bottom:8px">📋</div>
   <p>ยังไม่มีผู้ใช้ที่ได้รับอนุมัติ</p>
 </div>
 <?php else: ?>
@@ -31,7 +30,7 @@ $approved_items = model('App\Models\Liff_pending_model')
         <?= $p->approved_at ? date('d/m/Y H:i', strtotime($p->approved_at)) : '—' ?>
       </td>
       <td>
-        <button class="btn btn-warning btn-sm" onclick="revokeUser(<?= $p->id ?>)">🔒 ถอนสิทธิ์</button>
+        <button class="btn btn-warning btn-sm" onclick="revokeUser(<?= $p->id ?>)">ถอนสิทธิ์</button>
       </td>
     </tr>
     <?php endforeach; ?>

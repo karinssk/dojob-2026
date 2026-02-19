@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1>👋 สวัสดี, <?= esc($login_user->first_name) ?></h1>
+  <h1>สวัสดี, <?= esc($login_user->first_name) ?></h1>
   <p>ภาพรวมวันนี้</p>
 </div>
 
@@ -38,7 +38,6 @@
 
 <?php if (empty($recent_tasks)): ?>
 <div class="empty-state">
-  <div class="empty-icon">📋</div>
   <p>ยังไม่มีงาน</p>
 </div>
 <?php else: ?>
@@ -59,15 +58,15 @@
   <div class="task-title"><?= esc($t->title) ?></div>
   <div class="task-meta">
     <?php if ($t->deadline): ?>
-    <span class="task-meta-item">📅 <?= date('j M', strtotime($t->deadline)) ?>
-      <?php if ($t->end_time): ?> ⏰ <?= date('H:i', strtotime($t->end_time)) ?><?php endif; ?>
+    <span class="task-meta-item"><?= date('j M', strtotime($t->deadline)) ?>
+      <?php if ($t->end_time): ?> <?= date('H:i', strtotime($t->end_time)) ?><?php endif; ?>
     </span>
     <?php endif; ?>
     <?php if ($t->project_title): ?>
-    <span class="task-meta-item">📁 <?= esc($t->project_title) ?></span>
+    <span class="task-meta-item"><?= esc($t->project_title) ?></span>
     <?php endif; ?>
   </div>
 </div>
 <?php endforeach; ?>
-<a class="btn btn-secondary btn-block mt-8" href="<?= get_uri('liff/app/tasks') ?>">ดู Tasks ทั้งหมด →</a>
+<a class="btn btn-secondary btn-block mt-8" href="<?= get_uri('liff/app/tasks') ?>">ดู Tasks ทั้งหมด</a>
 <?php endif; ?>

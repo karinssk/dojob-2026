@@ -1,13 +1,13 @@
 <div class="page-header d-flex" style="justify-content:space-between;align-items:center">
   <h1><?= esc($event->title) ?></h1>
-  <a href="<?= get_uri('liff/app/events/' . $event->id . '/edit') ?>" class="btn btn-sm" style="padding:6px 14px">✏️</a>
+  <a href="<?= get_uri('liff/app/events/' . $event->id . '/edit') ?>" class="btn btn-sm" style="padding:6px 14px">แก้ไข</a>
 </div>
 
 <div class="card" style="border-left:5px solid <?= esc($event->color ?? '#6C8EF5') ?>">
   <div class="d-flex gap-8" style="align-items:center;margin-bottom:12px">
     <div style="width:14px;height:14px;border-radius:50%;background:<?= esc($event->color ?? '#6C8EF5') ?>;flex-shrink:0"></div>
     <span class="chip" style="background:<?= esc($event->color ?? '#6C8EF5') ?>22;color:<?= esc($event->color ?? '#6C8EF5') ?>">
-      <?= $event->share_with === 'all_team_members' ? '👥 ทีม' : '🔒 เฉพาะฉัน' ?>
+      <?= $event->share_with === 'all_team_members' ? 'ทีม' : 'เฉพาะฉัน' ?>
     </span>
   </div>
 
@@ -38,7 +38,7 @@
 
   <?php if (!empty($event->line_notify_enabled)): ?>
   <div style="margin-top:16px;padding-top:16px;border-top:1px solid #F1F5F9">
-    <div style="font-size:12px;color:#94A3B8;font-weight:600;margin-bottom:8px">🔔 LINE แจ้งเตือน</div>
+    <div style="font-size:12px;color:#94A3B8;font-weight:600;margin-bottom:8px">LINE แจ้งเตือน</div>
     <div style="display:flex;flex-wrap:wrap;gap:6px">
       <?php if ($event->line_notify_before_start !== null): ?>
       <span class="chip chip-blue">ก่อนเริ่ม <?= (int)$event->line_notify_before_start ?> นาที</span>
@@ -59,12 +59,12 @@
 </div>
 
 <div style="margin-top:16px">
-  <a href="<?= get_uri('liff/app/events/' . $event->id . '/edit') ?>" class="btn btn-primary btn-block">✏️ แก้ไข Event</a>
+  <a href="<?= get_uri('liff/app/events/' . $event->id . '/edit') ?>" class="btn btn-primary btn-block">แก้ไข Event</a>
 </div>
 
 <div style="margin-top:12px">
   <button class="btn btn-block" style="background:#FFF0F3;color:#C73060;border:none"
-    onclick="deleteEvent(<?= $event->id ?>)">🗑️ ลบ Event</button>
+    onclick="deleteEvent(<?= $event->id ?>)">ลบ Event</button>
 </div>
 
 <script>

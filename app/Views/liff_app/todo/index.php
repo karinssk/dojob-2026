@@ -48,7 +48,6 @@
 
 <?php if (empty($todos)): ?>
 <div style="text-align:center;padding:40px 20px;color:#94A3B8">
-  <div style="font-size:40px;margin-bottom:12px">✅</div>
   <p>ยังไม่มีรายการ เริ่มเพิ่มได้เลย!</p>
 </div>
 <?php endif; ?>

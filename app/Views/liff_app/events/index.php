@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1>📅 Events</h1>
+  <h1>Events</h1>
 </div>
 
 <div class="tabs" data-tabs>
@@ -10,7 +10,6 @@
 
 <?php if (empty($events)): ?>
 <div class="empty-state">
-  <div class="empty-icon">📅</div>
   <p>ไม่มี Event<?= $view === 'today' ? 'วันนี้' : '' ?></p>
 </div>
 <?php else: ?>
@@ -22,11 +21,11 @@
       <div class="task-title"><?= esc($e->title) ?></div>
       <div class="task-meta">
         <span class="task-meta-item">
-          📅 <?= date('j M', strtotime($e->start_date)) ?>
-          <?php if ($e->start_time): ?> ⏰ <?= date('H:i', strtotime($e->start_time)) ?><?php endif; ?>
+          <?= date('j M', strtotime($e->start_date)) ?>
+          <?php if ($e->start_time): ?> <?= date('H:i', strtotime($e->start_time)) ?><?php endif; ?>
           <?php if ($e->end_time): ?> – <?= date('H:i', strtotime($e->end_time)) ?><?php endif; ?>
         </span>
-        <?php if ($e->line_notify_enabled): ?><span class="chip chip-blue" style="font-size:10px">🔔</span><?php endif; ?>
+        <?php if ($e->line_notify_enabled): ?><span class="chip chip-blue" style="font-size:10px">LINE แจ้งเตือน</span><?php endif; ?>
       </div>
     </div>
   </div>

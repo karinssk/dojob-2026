@@ -63,7 +63,7 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
           <?php if ($task->start_time): ?> <?= date('H:i', strtotime($task->start_time)) ?><?php endif; ?>
           <?php endif; ?>
           <?php if ($task->deadline): ?>
-          → <?= date('j M', strtotime($task->deadline)) ?>
+          - <?= date('j M', strtotime($task->deadline)) ?>
           <?php if ($task->end_time): ?> <?= date('H:i', strtotime($task->end_time)) ?><?php endif; ?>
           <?php if ($is_overdue): ?> <span class="chip chip-pink">เกินกำหนด</span><?php endif; ?>
           <?php endif; ?>
@@ -82,7 +82,7 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
     <?php if ($task->line_notify_enabled): ?>
     <div class="mt-8" style="background:var(--blue-lt);border-radius:10px;padding:10px 12px">
       <span style="font-size:12px;color:var(--blue)">
-        🔔 LINE แจ้งเตือน: เปิด
+        LINE แจ้งเตือน: เปิด
         <?php if ($task->line_notify_before_start): ?> | ก่อนเริ่ม <?= $task->line_notify_before_start ?> นาที<?php endif; ?>
         <?php if ($task->line_notify_before_end): ?> | ก่อนสิ้นสุด <?= $task->line_notify_before_end ?> นาที<?php endif; ?>
         <?php if ($task->line_notify_no_update_hours): ?> | ไม่มีอัปเดต <?= $task->line_notify_no_update_hours ?> ชม.<?php endif; ?>
@@ -130,4 +130,4 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
 </div>
 <?php endif; ?>
 
-<a class="btn btn-secondary btn-block" href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>">✏️ แก้ไขงาน</a>
+<a class="btn btn-secondary btn-block" href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>">แก้ไขงาน</a>

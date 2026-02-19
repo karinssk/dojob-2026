@@ -21,25 +21,25 @@
 
 <!-- Floating Action Button (page-specific, injected by view) -->
 <?php if (!empty($fab_url)): ?>
-<a class="fab" href="<?= esc($fab_url) ?>" title="สร้างใหม่">＋</a>
+<a class="fab" href="<?= esc($fab_url) ?>" title="สร้างใหม่">+</a>
 <?php endif; ?>
 
 <!-- Bottom Tab Bar -->
 <nav class="bottom-tabs">
   <a class="bottom-tab <?= ($active_tab ?? '') === 'todo'     ? 'active' : '' ?>" href="<?= get_uri('liff/app/todo') ?>">
-    <span class="bottom-tab-icon">✅</span>To-Do
+    To-Do
   </a>
   <a class="bottom-tab <?= ($active_tab ?? '') === 'tasks'    ? 'active' : '' ?>" href="<?= get_uri('liff/app/tasks') ?>">
-    <span class="bottom-tab-icon">📋</span>Tasks
+    Tasks
   </a>
   <a class="bottom-tab <?= ($active_tab ?? '') === 'projects' ? 'active' : '' ?>" href="<?= get_uri('liff/app/projects') ?>">
-    <span class="bottom-tab-icon">📁</span>Projects
+    Projects
   </a>
   <a class="bottom-tab <?= ($active_tab ?? '') === 'events'   ? 'active' : '' ?>" href="<?= get_uri('liff/app/events') ?>">
-    <span class="bottom-tab-icon">📅</span>Events
+    Events
   </a>
   <a class="bottom-tab <?= ($active_tab ?? '') === 'profile'  ? 'active' : '' ?>" href="<?= get_uri('liff/app/profile') ?>">
-    <span class="bottom-tab-icon">👤</span>Profile
+    Profile
   </a>
 </nav>
 

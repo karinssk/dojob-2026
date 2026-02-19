@@ -111,7 +111,7 @@ async function submitLink() {
   btn.disabled  = true;
 
   try {
-    const res  = await fetch(BASE_URL + 'index.php/liff/request_link', {
+    const res  = await fetch(BASE_URL + 'liff/request_link', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
       body: new URLSearchParams({

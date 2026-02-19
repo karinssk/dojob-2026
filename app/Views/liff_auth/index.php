@@ -51,7 +51,7 @@ async function init() {
 
     setStatus('กำลังตรวจสอบบัญชี...');
 
-    const res  = await fetch(BASE_URL + 'index.php/liff/verify', {
+    const res  = await fetch(BASE_URL + 'liff/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
       body: new URLSearchParams({
@@ -83,7 +83,7 @@ async function init() {
       sessionStorage.setItem('liff_uid',  data.line_uid);
       sessionStorage.setItem('liff_name', data.display_name);
       sessionStorage.setItem('liff_users', JSON.stringify(data.users));
-      window.location.href = BASE_URL + 'index.php/liff/select_user'
+      window.location.href = BASE_URL + 'liff/select_user'
         + '?uid='  + encodeURIComponent(data.line_uid)
         + '&name=' + encodeURIComponent(data.display_name);
     }

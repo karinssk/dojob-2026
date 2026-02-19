@@ -6,7 +6,6 @@ $pending_items = model('App\Models\Liff_pending_model')
 <div id="pending-list">
 <?php if (empty($pending_items)): ?>
 <div style="text-align:center;padding:40px;color:#94A3B8">
-  <div style="font-size:32px;margin-bottom:8px">✅</div>
   <p>ไม่มีคำขอรออนุมัติ</p>
 </div>
 <?php else: ?>
@@ -30,8 +29,8 @@ $pending_items = model('App\Models\Liff_pending_model')
       <td><?= esc($p->rise_user_name ?: '—') ?></td>
       <td style="white-space:nowrap"><?= date('d/m/Y H:i', strtotime($p->created_at)) ?></td>
       <td>
-        <button class="btn btn-success btn-sm" onclick="approveUser(<?= $p->id ?>)">✅ อนุมัติ</button>
-        <button class="btn btn-danger btn-sm" onclick="rejectUser(<?= $p->id ?>)" style="margin-left:4px">❌ ปฏิเสธ</button>
+        <button class="btn btn-success btn-sm" onclick="approveUser(<?= $p->id ?>)">อนุมัติ</button>
+        <button class="btn btn-danger btn-sm" onclick="rejectUser(<?= $p->id ?>)" style="margin-left:4px">ปฏิเสธ</button>
       </td>
     </tr>
     <?php endforeach; ?>

@@ -25,7 +25,7 @@
 <div class="row">
   <div class="col-md-12">
     <button type="button" class="btn btn-default btn-sm" onclick="testMessagingApi()">
-      🔌 ทดสอบการเชื่อมต่อ Messaging API
+      ทดสอบการเชื่อมต่อ Messaging API
     </button>
     <span id="msg-api-result" style="margin-left:10px;font-size:13px"></span>
   </div>
@@ -69,7 +69,7 @@
   <div class="col-md-6" style="display:flex;align-items:flex-end;padding-bottom:16px">
     <div>
       <button type="button" class="btn btn-default btn-sm" onclick="testLoginChannel()">
-        🔌 ตรวจสอบค่า LIFF
+        ตรวจสอบค่า LIFF
       </button>
       <span id="liff-test-result" style="margin-left:10px;font-size:13px"></span>
       <div style="margin-top:8px;font-size:12px;color:#94A3B8">
@@ -129,7 +129,7 @@
 <!-- Save button -->
 <div class="row" style="margin-top:10px">
   <div class="col-md-12">
-    <button type="submit" class="btn btn-primary">💾 บันทึกการตั้งค่า</button>
+    <button type="submit" class="btn btn-primary">บันทึกการตั้งค่า</button>
   </div>
 </div>
 

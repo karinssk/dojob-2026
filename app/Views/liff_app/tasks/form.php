@@ -85,7 +85,6 @@
   <div class="form-group">
     <label class="form-label">รูปภาพ</label>
     <div class="upload-zone" onclick="document.getElementById('img-input').click()">
-      <div style="font-size:28px">📷</div>
       <p>แตะเพื่ออัปโหลดรูปภาพ</p>
     </div>
     <input type="file" id="img-input" name="images[]" accept="image/*" multiple hidden>
@@ -96,7 +95,7 @@
   <div class="form-group">
     <div class="toggle-wrap">
       <div>
-        <div class="toggle-label">🔔 LINE แจ้งเตือน</div>
+        <div class="toggle-label">LINE แจ้งเตือน</div>
         <div class="toggle-sub">ไม่บังคับ — เปิดเพื่อตั้งค่าการแจ้งเตือน</div>
       </div>
       <label class="toggle">
@@ -129,7 +128,7 @@
   </div>
 
   <button type="submit" class="btn btn-primary btn-block btn-lg" id="submit-btn">
-    💾 บันทึก
+    บันทึก
   </button>
 </form>
 
@@ -143,7 +142,7 @@ if (document.getElementById('notify-toggle').checked) {
 async function submitTask(e) {
   e.preventDefault();
   const btn = document.getElementById('submit-btn');
-  btn.textContent = '⏳ กำลังบันทึก...';
+  btn.textContent = 'กำลังบันทึก...';
   btn.disabled = true;
 
   const form = new FormData(e.target);
@@ -160,7 +159,7 @@ async function submitTask(e) {
   } else {
     document.getElementById('form-alert').innerHTML =
       `<div class="alert alert-danger">${res.message}</div>`;
-    btn.textContent = '💾 บันทึก';
+    btn.textContent = 'บันทึก';
     btn.disabled = false;
   }
 }

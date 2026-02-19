@@ -72,7 +72,7 @@ async function checkStatus() {
   btn.style.opacity = '0.7';
 
   try {
-    const res  = await fetch(BASE_URL + 'index.php/liff/check_status?uid=' + encodeURIComponent(LINE_UID), {
+    const res  = await fetch(BASE_URL + 'liff/check_status?uid=' + encodeURIComponent(LINE_UID), {
       headers: { 'X-Requested-With': 'XMLHttpRequest' }
     });
     const data = await res.json();
@@ -83,7 +83,7 @@ async function checkStatus() {
       return;
     }
     if (data.status === 'rejected') {
-      window.location.href = BASE_URL + 'index.php/liff/rejected?uid=' + encodeURIComponent(LINE_UID);
+      window.location.href = BASE_URL + 'liff/rejected?uid=' + encodeURIComponent(LINE_UID);
       return;
     }
     msg.textContent = '⏳ ยังรอการอนุมัติอยู่ กรุณารอสักครู่';

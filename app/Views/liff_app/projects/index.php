@@ -4,7 +4,6 @@
 
 <?php if (empty($projects)): ?>
 <div class="card" style="text-align:center;padding:40px 20px;color:#94A3B8">
-  <div style="font-size:40px;margin-bottom:12px">📁</div>
   <p>ยังไม่มีโปรเจกต์ที่คุณเกี่ยวข้อง</p>
 </div>
 <?php else: ?>
@@ -41,9 +40,9 @@
         <?= $done ?>/<?= $total ?> งาน · <?= $pct ?>%
       </div>
       <div style="font-size:12px;color:#94A3B8">
-        👥 <?= (int)($p->member_count ?? 0) ?> คน
+        <?= (int)($p->member_count ?? 0) ?> คน
         <?php if (!empty($p->line_notify_enabled)): ?>
-        · 🔔
+        · LINE แจ้งเตือน
         <?php endif; ?>
       </div>
     </div>
