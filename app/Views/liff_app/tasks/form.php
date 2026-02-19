@@ -20,45 +20,43 @@
 
   <div class="form-group">
     <label class="form-label">โปรเจกต์</label>
-    <?php
-      $sel_project_label = '— ไม่ระบุโปรเจกต์ —';
-      foreach ($projects as $p) {
-        if (($task->project_id ?? 0) == $p->id) { $sel_project_label = esc($p->title); break; }
-      }
-    ?>
-    <div class="custom-dropdown" id="project-dd">
-      <input type="hidden" name="project_id" value="<?= esc($task->project_id ?? '') ?>">
-      <div class="dropdown-trigger" id="project-trigger">
-        <span><?= $sel_project_label ?></span>
+    <div class="custom-dropdown">
+      <div class="dropdown-trigger">
+        <span id="project-label">
+          <?php
+            $lbl = '— ไม่ระบุโปรเจกต์ —';
+            foreach ($projects as $p) { if (($task->project_id ?? 0) == $p->id) { $lbl = esc($p->title); break; } }
+            echo $lbl;
+          ?>
+        </span>
         <span class="chev">▾</span>
-      </div>
-      <div class="dropdown-menu" id="project-menu">
-        <div class="dropdown-item" data-value="">— ไม่ระบุโปรเจกต์ —</div>
-        <?php foreach ($projects as $p): ?>
-        <div class="dropdown-item" data-value="<?= $p->id ?>"><?= esc($p->title) ?></div>
-        <?php endforeach; ?>
+        <select name="project_id" class="dropdown-native-select" id="project-select">
+          <option value="">— ไม่ระบุโปรเจกต์ —</option>
+          <?php foreach ($projects as $p): ?>
+          <option value="<?= $p->id ?>" <?= ($task->project_id ?? 0) == $p->id ? 'selected' : '' ?>><?= esc($p->title) ?></option>
+          <?php endforeach; ?>
+        </select>
       </div>
     </div>
   </div>
 
   <div class="form-group">
     <label class="form-label">มอบหมายให้</label>
-    <?php
-      $sel_user_label = '—';
-      foreach ($users as $u) {
-        if (($task->assigned_to ?? $login_user->id) == $u->id) { $sel_user_label = esc(trim($u->first_name . ' ' . $u->last_name)); break; }
-      }
-    ?>
-    <div class="custom-dropdown" id="assignee-dd">
-      <input type="hidden" name="assigned_to" value="<?= esc($task->assigned_to ?? $login_user->id) ?>">
-      <div class="dropdown-trigger" id="assignee-trigger">
-        <span><?= $sel_user_label ?></span>
+    <div class="custom-dropdown">
+      <div class="dropdown-trigger">
+        <span id="assignee-label">
+          <?php
+            $lbl = '—';
+            foreach ($users as $u) { if (($task->assigned_to ?? $login_user->id) == $u->id) { $lbl = esc(trim($u->first_name . ' ' . $u->last_name)); break; } }
+            echo $lbl;
+          ?>
+        </span>
         <span class="chev">▾</span>
-      </div>
-      <div class="dropdown-menu" id="assignee-menu">
-        <?php foreach ($users as $u): ?>
-        <div class="dropdown-item" data-value="<?= $u->id ?>"><?= esc(trim($u->first_name . ' ' . $u->last_name)) ?></div>
-        <?php endforeach; ?>
+        <select name="assigned_to" class="dropdown-native-select" id="assignee-select">
+          <?php foreach ($users as $u): ?>
+          <option value="<?= $u->id ?>" <?= ($task->assigned_to ?? $login_user->id) == $u->id ? 'selected' : '' ?>><?= esc(trim($u->first_name . ' ' . $u->last_name)) ?></option>
+          <?php endforeach; ?>
+        </select>
       </div>
     </div>
   </div>
@@ -88,23 +86,22 @@
   <div class="d-flex gap-8">
     <div class="form-group flex-1">
       <label class="form-label">ลำดับความสำคัญ</label>
-      <?php
-        $sel_prio_label = '— เลือก —';
-        foreach ($priorities as $p) {
-          if (($task->priority_id ?? 0) == $p->id) { $sel_prio_label = esc($p->title); break; }
-        }
-      ?>
-      <div class="custom-dropdown" id="priority-dd">
-        <input type="hidden" name="priority_id" value="<?= esc($task->priority_id ?? '') ?>">
-        <div class="dropdown-trigger" id="priority-trigger">
-          <span><?= $sel_prio_label ?></span>
+      <div class="custom-dropdown">
+        <div class="dropdown-trigger">
+          <span id="priority-label">
+            <?php
+              $lbl = '— เลือก —';
+              foreach ($priorities as $p) { if (($task->priority_id ?? 0) == $p->id) { $lbl = esc($p->title); break; } }
+              echo $lbl;
+            ?>
+          </span>
           <span class="chev">▾</span>
-        </div>
-        <div class="dropdown-menu" id="priority-menu">
-          <div class="dropdown-item" data-value="">— เลือก —</div>
-          <?php foreach ($priorities as $p): ?>
-          <div class="dropdown-item" data-value="<?= $p->id ?>"><?= esc($p->title) ?></div>
-          <?php endforeach; ?>
+          <select name="priority_id" class="dropdown-native-select" id="priority-select">
+            <option value="">— เลือก —</option>
+            <?php foreach ($priorities as $p): ?>
+            <option value="<?= $p->id ?>" <?= ($task->priority_id ?? 0) == $p->id ? 'selected' : '' ?>><?= esc($p->title) ?></option>
+            <?php endforeach; ?>
+          </select>
         </div>
       </div>
     </div>
@@ -186,40 +183,12 @@
 </form>
 
 <script>
-// One shared document handler closes all open dropdowns when tapping outside
-document.addEventListener('click', () => {
-  document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
-});
-
-function initDropdown(wrapId, triggerId, menuId, inputName) {
-  const wrap    = document.getElementById(wrapId);
-  if (!wrap) return;
-  const trigger = document.getElementById(triggerId);
-  const menu    = document.getElementById(menuId);
-  const input   = wrap.querySelector(`input[name="${inputName}"]`);
-
-  trigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const opening = !wrap.classList.contains('open');
-    document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
-    if (opening) wrap.classList.add('open');
-  });
-
-  menu.querySelectorAll('.dropdown-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.stopPropagation();
-      input.value = item.dataset.value || '';
-      trigger.querySelector('span').textContent = item.textContent.trim();
-      menu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      wrap.classList.remove('open');
-    });
-  });
-
-  // Highlight current selection on init
-  const current = input.value || '';
-  menu.querySelectorAll('.dropdown-item').forEach(item => {
-    if ((item.dataset.value || '') === current) item.classList.add('active');
+function syncLabel(selectId, labelId) {
+  const sel = document.getElementById(selectId);
+  const lbl = document.getElementById(labelId);
+  if (!sel || !lbl) return;
+  sel.addEventListener('change', () => {
+    lbl.textContent = sel.options[sel.selectedIndex].text;
   });
 }
 
@@ -232,9 +201,9 @@ function initTaskForm() {
   LiffApp.initImageUpload('img-input', 'img-previews');
   LiffApp.initNotifyToggle('notify-toggle','notify-section');
 
-  initDropdown('project-dd',  'project-trigger',  'project-menu',  'project_id');
-  initDropdown('assignee-dd', 'assignee-trigger', 'assignee-menu', 'assigned_to');
-  initDropdown('priority-dd', 'priority-trigger', 'priority-menu', 'priority_id');
+  syncLabel('project-select',  'project-label');
+  syncLabel('assignee-select', 'assignee-label');
+  syncLabel('priority-select', 'priority-label');
 
   const notifyInputs = [
     'start_date','start_time','deadline','end_time',
