@@ -7,6 +7,7 @@ use CodeIgniter\Controller;
 class Liff_notify_webhook extends Controller {
 
     public function webhook() {
+        helper('general');
         $this->response->setContentType('text/plain');
         $debug = [
             'timestamp' => date('c'),
