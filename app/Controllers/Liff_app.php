@@ -447,7 +447,9 @@ class Liff_app extends Security_Controller {
         }
 
         foreach ($tasks as $task) {
-            $task->all_comment_files_array = array_values(get_array_value($files_map, $task->id, []));
+            $task_files = $files_map[$task->id] ?? [];
+            if (!is_array($task_files)) { $task_files = []; }
+            $task->all_comment_files_array = array_values($task_files);
         }
     }
 }

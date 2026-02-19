@@ -105,6 +105,11 @@ class Liff_api extends Security_Controller {
         $user_id = $this->login_user->id;
         $id      = (int)$this->request->getPost('id');
 
+        $target_path = get_setting("timeline_file_path");
+        $files_data  = move_files_from_temp_dir_to_permanent_dir($target_path, "event");
+        $new_files   = @unserialize($files_data);
+        if (!is_array($new_files)) { $new_files = []; }
+
         $data = clean_data([
             'title'                    => $this->request->getPost('title'),
             'description'              => $this->request->getPost('description'),
@@ -129,7 +134,15 @@ class Liff_api extends Security_Controller {
             $data['line_notify_no_update_hours'] = null;
         }
 
-        if ($id) { unset($data['created_by']); }
+        if ($id) {
+            unset($data['created_by']);
+            $event_info = $this->Events_model->get_one($id);
+            if ($event_info && $event_info->files) {
+                $new_files = update_saved_files($target_path, $event_info->files, $new_files);
+            }
+        }
+
+        $data['files'] = serialize($new_files);
 
         $save_id = $this->Events_model->ci_save($data, $id);
 

@@ -64,6 +64,16 @@
     </select>
   </div>
 
+  <!-- Image upload -->
+  <div class="form-group">
+    <label class="form-label">รูปภาพ</label>
+    <div class="upload-zone" onclick="document.getElementById('event-img-input').click()">
+      <p>แตะเพื่ออัปโหลดรูปภาพ</p>
+    </div>
+    <input type="file" id="event-img-input" name="manualFiles[]" accept="image/*" multiple hidden>
+    <div class="upload-previews" id="event-img-previews"></div>
+  </div>
+
   <!-- LINE Notification (optional) -->
   <div class="form-group">
     <div class="toggle-wrap">
@@ -105,6 +115,7 @@
 
 <script>
 LiffApp.initNotifyToggle('notify-toggle', 'notify-section');
+LiffApp.initImageUpload('event-img-input', 'event-img-previews');
 
 function selectColor(c, el) {
   document.querySelectorAll('[name=color]').forEach(r => r.checked = r.value === c);
@@ -117,9 +128,7 @@ async function submitEvent(e) {
   const btn = document.getElementById('submit-btn');
   btn.textContent = 'กำลังบันทึก...'; btn.disabled = true;
   const form = new FormData(e.target);
-  const params = {};
-  for (const [k, v] of form.entries()) params[k] = v;
-  const res = await LiffApp.api('liff/api/events/save', 'POST', params);
+  const res = await LiffApp.api('liff/api/events/save', 'POST', form);
   if (res.success) {
     LiffApp.toast('บันทึกสำเร็จ', 'success');
     setTimeout(() => location.href = res.redirect, 800);

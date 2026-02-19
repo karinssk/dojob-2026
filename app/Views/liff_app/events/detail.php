@@ -58,6 +58,32 @@
   </div>
 </div>
 
+<?php
+$files = [];
+if (!empty($event->files)) {
+  $files = @unserialize($event->files);
+  if (!is_array($files)) { $files = []; }
+}
+?>
+<?php if (!empty($files)): ?>
+<div class="section-title">ไฟล์แนบ</div>
+<div class="card">
+  <div class="card-body">
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <?php foreach ($files as $file): ?>
+        <?php
+          $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
+          $url   = get_source_url_of_file($file, get_setting("timeline_file_path"));
+        ?>
+      <a href="<?= esc($url) ?>" target="_blank">
+        <img src="<?= esc($thumb) ?>" style="width:72px;height:72px;border-radius:10px;object-fit:cover" alt="">
+      </a>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
 <div style="margin-top:16px">
   <a href="<?= get_uri('liff/app/events/' . $event->id . '/edit') ?>" class="btn btn-primary btn-block">แก้ไข Event</a>
 </div>
