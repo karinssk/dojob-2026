@@ -50,6 +50,7 @@ function setView(v) {
     b.classList.toggle('active', b.dataset.view === v);
   });
   renderCalendar();
+  fetchEvents();
 }
 
 function calPrev() {
@@ -101,7 +102,12 @@ async function fetchEvents() {
     start: formatDate(start),
     end: formatDate(end)
   });
-  CAL.events = res.success ? (res.events || []) : [];
+  if (!res.success) {
+    LiffApp.toast(res.message || 'โหลดอีเวนต์ไม่สำเร็จ', 'error');
+    CAL.events = [];
+  } else {
+    CAL.events = res.events || [];
+  }
   renderCalendar();
 }
 
@@ -299,5 +305,18 @@ function eventsForRange(start, end) {
   });
 }
 
-fetchEvents();
+function initCalendar() {
+  if (!window.LiffApp) {
+    setTimeout(initCalendar, 50);
+    return;
+  }
+  renderCalendar();
+  fetchEvents();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCalendar);
+} else {
+  initCalendar();
+}
 </script>
