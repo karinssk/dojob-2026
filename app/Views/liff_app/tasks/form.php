@@ -193,7 +193,8 @@
 
 <script>
 // One shared handler: close all open custom dropdowns when clicking outside
-document.addEventListener('click', () => {
+document.addEventListener('click', (e) => {
+  console.log('[DD] document click | target:', e.target, '| open before:', [...document.querySelectorAll('.custom-dropdown.open')].map(d=>d.id));
   document.querySelectorAll('.custom-dropdown.open')
     .forEach(d => d.classList.remove('open'));
 });
@@ -249,17 +250,19 @@ async function submitTask(e) {
 
 function initDropdown(wrapId, triggerId, menuId, inputName) {
   const wrap    = document.getElementById(wrapId);
-  if (!wrap) return;
+  if (!wrap) { console.warn('[DD] wrap not found:', wrapId); return; }
   const trigger = document.getElementById(triggerId);
   const menu    = document.getElementById(menuId);
   const input   = wrap.querySelector(`input[name="${inputName}"]`);
+  console.log('[DD] initDropdown | wrapId:', wrapId, '| trigger:', trigger, '| menu:', menu, '| input:', input);
 
   trigger.addEventListener('click', (e) => {
-    e.stopPropagation(); // prevent shared document handler from immediately closing
+    e.stopPropagation();
     const opening = !wrap.classList.contains('open');
-    // Close all other open dropdowns first
+    console.log('[DD] trigger click | wrapId:', wrapId, '| currently open:', !opening, '| will open:', opening);
     document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
     if (opening) wrap.classList.add('open');
+    console.log('[DD] after toggle | wrap classes:', wrap.className);
   });
 
   menu.querySelectorAll('.dropdown-item').forEach(item => {
