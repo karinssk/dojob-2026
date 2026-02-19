@@ -37,7 +37,7 @@
   <div class="d-flex" style="flex-wrap:wrap;gap:8px">
     <?php foreach ($members as $m): ?>
     <div style="text-align:center;width:52px">
-      <?php $img = $m->image ? get_uri('files/' . $m->image) : get_uri('assets/images/user-avatar.jpg'); ?>
+      <?php $img = get_avatar($m->image); ?>
       <img src="<?= esc($img) ?>" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #E2E8F0">
       <div style="font-size:10px;color:#64748B;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
         <?= esc(explode(' ', $m->name)[0]) ?>

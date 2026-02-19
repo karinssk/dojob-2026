@@ -139,6 +139,30 @@ html, body {
 .task-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: var(--border); }
 .task-actions { display: flex; gap: 8px; margin-top: 10px; }
 
+/* --- Project cards --------------------------------------- */
+.project-link { text-decoration: none; color: inherit; display: block; }
+.project-card { padding: 14px 16px; }
+.project-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.project-title {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
+}
+.project-category { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.project-status {
+  font-size: 11px; font-weight: 700; padding: 4px 10px;
+  border-radius: var(--r-chip); white-space: nowrap; flex-shrink: 0;
+}
+.project-progress {
+  height: 6px; background: #EEF2F7; border-radius: 999px;
+  overflow: hidden; margin: 8px 0 6px;
+}
+.project-progress-bar { height: 100%; border-radius: 999px; transition: width 0.3s ease; }
+.project-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--label);
+}
+.project-deadline { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
 /* --- Avatar ------------------------------------------------ */
 .avatar {
   width: 36px; height: 36px;
@@ -151,6 +175,41 @@ html, body {
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 .avatar-sm  { width: 28px; height: 28px; font-size: 11px; }
 .avatar-lg  { width: 48px; height: 48px; font-size: 18px; }
+
+/* --- Profile --------------------------------------------- */
+.profile-card { text-align: center; padding: 26px 20px 22px; }
+.profile-avatar {
+  width: 82px; height: 82px; border-radius: 50%;
+  object-fit: cover; border: 3px solid #EEF2FF;
+  box-shadow: 0 6px 20px rgba(15,23,42,0.08);
+  margin-bottom: 10px;
+}
+.profile-name { font-size: 17px; font-weight: 700; color: var(--text); }
+.profile-email { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.profile-pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 700;
+  margin-top: 10px;
+}
+.profile-pill-success { background: var(--green-lt); color: #166534; }
+.profile-pill-warn { background: var(--yellow-lt); color: #92400E; }
+
+.list-card .card-header { border-bottom: 0; padding-bottom: 6px; }
+.list-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px; border-top: 1px solid var(--border);
+  font-size: 13px; color: var(--label);
+}
+.list-val { color: var(--text); font-weight: 600; text-align: right; }
+.list-val-small { font-size: 11px; word-break: break-all; }
+.list-link {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border-top: 1px solid var(--border);
+  text-decoration: none; color: var(--text); font-size: 14px; font-weight: 600;
+}
+.list-link:first-of-type { border-top: 0; }
+.list-link-danger { color: #BE185D; background: var(--pink-lt); border-radius: 0 0 var(--r-card) var(--r-card); }
+.list-arrow { color: var(--muted); }
 
 /* --- Button ------------------------------------------------ */
 .btn {

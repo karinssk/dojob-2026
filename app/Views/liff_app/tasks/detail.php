@@ -44,7 +44,7 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
         <div class="d-flex align-center gap-8 mt-4">
           <div class="avatar avatar-sm">
             <?php if ($task->assigned_img): ?>
-            <img src="<?= get_uri('files/thumbnails/' . $task->assigned_img) ?>" alt="">
+            <img src="<?= esc(get_avatar($task->assigned_img)) ?>" alt="">
             <?php else: ?>
             <?= mb_substr($task->assigned_name, 0, 1) ?>
             <?php endif; ?>
@@ -100,8 +100,8 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
   <div class="card-body">
     <div style="display:flex;flex-wrap:wrap;gap:8px">
       <?php foreach ($imgs as $img): ?>
-      <a href="<?= get_uri('files/' . $img) ?>" target="_blank">
-        <img src="<?= get_uri('files/thumbnails/' . $img) ?>" style="width:72px;height:72px;border-radius:10px;object-fit:cover" alt="">
+      <a href="<?= get_file_uri('files/' . $img) ?>" target="_blank">
+        <img src="<?= get_file_uri('files/thumbnails/' . $img) ?>" style="width:72px;height:72px;border-radius:10px;object-fit:cover" alt="">
       </a>
       <?php endforeach; ?>
     </div>

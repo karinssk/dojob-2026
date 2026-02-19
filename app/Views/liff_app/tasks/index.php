@@ -45,7 +45,7 @@
   <?php if ($t->images): ?>
   <div class="task-images">
     <?php foreach (array_slice(json_decode($t->images, true) ?: [], 0, 3) as $img): ?>
-    <img class="task-thumb" src="<?= get_uri('files/thumbnails/' . $img) ?>" alt="" onerror="this.style.display='none'">
+    <img class="task-thumb" src="<?= get_file_uri('files/thumbnails/' . $img) ?>" alt="" onerror="this.style.display='none'">
     <?php endforeach; ?>
   </div>
   <?php endif; ?>

@@ -1,90 +1,57 @@
 <?php
 $user = $login_user;
-$img  = $user->image ? get_uri('files/' . $user->image) : get_uri('assets/images/user-avatar.jpg');
+$img  = get_avatar($user->image);
 ?>
 
-<!-- Avatar + Name -->
-<div class="card" style="text-align:center;padding:28px 20px;margin-bottom:12px">
-  <img src="<?= esc($img) ?>" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #E2E8F0;margin-bottom:12px">
-  <div style="font-size:18px;font-weight:700;color:#1E293B">
-    <?= esc(trim($user->first_name . ' ' . $user->last_name)) ?>
-  </div>
-  <div style="font-size:13px;color:#64748B;margin-top:4px"><?= esc($user->email ?? '') ?></div>
+<!-- Profile header -->
+<div class="card profile-card">
+  <img src="<?= esc($img) ?>" class="profile-avatar" alt="">
+  <div class="profile-name"><?= esc(trim($user->first_name . ' ' . $user->last_name)) ?></div>
+  <div class="profile-email"><?= esc($user->email ?? '') ?></div>
 
   <?php if (!empty($mapping)): ?>
-  <div style="margin-top:12px;padding:8px 16px;background:#F0FDF4;border-radius:12px;display:inline-block">
-    <span style="font-size:12px;color:#16A34A;font-weight:600">เชื่อมต่อ LINE (LIFF) แล้ว</span>
-  </div>
+  <div class="profile-pill profile-pill-success">เชื่อมต่อ LINE (LIFF) แล้ว</div>
   <?php else: ?>
-  <div style="margin-top:12px;padding:8px 16px;background:#FFF7ED;border-radius:12px;display:inline-block">
-    <span style="font-size:12px;color:#EA580C;font-weight:600">ยังไม่ได้เชื่อมต่อ LINE</span>
-  </div>
+  <div class="profile-pill profile-pill-warn">ยังไม่ได้เชื่อมต่อ LINE</div>
   <?php endif; ?>
 </div>
 
 <!-- Account info -->
-<div class="card" style="margin-bottom:12px">
-  <div style="font-size:13px;font-weight:600;color:#64748B;margin-bottom:12px">ข้อมูลบัญชี</div>
-  <div class="info-row">
-    <span class="info-label">ตำแหน่ง</span>
-    <span class="info-val"><?= esc($user->job_title ?? '—') ?></span>
+<div class="card list-card">
+  <div class="card-header"><h3>ข้อมูลบัญชี</h3></div>
+  <div class="list-row">
+    <span>ตำแหน่ง</span>
+    <span class="list-val"><?= esc($user->job_title ?? '—') ?></span>
   </div>
-  <div class="info-row">
-    <span class="info-label">แผนก</span>
-    <span class="info-val"><?= esc($user->department ?? '—') ?></span>
+  <div class="list-row">
+    <span>แผนก</span>
+    <span class="list-val"><?= esc($user->department ?? '—') ?></span>
   </div>
-  <div class="info-row">
-    <span class="info-label">โทรศัพท์</span>
-    <span class="info-val"><?= esc($user->phone ?? '—') ?></span>
+  <div class="list-row">
+    <span>โทรศัพท์</span>
+    <span class="list-val"><?= esc($user->phone ?? '—') ?></span>
   </div>
   <?php if (!empty($mapping)): ?>
-  <div class="info-row">
-    <span class="info-label">LINE LIFF UID</span>
-    <span class="info-val" style="font-size:11px;word-break:break-all"><?= esc($mapping->line_liff_user_id ?? '—') ?></span>
+  <div class="list-row">
+    <span>LINE LIFF UID</span>
+    <span class="list-val list-val-small"><?= esc($mapping->line_liff_user_id ?? '—') ?></span>
   </div>
   <?php endif; ?>
 </div>
 
 <!-- Actions -->
-<div class="card" style="margin-bottom:12px">
-  <div style="font-size:13px;font-weight:600;color:#64748B;margin-bottom:12px">การตั้งค่า</div>
-
-  <a href="<?= get_uri('profile') ?>" class="list-action-row">
+<div class="card list-card">
+  <div class="card-header"><h3>การตั้งค่า</h3></div>
+  <a href="<?= get_uri('profile') ?>" class="list-link">
     <span>แก้ไขโปรไฟล์</span>
-    <span style="color:#94A3B8">›</span>
+    <span class="list-arrow">›</span>
   </a>
-  <a href="<?= get_uri('profile/change_password') ?>" class="list-action-row">
+  <a href="<?= get_uri('profile/change_password') ?>" class="list-link">
     <span>เปลี่ยนรหัสผ่าน</span>
-    <span style="color:#94A3B8">›</span>
+    <span class="list-arrow">›</span>
+  </a>
+  <a href="<?= get_uri('logout') ?>" class="list-link list-link-danger">
+    <span>ออกจากระบบ</span>
+    <span class="list-arrow">›</span>
   </a>
 </div>
-
-<!-- Logout -->
-<a href="<?= get_uri('logout') ?>" class="btn btn-block" style="background:#FFF0F3;color:#C73060;border:none;font-weight:600">
-  ออกจากระบบ
-</a>
-
-<style>
-.info-row {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:8px 0;
-  border-bottom:1px solid #F1F5F9;
-  font-size:13px;
-}
-.info-row:last-child { border-bottom:none; }
-.info-label { color:#94A3B8; }
-.info-val { color:#1E293B; font-weight:500; text-align:right; }
-.list-action-row {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px 0;
-  border-bottom:1px solid #F1F5F9;
-  text-decoration:none;
-  color:#1E293B;
-  font-size:14px;
-}
-.list-action-row:last-child { border-bottom:none; }
-</style>
