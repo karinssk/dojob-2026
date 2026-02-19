@@ -251,12 +251,18 @@ if (!function_exists('upload_file_to_temp')) {
 if (!function_exists('move_temp_file')) {
 
     function move_temp_file($file_name, $target_path, $related_to = "", $source_path = NULL, $static_file_name = "", $file_content = "", $direct_upload = false, $file_size = 0, $upload_to_local = false) {
+        if (!$file_name && !$file_content) {
+            return false;
+        }
         //to make the file name unique we'll add a prefix
         $filename_prefix = $related_to . "_" . uniqid("file") . "-";
 
         //if not provide any source path we'll find the default path
         if (!$source_path) {
             $source_path = getcwd() . "/" . get_setting("temp_file_path") . $file_name;
+        }
+        if (!$file_content && !starts_with($source_path, "data") && is_dir($source_path)) {
+            return false;
         }
 
         //remove unsupported values from the file name
@@ -552,15 +558,18 @@ if (!function_exists('move_files_from_temp_dir_to_permanent_dir')) {
 
         if ($file_names && get_array_value($file_names, 0)) {
             foreach ($file_names as $key => $file_name) {
+                if (!$file_name) { continue; }
 
                 $file_size = get_array_value($file_sizes, $key);
                 $file_data = move_temp_file($file_name, $target_path, $related_to, null, "", "", false, $file_size);
-                $files_data[] = array(
-                    "file_name" => get_array_value($file_data, "file_name"),
-                    "file_size" => $file_size,
-                    "file_id" => get_array_value($file_data, "file_id"),
-                    "service_type" => get_array_value($file_data, "service_type")
-                );
+                if ($file_data) {
+                    $files_data[] = array(
+                        "file_name" => get_array_value($file_data, "file_name"),
+                        "file_size" => $file_size,
+                        "file_id" => get_array_value($file_data, "file_id"),
+                        "service_type" => get_array_value($file_data, "service_type")
+                    );
+                }
             }
         }
 
@@ -573,13 +582,19 @@ if (!function_exists('move_files_from_temp_dir_to_permanent_dir')) {
                     $file_name = $files["name"][$key];
                     $file_size = $files["size"][$key];
 
+                    if (!$file_name || !$temp_file || !is_file($temp_file)) {
+                        continue;
+                    }
+
                     $file_data = move_temp_file($file_name, $target_path, $related_to, $temp_file, "", "", false, $file_size);
-                    $files_data[] = array(
-                        "file_name" => get_array_value($file_data, "file_name"),
-                        "file_size" => $file_size,
-                        "file_id" => get_array_value($file_data, "file_id"),
-                        "service_type" => get_array_value($file_data, "service_type")
-                    );
+                    if ($file_data) {
+                        $files_data[] = array(
+                            "file_name" => get_array_value($file_data, "file_name"),
+                            "file_size" => $file_size,
+                            "file_id" => get_array_value($file_data, "file_id"),
+                            "service_type" => get_array_value($file_data, "service_type")
+                        );
+                    }
                 }
             }
         }
