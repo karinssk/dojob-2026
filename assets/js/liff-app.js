@@ -8,6 +8,13 @@ const LiffApp = (() => {
 
   /* ── API fetch ── */
   async function api(path, method = 'GET', body = null) {
+    const url = BASE_URL + path;
+    const debug = {
+      url,
+      method,
+      request: summarizeBody(body),
+      timestamp: new Date().toISOString(),
+    };
     const opts = {
       method,
       headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
@@ -20,9 +27,39 @@ const LiffApp = (() => {
         opts.body = new URLSearchParams(body).toString();
       }
     }
-    const res  = await fetch(BASE_URL + path, opts);
+
+    let res;
+    try {
+      res = await fetch(url, opts);
+    } catch (e) {
+      debug.network_error = e.message;
+      logDebug(debug);
+      return { success: false, message: 'Network error', debug };
+    }
+
+    debug.status = res.status;
+    debug.statusText = res.statusText;
+
     const text = await res.text();
-    try { return JSON.parse(text); } catch { return { success: false, message: text }; }
+    debug.response = text;
+
+    let data = null;
+    try {
+      data = JSON.parse(text);
+      debug.response_json = data;
+    } catch (e) {
+      debug.parse_error = e.message;
+    }
+
+    const isError = !res.ok || !data || data.success === false;
+    if (isError) {
+      logDebug(debug);
+    }
+
+    if (data) {
+      return data;
+    }
+    return { success: false, message: `Request failed (HTTP ${res.status})`, debug };
   }
 
   /* ── Toast notification ── */
@@ -156,6 +193,28 @@ const LiffApp = (() => {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
     return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function summarizeBody(body) {
+    if (!body) return null;
+    if (body instanceof FormData) {
+      const out = {};
+      for (const [k, v] of body.entries()) {
+        out[k] = v instanceof File ? `[file:${v.name || 'blob'}]` : v;
+      }
+      return out;
+    }
+    return body;
+  }
+
+  function logDebug(payload) {
+    if (!payload) return;
+    console.error('[LIFF API DEBUG]', payload);
+    const el = document.getElementById('liff-debug-log');
+    if (el) {
+      el.textContent = JSON.stringify(payload, null, 2);
+      el.style.display = 'block';
+    }
   }
 
   return { api, toast, initTabs, initNotifyToggle, initImageUpload, updateTaskStatus, toggleTodo, confirm, formatDate };

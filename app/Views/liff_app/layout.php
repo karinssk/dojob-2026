@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" data-base="<?= get_uri() ?>"
+<html lang="th" data-base="<?= get_file_uri('') ?>"
   data-default-start="<?= get_setting('line_default_notify_before_start') ?: 30 ?>"
   data-default-end="<?= get_setting('line_default_notify_before_end') ?: 60 ?>"
   data-default-update="<?= get_setting('line_default_no_update_hours') ?: 24 ?>">
@@ -18,6 +18,7 @@
 <div class="liff-page" id="liff-page-content">
   <?= $content ?? '' ?>
 </div>
+<div id="liff-debug-log" class="liff-debug-log" style="display:none"></div>
 
 <!-- Floating Action Button (page-specific, injected by view) -->
 <?php if (!empty($fab_url)): ?>
