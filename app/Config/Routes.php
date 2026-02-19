@@ -94,6 +94,7 @@ $routes->post('liff/api/tasks/comment_save', 'Liff_api::task_comment_save');
 $routes->post('liff/api/events/save', 'Liff_api::event_save');
 $routes->post('liff/api/events/delete', 'Liff_api::event_delete');
 $routes->post('liff/api/events/comment_save', 'Liff_api::event_comment_save');
+$routes->post('liff/api/events/calendar', 'Liff_api::events_calendar');
 $routes->post('liff/api/todo/save', 'Liff_api::todo_save');
 $routes->post('liff/api/todo/toggle', 'Liff_api::todo_toggle');
 

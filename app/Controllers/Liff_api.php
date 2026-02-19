@@ -246,6 +246,30 @@ class Liff_api extends Security_Controller {
         return $this->_json(['success' => true]);
     }
 
+    // ── Event: calendar data (month/week/day) ─────────────────────
+    public function events_calendar() {
+        $user_id = $this->login_user->id;
+        $start   = $this->request->getPost('start');
+        $end     = $this->request->getPost('end');
+
+        if (!$start || !$end) {
+            return $this->_json(['success' => false, 'message' => 'Missing date range'], 400);
+        }
+
+        $events = $this->db->query(
+            "SELECT e.id, e.title, e.start_date, e.end_date, e.start_time, e.end_time, e.color, e.share_with, e.line_notify_enabled
+             FROM rise_events e
+             WHERE e.deleted=0
+               AND e.start_date <= ?
+               AND (e.end_date IS NULL OR e.end_date = '' OR e.end_date >= ?)
+               AND (e.created_by=? OR e.share_with LIKE '%all_team%' OR e.share_with LIKE '%$user_id%')
+             ORDER BY e.start_date ASC, e.start_time ASC",
+            [$end, $start, $user_id]
+        )->getResult();
+
+        return $this->_json(['success' => true, 'events' => $events]);
+    }
+
     // ── Todo: save ─────────────────────────────────────────────────
     public function todo_save() {
         $user_id = $this->login_user->id;
