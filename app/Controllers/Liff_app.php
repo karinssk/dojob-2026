@@ -9,11 +9,13 @@ namespace App\Controllers;
 class Liff_app extends Security_Controller {
 
     protected $Liff_pending_model;
+    protected $Task_priority_model;
 
     public function __construct() {
         parent::__construct();
         $this->db = \Config\Database::connect();
         $this->Liff_pending_model = model('App\Models\Liff_pending_model');
+        $this->Task_priority_model = model('App\Models\Task_priority_model');
     }
 
     // Override Security_Controller redirect to go to LIFF login instead of web signin
