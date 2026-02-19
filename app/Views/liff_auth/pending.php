@@ -5,26 +5,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>DoJob — รอการอนุมัติ</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?= get_file_uri('assets/css/liff-ui.css') ?>?v=<?= time() ?>">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Sarabun',sans-serif;background:#F4F6FB;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-  .card{background:#fff;border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.08);padding:40px 28px;max-width:380px;width:100%;text-align:center}
+  body{font-family:'Sarabun',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow-card);padding:40px 28px;max-width:380px;width:100%;text-align:center}
   .icon{font-size:56px;margin-bottom:16px;animation:pulse 2s ease-in-out infinite}
   @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-  h1{font-size:22px;font-weight:700;color:#1E293B;margin-bottom:8px}
-  .desc{font-size:14px;color:#64748B;line-height:1.7;margin-bottom:24px}
-  .info-box{background:#F8FAFF;border:1.5px solid #DBEAFE;border-radius:14px;padding:16px;margin-bottom:24px;text-align:left}
-  .info-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #EFF6FF;font-size:14px}
+  h1{font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px}
+  .desc{font-size:14px;color:var(--label);line-height:1.7;margin-bottom:24px}
+  .info-box{background:var(--surface);border:1.5px solid #DBEAFE;border-radius:14px;padding:16px;margin-bottom:24px;text-align:left}
+  .info-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #EEF2FF;font-size:14px}
   .info-row:last-child{border-bottom:none}
-  .info-label{color:#64748B;font-weight:500}
-  .info-value{color:#1E293B;font-weight:600;text-align:right;max-width:60%;word-break:break-all}
+  .info-label{color:var(--label);font-weight:500}
+  .info-value{color:var(--text);font-weight:600;text-align:right;max-width:60%;word-break:break-all}
   .chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
-  .chip-yellow{background:#FFFBEB;color:#92400E;border:1px solid #FCD34D}
+  .chip-yellow{background:var(--yellow-lt);color:#92400E;border:1px solid #FCD34D}
   .btn{width:100%;padding:14px;border:none;border-radius:14px;font-family:'Sarabun',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;transition:all 0.2s}
-  .btn-primary{background:#6C8EF5;color:#fff}
+  .btn-primary{background:var(--blue);color:#fff}
   .btn-secondary{background:#F1F5F9;color:#475569}
   .btn:active{transform:scale(0.98)}
-  .status-text{font-size:13px;color:#94A3B8;margin-top:8px}
+  .status-text{font-size:13px;color:var(--muted);margin-top:8px}
 </style>
 </head>
 <body>

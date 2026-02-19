@@ -6,19 +6,20 @@
 <title>DoJob — LINE Login</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?= get_file_uri('assets/css/liff-ui.css') ?>?v=<?= time() ?>">
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Sarabun',sans-serif;background:#F4F6FB;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-  .card{background:#fff;border-radius:24px;box-shadow:0 8px 32px rgba(0,0,0,0.08);padding:40px 32px;max-width:380px;width:100%;text-align:center}
-  .logo{width:64px;height:64px;background:linear-gradient(135deg,#6C8EF5,#A78BFA);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px}
-  h1{font-size:22px;font-weight:700;color:#1E293B;margin-bottom:8px}
-  p{font-size:14px;color:#64748B;line-height:1.6;margin-bottom:24px}
-  .spinner{width:40px;height:40px;border:3px solid #E2E8F0;border-top-color:#6C8EF5;border-radius:50%;animation:spin 0.8s linear infinite;margin:20px auto}
+  body{font-family:'Sarabun',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:var(--card);border-radius:var(--r-card);box-shadow:var(--shadow-card);padding:40px 32px;max-width:380px;width:100%;text-align:center}
+  .logo{width:64px;height:64px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px}
+  h1{font-size:22px;font-weight:700;color:var(--text);margin-bottom:8px}
+  p{font-size:14px;color:var(--label);line-height:1.6;margin-bottom:24px}
+  .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:20px auto}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .status{font-size:13px;color:#94A3B8;margin-top:12px}
-  .error-box{background:#FFF0F3;border:1px solid #F97FA3;border-radius:12px;padding:16px;margin-top:20px;color:#C73060;font-size:14px;display:none}
-  .btn{display:block;width:100%;padding:14px;background:#6C8EF5;color:#fff;border:none;border-radius:14px;font-family:'Sarabun',sans-serif;font-size:16px;font-weight:600;cursor:pointer;text-decoration:none;margin-top:16px}
+  .status{font-size:13px;color:var(--muted);margin-top:12px}
+  .error-box{background:var(--pink-lt);border:1px solid #F9A8C9;border-radius:12px;padding:16px;margin-top:20px;color:#C0295A;font-size:14px;display:none}
+  .btn{display:block;width:100%;padding:14px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-family:'Sarabun',sans-serif;font-size:16px;font-weight:600;cursor:pointer;text-decoration:none;margin-top:16px}
   .btn:active{transform:scale(0.98)}
 </style>
 </head>
