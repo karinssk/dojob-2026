@@ -28,6 +28,7 @@
       ทดสอบการเชื่อมต่อ Messaging API
     </button>
     <span id="msg-api-result" style="margin-left:10px;font-size:13px"></span>
+    <div id="msg-api-log" style="display:none;margin-top:8px;background:#0F172A;color:#E2E8F0;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-all"></div>
   </div>
 </div>
 
@@ -72,6 +73,7 @@
         ตรวจสอบค่า LIFF
       </button>
       <span id="liff-test-result" style="margin-left:10px;font-size:13px"></span>
+      <div id="liff-test-log" style="display:none;margin-top:8px;background:#0F172A;color:#E2E8F0;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-all"></div>
       <div style="margin-top:8px;font-size:12px;color:#94A3B8">
         LIFF URL: <code><?= get_uri('liff') ?></code>
       </div>
@@ -164,15 +166,43 @@ $(document).ready(function(){
 
 function testMessagingApi() {
   $('#msg-api-result').html('<i>กำลังทดสอบ...</i>');
-  $.post('<?= get_uri('liff_settings/test_line_messaging_api') ?>', function(r){
-    $('#msg-api-result').html(r.message);
+  $('#msg-api-log').hide().text('');
+  $.ajax({
+    url: '<?= get_uri('liff_settings/test_line_messaging_api') ?>',
+    method: 'POST',
+    dataType: 'json',
+    success: function(r){
+      $('#msg-api-result').html(r.message);
+      renderDebugLog('#msg-api-log', r.debug);
+    },
+    error: function(xhr){
+      $('#msg-api-result').html('❌ AJAX error');
+      renderDebugLog('#msg-api-log', { status: xhr.status, response: xhr.responseText });
+    }
   });
 }
 
 function testLoginChannel() {
   $('#liff-test-result').html('<i>กำลังตรวจสอบ...</i>');
-  $.post('<?= get_uri('liff_settings/test_line_login_channel') ?>', function(r){
-    $('#liff-test-result').html(r.message);
+  $('#liff-test-log').hide().text('');
+  $.ajax({
+    url: '<?= get_uri('liff_settings/test_line_login_channel') ?>',
+    method: 'POST',
+    dataType: 'json',
+    success: function(r){
+      $('#liff-test-result').html(r.message);
+      renderDebugLog('#liff-test-log', r.debug);
+    },
+    error: function(xhr){
+      $('#liff-test-result').html('❌ AJAX error');
+      renderDebugLog('#liff-test-log', { status: xhr.status, response: xhr.responseText });
+    }
   });
+}
+
+function renderDebugLog(target, data) {
+  if (!data) { return; }
+  var text = JSON.stringify(data, null, 2);
+  $(target).text(text).show();
 }
 </script>

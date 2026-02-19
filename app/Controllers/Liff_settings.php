@@ -73,27 +73,56 @@ class Liff_settings extends Security_Controller {
     // ──────────────────────────────────────────────────────────────
     public function test_line_messaging_api() {
         $token = get_setting('line_channel_access_token');
+        $debug = [
+            'endpoint'      => 'https://api.line.me/v2/bot/info',
+            'token_present' => (bool)$token,
+            'token_length'  => $token ? strlen($token) : 0,
+            'token_preview' => $token ? (substr($token, 0, 6) . '...' . substr($token, -4)) : '',
+            'timestamp'     => date('c'),
+        ];
         if (!$token) {
-            echo json_encode(['success' => false, 'message' => 'Channel Access Token ยังไม่ได้ตั้งค่า']);
-            return;
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Channel Access Token ยังไม่ได้ตั้งค่า',
+                'debug'   => $debug,
+            ]);
         }
 
-        $ch = curl_init('https://api.line.me/v2/bot/info');
+        $ch = curl_init($debug['endpoint']);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER     => ["Authorization: Bearer $token"],
             CURLOPT_TIMEOUT        => 10,
         ]);
-        $res  = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $start = microtime(true);
+        $res   = curl_exec($ch);
+        $debug['curl_errno'] = curl_errno($ch);
+        $debug['curl_error'] = curl_error($ch);
+        $debug['http_code']  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $debug['elapsed_ms'] = (int)round((microtime(true) - $start) * 1000);
         curl_close($ch);
 
         $data = json_decode($res, true);
-        if ($code === 200 && isset($data['displayName'])) {
-            echo json_encode(['success' => true, 'message' => '✅ เชื่อมต่อสำเร็จ — Bot: ' . $data['displayName']]);
-        } else {
-            echo json_encode(['success' => false, 'message' => '❌ เชื่อมต่อไม่ได้ — ' . ($data['message'] ?? 'HTTP ' . $code)]);
+        $debug['response_raw']  = $res;
+        $debug['response_json'] = $data;
+
+        if ($debug['http_code'] === 200 && isset($data['displayName'])) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => '✅ เชื่อมต่อสำเร็จ — Bot: ' . $data['displayName'],
+                'debug'   => $debug,
+            ]);
         }
+
+        $error_msg = $data['message'] ?? ('HTTP ' . ($debug['http_code'] ?? ''));
+        if ($debug['curl_errno']) {
+            $error_msg .= ' (cURL: ' . $debug['curl_error'] . ')';
+        }
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => '❌ เชื่อมต่อไม่ได้ — ' . $error_msg,
+            'debug'   => $debug,
+        ]);
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -102,15 +131,45 @@ class Liff_settings extends Security_Controller {
     public function test_line_login_channel() {
         $channel_id = get_setting('line_login_channel_id');
         $liff_id    = get_setting('line_liff_id');
+        $prefix     = '';
+        $format_ok  = false;
 
-        if (!$channel_id || !$liff_id) {
-            echo json_encode(['success' => false, 'message' => 'Login Channel ID หรือ LIFF ID ยังไม่ได้ตั้งค่า']);
-            return;
+        if ($liff_id && strpos($liff_id, '-') !== false) {
+            $prefix = explode('-', $liff_id)[0];
+        }
+        if ($liff_id) {
+            $format_ok = (bool)preg_match('/^[0-9]+-[A-Za-z0-9]+$/', $liff_id);
         }
 
-        echo json_encode([
-            'success' => true,
-            'message' => '✅ ค่า LIFF ID และ Login Channel ID ถูกบันทึกแล้ว (ทดสอบจริงต้องใช้งานผ่าน LINE)',
+        $debug = [
+            'line_login_channel_id'   => $channel_id,
+            'line_liff_id'            => $liff_id,
+            'liff_id_prefix'          => $prefix,
+            'liff_id_format_ok'       => $format_ok,
+            'prefix_matches_channel'  => ($channel_id && $prefix) ? ($prefix === $channel_id) : null,
+            'liff_url'                => get_uri('liff'),
+            'timestamp'               => date('c'),
+        ];
+
+        if (!$channel_id || !$liff_id) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Login Channel ID หรือ LIFF ID ยังไม่ได้ตั้งค่า',
+                'debug'   => $debug,
+            ]);
+        }
+
+        $msg = '✅ ค่า LIFF ID และ Login Channel ID ถูกบันทึกแล้ว (ทดสอบจริงต้องใช้งานผ่าน LINE)';
+        if (!$format_ok) {
+            $msg = '⚠️ รูปแบบ LIFF ID ไม่ถูกต้อง (ควรเป็น {ChannelId}-xxxx)';
+        } elseif ($debug['prefix_matches_channel'] === false) {
+            $msg = '⚠️ LIFF ID ไม่ตรงกับ Login Channel ID';
+        }
+
+        return $this->response->setJSON([
+            'success' => $format_ok,
+            'message' => $msg,
+            'debug'   => $debug,
         ]);
     }
 
