@@ -20,51 +20,21 @@
 
   <div class="form-group">
     <label class="form-label">โปรเจกต์</label>
-    <?php
-      $selected_project = null;
-      foreach ($projects as $p) {
-        if (($task->project_id ?? 0) == $p->id) { $selected_project = $p; break; }
-      }
-    ?>
-    <div class="custom-dropdown" id="project-dd">
-      <input type="hidden" name="project_id" value="<?= esc($task->project_id ?? '') ?>">
-      <button type="button" class="dropdown-trigger" id="project-trigger">
-        <span><?= $selected_project ? esc($selected_project->title) : '— ไม่ระบุโปรเจกต์ —' ?></span>
-        <span class="chev">▾</span>
-      </button>
-      <div class="dropdown-menu" id="project-menu">
-        <div class="dropdown-item" data-value="">— ไม่ระบุโปรเจกต์ —</div>
-        <?php foreach ($projects as $p): ?>
-        <div class="dropdown-item" data-value="<?= $p->id ?>">
-          <?= esc($p->title) ?>
-        </div>
-        <?php endforeach; ?>
-      </div>
-    </div>
+    <select class="form-control" name="project_id">
+      <option value="">— ไม่ระบุโปรเจกต์ —</option>
+      <?php foreach ($projects as $p): ?>
+      <option value="<?= $p->id ?>" <?= ($task->project_id ?? 0) == $p->id ? 'selected' : '' ?>><?= esc($p->title) ?></option>
+      <?php endforeach; ?>
+    </select>
   </div>
 
   <div class="form-group">
     <label class="form-label">มอบหมายให้</label>
-    <?php
-      $selected_user = null;
-      foreach ($users as $u) {
-        if (($task->assigned_to ?? $login_user->id) == $u->id) { $selected_user = $u; break; }
-      }
-    ?>
-    <div class="custom-dropdown" id="assignee-dd">
-      <input type="hidden" name="assigned_to" value="<?= esc($task->assigned_to ?? $login_user->id) ?>">
-      <button type="button" class="dropdown-trigger" id="assignee-trigger">
-        <span><?= $selected_user ? esc(trim($selected_user->first_name . ' ' . $selected_user->last_name)) : '—' ?></span>
-        <span class="chev">▾</span>
-      </button>
-      <div class="dropdown-menu" id="assignee-menu">
-        <?php foreach ($users as $u): ?>
-        <div class="dropdown-item" data-value="<?= $u->id ?>">
-          <?= esc(trim($u->first_name . ' ' . $u->last_name)) ?>
-        </div>
-        <?php endforeach; ?>
-      </div>
-    </div>
+    <select class="form-control" name="assigned_to">
+      <?php foreach ($users as $u): ?>
+      <option value="<?= $u->id ?>" <?= ($task->assigned_to ?? $login_user->id) == $u->id ? 'selected' : '' ?>><?= esc(trim($u->first_name . ' ' . $u->last_name)) ?></option>
+      <?php endforeach; ?>
+    </select>
   </div>
 
   <div class="d-flex gap-8">
@@ -92,27 +62,12 @@
   <div class="d-flex gap-8">
     <div class="form-group flex-1">
       <label class="form-label">ลำดับความสำคัญ</label>
-      <?php
-        $selected_prio = null;
-        foreach ($priorities as $p) {
-          if (($task->priority_id ?? 0) == $p->id) { $selected_prio = $p; break; }
-        }
-      ?>
-      <div class="custom-dropdown" id="priority-dd">
-        <input type="hidden" name="priority_id" value="<?= esc($task->priority_id ?? '') ?>">
-        <button type="button" class="dropdown-trigger" id="priority-trigger">
-          <span><?= $selected_prio ? esc($selected_prio->title) : '— เลือก —' ?></span>
-          <span class="chev">▾</span>
-        </button>
-        <div class="dropdown-menu" id="priority-menu">
-          <div class="dropdown-item" data-value="">— เลือก —</div>
-          <?php foreach ($priorities as $p): ?>
-          <div class="dropdown-item" data-value="<?= $p->id ?>">
-            <?= esc($p->title) ?>
-          </div>
-          <?php endforeach; ?>
-        </div>
-      </div>
+      <select class="form-control" name="priority_id">
+        <option value="">— เลือก —</option>
+        <?php foreach ($priorities as $p): ?>
+        <option value="<?= $p->id ?>" <?= ($task->priority_id ?? 0) == $p->id ? 'selected' : '' ?>><?= esc($p->title) ?></option>
+        <?php endforeach; ?>
+      </select>
     </div>
     <div class="form-group flex-1">
       <label class="form-label">สถานะ</label>
@@ -192,13 +147,6 @@
 </form>
 
 <script>
-// One shared handler: close all open custom dropdowns when clicking outside
-document.addEventListener('click', (e) => {
-  console.log('[DD] document click | target:', e.target, '| open before:', [...document.querySelectorAll('.custom-dropdown.open')].map(d=>d.id));
-  document.querySelectorAll('.custom-dropdown.open')
-    .forEach(d => d.classList.remove('open'));
-});
-
 function initTaskForm() {
   if (!window.LiffApp) {
     setTimeout(initTaskForm, 50);
@@ -207,10 +155,6 @@ function initTaskForm() {
 
   LiffApp.initImageUpload('img-input', 'img-previews');
   LiffApp.initNotifyToggle('notify-toggle','notify-section');
-
-  initDropdown('project-dd',  'project-trigger',  'project-menu',  'project_id');
-  initDropdown('assignee-dd', 'assignee-trigger', 'assignee-menu', 'assigned_to');
-  initDropdown('priority-dd', 'priority-trigger', 'priority-menu', 'priority_id');
 
   const notifyInputs = [
     'start_date','start_time','deadline','end_time',
@@ -248,40 +192,6 @@ async function submitTask(e) {
   }
 }
 
-function initDropdown(wrapId, triggerId, menuId, inputName) {
-  const wrap    = document.getElementById(wrapId);
-  if (!wrap) { console.warn('[DD] wrap not found:', wrapId); return; }
-  const trigger = document.getElementById(triggerId);
-  const menu    = document.getElementById(menuId);
-  const input   = wrap.querySelector(`input[name="${inputName}"]`);
-  console.log('[DD] initDropdown | wrapId:', wrapId, '| trigger:', trigger, '| menu:', menu, '| input:', input);
-
-  trigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const opening = !wrap.classList.contains('open');
-    console.log('[DD] trigger click | wrapId:', wrapId, '| currently open:', !opening, '| will open:', opening);
-    document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
-    if (opening) wrap.classList.add('open');
-    console.log('[DD] after toggle | wrap classes:', wrap.className);
-  });
-
-  menu.querySelectorAll('.dropdown-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.stopPropagation();
-      input.value = item.dataset.value || '';
-      trigger.querySelector('span').textContent = item.textContent.trim();
-      menu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      wrap.classList.remove('open');
-    });
-  });
-
-  // Highlight current selection
-  const current = input.value || '';
-  menu.querySelectorAll('.dropdown-item').forEach(item => {
-    if ((item.dataset.value || '') === current) item.classList.add('active');
-  });
-}
 
 function updateNotifyPreview() {
   const startDate = document.querySelector('[name="start_date"]').value;
