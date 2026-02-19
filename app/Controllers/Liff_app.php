@@ -259,7 +259,7 @@ class Liff_app extends Security_Controller {
         $user_id  = $this->login_user->id;
         $projects = $this->db->query(
             "SELECT p.*,
-                    ps.title AS status_title, ps.color AS status_color,
+                    ps.title AS status_title, NULL AS status_color,
                     COUNT(DISTINCT pm.user_id) AS member_count,
                     COUNT(DISTINCT t.id) AS task_count,
                     SUM(CASE WHEN ts.key_name='closed' THEN 1 ELSE 0 END) AS done_count
