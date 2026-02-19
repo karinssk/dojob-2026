@@ -108,7 +108,7 @@ const LiffApp = (() => {
       no_update:    parseInt(document.documentElement.dataset.defaultUpdate || '24'),
     };
 
-    toggle.addEventListener('change', () => {
+    const applyState = () => {
       if (toggle.checked) {
         section.classList.add('open');
         // Pre-fill with system defaults if empty
@@ -121,7 +121,10 @@ const LiffApp = (() => {
       } else {
         section.classList.remove('open');
       }
-    });
+    };
+
+    toggle.addEventListener('change', applyState);
+    applyState();
   }
 
   /* ── Image upload preview ── */
