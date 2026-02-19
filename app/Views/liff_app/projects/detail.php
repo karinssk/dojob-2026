@@ -3,45 +3,46 @@
 </div>
 
 <!-- Progress card -->
-<div class="card" style="margin-bottom:12px">
-  <div class="d-flex" style="justify-content:space-between;align-items:center;margin-bottom:12px">
-    <div>
-      <?php $sc = $project->status_color ?? '#94A3B8'; ?>
-      <span class="chip" style="background:<?= esc($sc) ?>22;color:<?= esc($sc) ?>">
-        <?= esc($project->status_title ?? 'Active') ?>
-      </span>
-    </div>
-    <div style="font-size:20px;font-weight:700;color:#1E293B"><?= $progress ?>%</div>
+<?php
+  $sc = $project->status_color ?? 'var(--blue)';
+  $status_label = $project->status_title ?? 'Active';
+?>
+<div class="card project-detail-card">
+  <div class="project-detail-top">
+    <span class="project-status-pill" style="background:<?= esc($sc) ?>22;color:<?= esc($sc) ?>">
+      <?= esc($status_label) ?>
+    </span>
+    <div class="project-detail-percent"><?= $progress ?>%</div>
   </div>
 
-  <div style="background:#F1F5F9;border-radius:999px;height:8px;margin-bottom:12px;overflow:hidden">
-    <div style="width:<?= $progress ?>%;height:100%;background:var(--blue);border-radius:999px"></div>
+  <div class="project-progress">
+    <div class="project-progress-bar" style="width:<?= $progress ?>%;background:<?= esc($sc) ?>"></div>
   </div>
 
-  <div class="d-flex" style="justify-content:space-between;font-size:13px;color:#64748B">
+  <div class="project-detail-meta">
     <span><?= count($tasks) ?> งานทั้งหมด</span>
     <?php if ($project->deadline): ?>
     <span>กำหนด <?= date('d M Y', strtotime($project->deadline)) ?></span>
+    <?php else: ?>
+    <span>ไม่กำหนดวันสิ้นสุด</span>
     <?php endif; ?>
   </div>
 
   <?php if ($project->description): ?>
-  <p style="font-size:13px;color:#475569;margin-top:12px;line-height:1.6"><?= nl2br(esc($project->description)) ?></p>
+  <p class="project-detail-desc"><?= nl2br(esc($project->description)) ?></p>
   <?php endif; ?>
 </div>
 
 <!-- Members -->
 <?php if (!empty($members)): ?>
-<div class="card" style="margin-bottom:12px">
-  <div style="font-size:13px;font-weight:600;color:#64748B;margin-bottom:10px">สมาชิก (<?= count($members) ?> คน)</div>
-  <div class="d-flex" style="flex-wrap:wrap;gap:8px">
+<div class="card member-card">
+  <div class="member-card-title">สมาชิก (<?= count($members) ?> คน)</div>
+  <div class="member-grid">
     <?php foreach ($members as $m): ?>
-    <div style="text-align:center;width:52px">
+    <div class="member-item">
       <?php $img = get_avatar($m->image); ?>
-      <img src="<?= esc($img) ?>" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #E2E8F0">
-      <div style="font-size:10px;color:#64748B;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-        <?= esc(explode(' ', $m->name)[0]) ?>
-      </div>
+      <img src="<?= esc($img) ?>" class="member-avatar" alt="">
+      <div class="member-name"><?= esc(explode(' ', $m->name)[0]) ?></div>
     </div>
     <?php endforeach; ?>
   </div>
@@ -61,28 +62,24 @@
   <?php else: ?>
   <?php foreach ($tasks as $t): ?>
   <?php $tc = $t->status_color ?? '#94A3B8'; ?>
-  <a href="<?= get_uri('liff/app/tasks/' . $t->id) ?>" style="text-decoration:none">
-    <div class="card" style="margin-bottom:8px;padding:12px 14px">
-      <div class="d-flex" style="justify-content:space-between;align-items:center">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:600;color:#1E293B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-            <?= esc($t->title) ?>
-          </div>
-          <?php if ($t->assigned_name): ?>
-          <div style="font-size:12px;color:#94A3B8;margin-top:2px"><?= esc($t->assigned_name) ?></div>
-          <?php endif; ?>
-        </div>
-        <span class="chip" style="background:<?= esc($tc) ?>22;color:<?= esc($tc) ?>;margin-left:8px;flex-shrink:0;font-size:11px">
-          <?= esc($t->status_title) ?>
-        </span>
+  <a class="project-task-link" href="<?= get_uri('liff/app/tasks/' . $t->id) ?>">
+    <div class="project-task-row">
+      <div class="project-task-main">
+        <div class="project-task-title"><?= esc($t->title) ?></div>
+        <?php if ($t->assigned_name): ?>
+        <div class="project-task-sub"><?= esc($t->assigned_name) ?></div>
+        <?php endif; ?>
       </div>
-      <?php if ($t->deadline): ?>
-      <div style="font-size:11px;color:#94A3B8;margin-top:6px">
-        <?php $late = strtotime($t->deadline) < time() && ($t->status_key_name ?? '') !== 'closed'; ?>
-        <?= $late ? '<span style="color:#F97FA3">' : '' ?>กำหนด <?= date('d M', strtotime($t->deadline)) ?><?= $late ? '</span>' : '' ?>
-      </div>
-      <?php endif; ?>
+      <span class="project-task-status" style="background:<?= esc($tc) ?>22;color:<?= esc($tc) ?>">
+        <?= esc($t->status_title) ?>
+      </span>
     </div>
+    <?php if ($t->deadline): ?>
+    <?php $late = strtotime($t->deadline) < time() && ($t->status_key_name ?? '') !== 'closed'; ?>
+    <div class="project-task-deadline <?= $late ? 'late' : '' ?>">
+      กำหนด <?= date('d M', strtotime($t->deadline)) ?>
+    </div>
+    <?php endif; ?>
   </a>
   <?php endforeach; ?>
   <?php endif; ?>
@@ -111,5 +108,5 @@
 </div>
 
 <script>
-LiffApp.initTabs('proj-tabs');
+LiffApp.initTabs('#proj-tabs');
 </script>

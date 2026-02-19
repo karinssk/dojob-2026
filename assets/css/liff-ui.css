@@ -163,6 +163,48 @@ html, body {
 }
 .project-deadline { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
+/* --- Project detail -------------------------------------- */
+.project-detail-card { padding: 16px; }
+.project-detail-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.project-detail-percent { font-size: 20px; font-weight: 700; color: var(--text); }
+.project-status-pill {
+  font-size: 11px; font-weight: 700; padding: 4px 10px;
+  border-radius: var(--r-chip); white-space: nowrap;
+}
+.project-detail-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--label); }
+.project-detail-desc { font-size: 13px; color: var(--label); margin-top: 10px; line-height: 1.6; }
+
+.member-card { padding: 14px 16px 12px; }
+.member-card-title { font-size: 13px; font-weight: 700; color: var(--label); margin-bottom: 10px; }
+.member-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; }
+.member-item { text-align: center; }
+.member-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  object-fit: cover; border: 2px solid #E2E8F0;
+  box-shadow: 0 4px 10px rgba(15,23,42,0.08);
+}
+.member-name { font-size: 10px; color: var(--muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.project-task-link { text-decoration: none; color: inherit; display: block; }
+.project-task-row {
+  background: var(--card); border-radius: var(--r-card); box-shadow: var(--shadow-card);
+  padding: 12px 14px; display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px;
+}
+.project-task-main { min-width: 0; flex: 1; }
+.project-task-title { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.project-task-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.project-task-status {
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: var(--r-chip);
+  margin-left: 8px; white-space: nowrap;
+}
+.project-task-deadline { font-size: 11px; color: var(--muted); margin: 4px 2px 8px; }
+.project-task-deadline.late { color: #F472B6; }
+
+@media (max-width: 380px) {
+  .member-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+}
+
 /* --- Avatar ------------------------------------------------ */
 .avatar {
   width: 36px; height: 36px;
@@ -311,25 +353,37 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 /* --- Bottom Tab Bar ---------------------------------------- */
 .bottom-tabs {
   position: fixed; bottom: 0; left: 0; right: 0;
-  height: 70px;
-  background: var(--card);
+  height: 68px;
+  background: rgba(255,255,255,0.95);
   border-top: 1px solid #E8EEF7;
   display: flex; justify-content: space-around; align-items: center;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+  backdrop-filter: blur(8px);
   box-shadow: var(--shadow-tab);
   z-index: 100;
 }
 .bottom-tab {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 6px 12px; border-radius: 14px;
+  flex: 1 1 20%;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 4px 0;
   text-decoration: none; color: var(--muted);
   font-size: 10px; font-weight: 600; cursor: pointer;
-  transition: color 0.15s, background 0.15s, transform 0.15s; position: relative;
+  transition: color 0.15s, transform 0.15s; position: relative;
 }
-.bottom-tab.active { color: var(--blue); background: var(--blue-lt); }
+.bottom-tab.active { color: var(--blue); }
 .bottom-tab:active { transform: scale(0.96); }
-.bottom-tab-icon { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; }
-.bottom-tab-icon svg { width: 22px; height: 22px; }
+.bottom-tab-icon {
+  width: 30px; height: 30px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 12px;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.bottom-tab.active .bottom-tab-icon {
+  background: var(--blue-lt);
+  color: var(--blue);
+  box-shadow: 0 6px 16px rgba(79,125,243,0.25);
+}
+.bottom-tab-icon svg { width: 20px; height: 20px; display: block; }
 .bottom-tab-label { font-size: 10px; letter-spacing: 0.02em; }
 .bottom-tab-badge {
   position: absolute; top: 0; right: 6px;
