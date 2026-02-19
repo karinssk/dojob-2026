@@ -1,6 +1,6 @@
-<div class="page-header d-flex" style="justify-content:space-between;align-items:center">
+<div class="page-header page-header-row">
   <h1><?= esc($event->title) ?></h1>
-  <a href="<?= get_uri('liff/app/events/' . $event->id . '/edit') ?>" class="btn btn-sm" style="padding:6px 14px">แก้ไข</a>
+  <a href="<?= get_uri('liff/app/events/' . $event->id . '/edit') ?>" class="btn btn-primary btn-sm edit-btn">แก้ไข</a>
 </div>
 
 <div class="card" style="border-left:5px solid <?= esc($event->color ?? '#6C8EF5') ?>">
@@ -84,6 +84,69 @@ if (!empty($event->files)) {
 </div>
 <?php endif; ?>
 
+<!-- Comments -->
+<div class="section-title">ความคิดเห็น</div>
+<?php if (empty($comments)): ?>
+<div class="card">
+  <div class="card-body text-sm text-muted">ยังไม่มีความคิดเห็น</div>
+</div>
+<?php else: ?>
+<div class="card">
+  <div class="card-body">
+    <div class="comment-list">
+      <?php foreach ($comments as $c): ?>
+        <?php
+          $avatar = get_avatar($c->created_by_avatar ?? '');
+          $cfiles = $c->files ? @unserialize($c->files) : [];
+          if (!is_array($cfiles)) { $cfiles = []; }
+        ?>
+      <div class="comment-item">
+        <img src="<?= esc($avatar) ?>" class="comment-avatar" alt="">
+        <div class="comment-body">
+          <div class="comment-meta">
+            <span class="comment-name"><?= esc($c->created_by_user ?? 'User') ?></span>
+            <span class="comment-time"><?= date('d M H:i', strtotime($c->created_at ?? 'now')) ?></span>
+          </div>
+          <?php if (!empty($c->description)): ?>
+          <div class="comment-text"><?= nl2br(esc($c->description)) ?></div>
+          <?php endif; ?>
+          <?php if (!empty($cfiles)): ?>
+          <div class="comment-attachments">
+            <?php foreach ($cfiles as $file): ?>
+              <?php
+                if (!is_array($file)) { continue; }
+                $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
+                $url   = get_source_url_of_file($file, get_setting("timeline_file_path"));
+              ?>
+              <a href="<?= esc($url) ?>" target="_blank"><img src="<?= esc($thumb) ?>" alt=""></a>
+            <?php endforeach; ?>
+          </div>
+          <?php endif; ?>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
+<div class="card comment-form-card">
+  <div class="card-body">
+    <form id="event-comment-form" onsubmit="submitEventComment(event)">
+      <textarea class="form-control" name="description" rows="3" placeholder="เขียนความคิดเห็น..."></textarea>
+      <input type="hidden" name="event_id" value="<?= (int)$event->id ?>">
+      <div class="comment-actions">
+        <label class="comment-attach">
+          แนบรูป
+          <input type="file" id="event-comment-images" name="manualFiles[]" accept="image/*" multiple hidden>
+        </label>
+        <button type="submit" class="btn btn-primary btn-sm">ส่ง</button>
+      </div>
+      <div class="upload-previews" id="event-comment-previews"></div>
+    </form>
+  </div>
+</div>
+
 <div style="margin-top:16px">
   <a href="<?= get_uri('liff/app/events/' . $event->id . '/edit') ?>" class="btn btn-primary btn-block">แก้ไข Event</a>
 </div>
@@ -94,6 +157,7 @@ if (!empty($event->files)) {
 </div>
 
 <script>
+LiffApp.initImageUpload('event-comment-images', 'event-comment-previews');
 async function deleteEvent(id) {
   if (!confirm('ลบ Event นี้?')) return;
   const res = await LiffApp.api('liff/api/events/delete', 'POST', { id });
@@ -102,6 +166,20 @@ async function deleteEvent(id) {
     setTimeout(() => location.href = '<?= get_uri('liff/app/events') ?>', 500);
   } else {
     LiffApp.toast(res.message || 'เกิดข้อผิดพลาด', 'danger');
+  }
+}
+
+async function submitEventComment(e) {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  const res = await LiffApp.api('liff/api/events/comment_save', 'POST', form);
+  if (res.success) {
+    location.reload();
+  } else {
+    LiffApp.toast(res.message || 'เกิดข้อผิดพลาด', 'error');
+    btn.disabled = false;
   }
 }
 </script>

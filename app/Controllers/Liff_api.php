@@ -8,10 +8,12 @@ namespace App\Controllers;
 class Liff_api extends Security_Controller {
 
     protected $Liff_pending_model;
+    protected $Event_comments_model;
 
     public function __construct() {
         parent::__construct();
         $this->Liff_pending_model = model('App\Models\Liff_pending_model');
+        $this->Event_comments_model = model('App\Models\Event_comments_model');
     }
 
     protected function _check_login() {
@@ -100,6 +102,46 @@ class Liff_api extends Security_Controller {
         return $this->_json($result);
     }
 
+    // ── Task: save comment (with images) ──────────────────────────
+    public function task_comment_save() {
+        $task_id    = (int)$this->request->getPost('task_id');
+        $project_id = (int)$this->request->getPost('project_id');
+        $desc       = trim($this->request->getPost('description') ?? '');
+
+        if (!$task_id) {
+            return $this->_json(['success' => false, 'message' => 'Missing task_id'], 400);
+        }
+
+        $target_path = get_setting("timeline_file_path");
+        $files_data  = move_files_from_temp_dir_to_permanent_dir($target_path, "project_comment");
+        $has_files   = ($files_data && $files_data !== "a:0:{}");
+
+        if (!$desc && !$has_files) {
+            return $this->_json(['success' => false, 'message' => 'กรุณากรอกข้อความหรือแนบไฟล์อย่างน้อย 1 รายการ'], 422);
+        }
+
+        $data = [
+            "created_by" => $this->login_user->id,
+            "created_at" => get_current_utc_time(),
+            "project_id" => $project_id,
+            "file_id"    => 0,
+            "task_id"    => $task_id,
+            "customer_feedback_id" => 0,
+            "comment_id" => 0,
+            "description" => $desc
+        ];
+
+        $data = clean_data($data);
+        $data["files"] = $files_data; // don't clean serialized data
+
+        $save_id = $this->Project_comments_model->save_comment($data);
+        if (!$save_id) {
+            return $this->_json(['success' => false, 'message' => 'บันทึกความคิดเห็นไม่สำเร็จ']);
+        }
+
+        return $this->_json(['success' => true]);
+    }
+
     // ── Event: save ────────────────────────────────────────────────
     public function event_save() {
         $user_id = $this->login_user->id;
@@ -151,6 +193,43 @@ class Liff_api extends Security_Controller {
         }
 
         return $this->_json(['success' => true, 'id' => $save_id, 'redirect' => get_uri('liff/app/events/' . $save_id)]);
+    }
+
+    // ── Event: save comment (with images) ─────────────────────────
+    public function event_comment_save() {
+        $event_id = (int)$this->request->getPost('event_id');
+        $desc     = trim($this->request->getPost('description') ?? '');
+
+        if (!$event_id) {
+            return $this->_json(['success' => false, 'message' => 'Missing event_id'], 400);
+        }
+
+        $target_path = get_setting("timeline_file_path");
+        $files_data  = move_files_from_temp_dir_to_permanent_dir($target_path, "event_comment");
+        $has_files   = ($files_data && $files_data !== "a:0:{}");
+
+        if (!$desc && !$has_files) {
+            return $this->_json(['success' => false, 'message' => 'กรุณากรอกข้อความหรือแนบไฟล์อย่างน้อย 1 รายการ'], 422);
+        }
+
+        $data = [
+            "event_id"   => $event_id,
+            "description"=> $desc,
+            "files"      => $files_data,
+            "created_by" => $this->login_user->id,
+            "created_at" => get_current_utc_time(),
+            "deleted"    => 0
+        ];
+
+        $data = clean_data($data);
+        $data["files"] = $files_data; // keep serialized
+
+        $save_id = $this->Event_comments_model->ci_save($data);
+        if (!$save_id) {
+            return $this->_json(['success' => false, 'message' => 'บันทึกความคิดเห็นไม่สำเร็จ']);
+        }
+
+        return $this->_json(['success' => true]);
     }
 
     // ── Event: delete ──────────────────────────────────────────────

@@ -10,12 +10,14 @@ class Liff_app extends Security_Controller {
 
     protected $Liff_pending_model;
     protected $Task_priority_model;
+    protected $Event_comments_model;
 
     public function __construct() {
         parent::__construct();
         $this->db = \Config\Database::connect();
         $this->Liff_pending_model = model('App\Models\Liff_pending_model');
         $this->Task_priority_model = model('App\Models\Task_priority_model');
+        $this->Event_comments_model = model('App\Models\Event_comments_model');
     }
 
     // Override Security_Controller redirect to go to LIFF login instead of web signin
@@ -163,6 +165,10 @@ class Liff_app extends Security_Controller {
         )->getResult();
 
         $statuses = $this->Task_status_model->get_details()->getResult();
+        $comments = $this->Project_comments_model->get_details([
+            'task_id'    => (int)$task_id,
+            'comment_id' => 0
+        ])->getResult();
         $comment_files = $this->_get_task_comment_files($task_id);
 
         return $this->_liff_view('liff_app/tasks/detail', [
@@ -171,6 +177,7 @@ class Liff_app extends Security_Controller {
             'task'       => $task,
             'activity'   => $activity,
             'statuses'   => $statuses,
+            'comments'   => $comments,
             'comment_files' => $comment_files,
         ]);
     }
@@ -240,10 +247,13 @@ class Liff_app extends Security_Controller {
         )->getRow();
         if (!$event) { app_redirect('liff/app/events'); }
 
+        $event_comments = $this->Event_comments_model->get_by_event($event_id);
+
         return $this->_liff_view('liff_app/events/detail', [
             'page_title' => $event->title,
             'active_tab' => 'events',
             'event'      => $event,
+            'comments'   => $event_comments,
         ]);
     }
 
@@ -263,6 +273,7 @@ class Liff_app extends Security_Controller {
         $user_id  = $this->login_user->id;
         $projects = $this->db->query(
             "SELECT p.*,
+                    ps.key_name AS status_key_name,
                     ps.title AS status_title, NULL AS status_color,
                     COUNT(DISTINCT pm.user_id) AS member_count,
                     COUNT(DISTINCT t.id) AS task_count,
@@ -273,7 +284,9 @@ class Liff_app extends Security_Controller {
              LEFT JOIN rise_project_members pm ON pm.project_id=p.id
              LEFT JOIN rise_tasks t ON t.project_id=p.id AND t.deleted=0
              LEFT JOIN rise_task_status ts ON ts.id=t.status_id
-             WHERE p.deleted=0 AND (p.created_by=$user_id OR pm2.id IS NOT NULL)
+             WHERE p.deleted=0
+               AND (p.created_by=$user_id OR pm2.id IS NOT NULL)
+               AND ps.key_name='open'
              GROUP BY p.id
              ORDER BY p.created_date DESC
              LIMIT 30"

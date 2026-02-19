@@ -3,9 +3,12 @@ $color = $task->status_color ?: '#6C8EF5';
 $bg    = $color . '22';
 $is_overdue = $task->deadline && strtotime($task->deadline) < time();
 ?>
-<div class="page-header">
-  <h1 style="font-size:16px;line-height:1.4"><?= esc($task->title) ?></h1>
-  <p><?= esc($task->project_title ?? 'ไม่ระบุโปรเจกต์') ?></p>
+<div class="page-header page-header-row">
+  <div>
+    <h1 style="font-size:16px;line-height:1.4"><?= esc($task->title) ?></h1>
+    <p><?= esc($task->project_title ?? 'ไม่ระบุโปรเจกต์') ?></p>
+  </div>
+  <a href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>" class="btn btn-primary btn-sm edit-btn">แก้ไข</a>
 </div>
 
 <!-- Status quick-update -->
@@ -112,6 +115,70 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
 </div>
 <?php endif; ?>
 
+<!-- Comments -->
+<div class="section-title">ความคิดเห็น</div>
+<?php if (empty($comments)): ?>
+<div class="card">
+  <div class="card-body text-sm text-muted">ยังไม่มีความคิดเห็น</div>
+</div>
+<?php else: ?>
+<div class="card">
+  <div class="card-body">
+    <div class="comment-list">
+      <?php foreach ($comments as $c): ?>
+        <?php
+          $avatar = get_avatar($c->created_by_avatar ?? '');
+          $files = $c->files ? @unserialize($c->files) : [];
+          if (!is_array($files)) { $files = []; }
+        ?>
+      <div class="comment-item">
+        <img src="<?= esc($avatar) ?>" class="comment-avatar" alt="">
+        <div class="comment-body">
+          <div class="comment-meta">
+            <span class="comment-name"><?= esc($c->created_by_user ?? 'User') ?></span>
+            <span class="comment-time"><?= date('d M H:i', strtotime($c->created_at ?? 'now')) ?></span>
+          </div>
+          <?php if (!empty($c->description)): ?>
+          <div class="comment-text"><?= nl2br(esc($c->description)) ?></div>
+          <?php endif; ?>
+          <?php if (!empty($files)): ?>
+          <div class="comment-attachments">
+            <?php foreach ($files as $file): ?>
+              <?php
+                if (!is_array($file)) { continue; }
+                $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
+                $url   = get_source_url_of_file($file, get_setting("timeline_file_path"));
+              ?>
+              <a href="<?= esc($url) ?>" target="_blank"><img src="<?= esc($thumb) ?>" alt=""></a>
+            <?php endforeach; ?>
+          </div>
+          <?php endif; ?>
+        </div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
+<div class="card comment-form-card">
+  <div class="card-body">
+    <form id="task-comment-form" onsubmit="submitTaskComment(event)">
+      <textarea class="form-control" name="description" rows="3" placeholder="เขียนความคิดเห็น..."></textarea>
+      <input type="hidden" name="task_id" value="<?= (int)$task->id ?>">
+      <input type="hidden" name="project_id" value="<?= (int)($task->project_id ?? 0) ?>">
+      <div class="comment-actions">
+        <label class="comment-attach">
+          แนบรูป
+          <input type="file" id="task-comment-images" name="manualFiles[]" accept="image/*" multiple hidden>
+        </label>
+        <button type="submit" class="btn btn-primary btn-sm">ส่ง</button>
+      </div>
+      <div class="upload-previews" id="task-comment-previews"></div>
+    </form>
+  </div>
+</div>
+
 <!-- Activity feed -->
 <?php if (!empty($activity)): ?>
 <div class="section-title">ประวัติการอัปเดต</div>
@@ -133,4 +200,21 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
 </div>
 <?php endif; ?>
 
-<a class="btn btn-secondary btn-block" href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>">แก้ไขงาน</a>
+<a class="btn btn-primary btn-block" href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>">แก้ไขงาน</a>
+
+<script>
+LiffApp.initImageUpload('task-comment-images', 'task-comment-previews');
+async function submitTaskComment(e) {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  const res = await LiffApp.api('liff/api/tasks/comment_save', 'POST', form);
+  if (res.success) {
+    location.reload();
+  } else {
+    LiffApp.toast(res.message || 'เกิดข้อผิดพลาด', 'error');
+    btn.disabled = false;
+  }
+}
+</script>

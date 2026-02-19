@@ -417,6 +417,8 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 }
 .page-header h1 { font-size: 20px; font-weight: 700; color: var(--text); }
 .page-header p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.page-header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.edit-btn { box-shadow: 0 6px 16px rgba(79,125,243,0.25); }
 
 /* --- Empty state ------------------------------------------- */
 .empty-state { text-align: center; padding: 60px 20px; }
@@ -486,6 +488,28 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 .activity-content { flex: 1; }
 .activity-text { font-size: 13px; color: var(--text); line-height: 1.5; }
 .activity-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* --- Comments -------------------------------------------- */
+.comment-list { display: flex; flex-direction: column; gap: 12px; }
+.comment-item { display: flex; gap: 10px; }
+.comment-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  object-fit: cover; border: 2px solid #E2E8F0;
+}
+.comment-body { flex: 1; min-width: 0; }
+.comment-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted); }
+.comment-name { font-weight: 700; color: var(--text); }
+.comment-text { font-size: 13px; color: var(--label); margin-top: 4px; line-height: 1.5; }
+.comment-attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.comment-attachments img { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; }
+.comment-form-card textarea { margin-bottom: 8px; }
+.comment-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.comment-attach {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px 12px; border-radius: 10px; background: #EEF2FF; color: var(--blue);
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.comment-attach input { display: none; }
 
 /* --- Utility ---------------------------------------------- */
 .d-flex { display: flex; }
