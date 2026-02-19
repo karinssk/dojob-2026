@@ -192,22 +192,35 @@
 </form>
 
 <script>
-LiffApp.initImageUpload('img-input', 'img-previews');
-LiffApp.initNotifyToggle('notify-toggle','notify-section');
+function initTaskForm() {
+  if (!window.LiffApp) {
+    setTimeout(initTaskForm, 50);
+    return;
+  }
 
-initCustomProjectDropdown();
-initCustomDropdown('assignee-dd', 'assignee-trigger', 'assignee-menu', 'assigned_to');
-initCustomDropdown('priority-dd', 'priority-trigger', 'priority-menu', 'priority_id');
+  LiffApp.initImageUpload('img-input', 'img-previews');
+  LiffApp.initNotifyToggle('notify-toggle','notify-section');
 
-const notifyInputs = [
-  'start_date','start_time','deadline','end_time',
-  'line_notify_before_start','line_notify_before_end','line_notify_no_update_hours'
-];
-notifyInputs.forEach(name => {
-  const el = document.querySelector(`[name="${name}"]`);
-  if (el) el.addEventListener('input', updateNotifyPreview);
-});
-updateNotifyPreview();
+  initCustomProjectDropdown();
+  initCustomDropdown('assignee-dd', 'assignee-trigger', 'assignee-menu', 'assigned_to');
+  initCustomDropdown('priority-dd', 'priority-trigger', 'priority-menu', 'priority_id');
+
+  const notifyInputs = [
+    'start_date','start_time','deadline','end_time',
+    'line_notify_before_start','line_notify_before_end','line_notify_no_update_hours'
+  ];
+  notifyInputs.forEach(name => {
+    const el = document.querySelector(`[name="${name}"]`);
+    if (el) el.addEventListener('input', updateNotifyPreview);
+  });
+  updateNotifyPreview();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTaskForm);
+} else {
+  initTaskForm();
+}
 
 async function submitTask(e) {
   e.preventDefault();
