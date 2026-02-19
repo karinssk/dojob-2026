@@ -415,42 +415,11 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   box-shadow: 0 4px 16px rgba(15,23,42,0.06);
   position: sticky; top: 0; z-index: 50;
 }
-.page-header.has-back { padding-left: 54px; }
 .page-header h1 { font-size: 20px; font-weight: 700; color: var(--text); }
 .page-header p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .page-header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .edit-btn { box-shadow: 0 6px 16px rgba(79,125,243,0.25); }
 
-/* Sticky header fallback (fixed) */
-body.liff-header-fixed .page-header {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  margin: 0;
-  padding-top: calc(18px + env(safe-area-inset-top));
-}
-body.liff-header-fixed .liff-page {
-  padding-top: calc(var(--pad) + var(--liff-header-h, 64px));
-}
-
-/* --- Back button ----------------------------------------- */
-.liff-back-btn {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: #EEF2FF;
-  border: none;
-  color: var(--blue);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 16px rgba(79,125,243,0.22);
-}
-.liff-back-btn svg { width: 20px; height: 20px; }
-.liff-back-btn:active { transform: scale(0.95); }
 
 /* --- Empty state ------------------------------------------- */
 .empty-state { text-align: center; padding: 60px 20px; }
