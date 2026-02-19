@@ -1,0 +1,6 @@
+line liff login > fill name > select exiting user in db (check if user has select is already link with previous line) > link line and user > login
+> task management , event management , every users have to_do , and every user can create task , event upload images and can assign to other users >
+can set start time end time and can set line notification if task or event is no update data or status , can set notification time before start time and end time
+and this is design for ui >>a clean, modern productivity/dashboard UI theme: card‑based task management with lots of whitespace, soft shadows, rounded corners, and pastel accent chips. The styling blends iOS-like minimalism with Material-style components (tabs, chips, floating action button), giving it a light, friendly “soft UI” vibe rather than heavy skeuomorphism.
+give me plan first what we need to do  
+
