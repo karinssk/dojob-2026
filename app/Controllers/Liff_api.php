@@ -95,6 +95,53 @@ class Liff_api extends Security_Controller {
         return $this->_json(['success' => true, 'status_title' => $status->title ?? '']);
     }
 
+    // ── Task: test notify to LIFF rooms (immediate) ─────────────────
+    public function task_notify_test() {
+        $task_id    = (int)$this->request->getPost('id');
+        $title      = trim($this->request->getPost('title') ?? '');
+        $start_date = $this->request->getPost('start_date') ?: null;
+        $start_time = $this->request->getPost('start_time') ?: null;
+        $deadline   = $this->request->getPost('deadline') ?: null;
+        $end_time   = $this->request->getPost('end_time') ?: null;
+
+        $rooms = $this->_get_liff_rooms();
+        if (empty($rooms)) {
+            return $this->_json(['success' => false, 'message' => 'ยังไม่ได้เลือกห้องสำหรับแจ้งเตือน (ดูที่ Settings > LIFF)']);
+        }
+
+        $title = $title ?: 'งาน';
+        $msg  = "🧪 ทดสอบแจ้งเตือนงาน\n";
+        $msg .= "📋 {$title}\n";
+        if ($start_date && $start_time) {
+            $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($start_date . ' ' . $start_time)) . "\n";
+        }
+        if ($deadline && $end_time) {
+            $msg .= "🔚 สิ้นสุด: " . date('d/m H:i', strtotime($deadline . ' ' . $end_time)) . "\n";
+        }
+        if ($task_id) {
+            $msg .= get_uri("liff/app/tasks/{$task_id}");
+        }
+
+        $Line = new \App\Libraries\Liff_line_webhook();
+        $results = [];
+        $ok = true;
+        foreach ($rooms as $rid) {
+            $res = $Line->send_push_message($rid, $msg, 'room');
+            $results[] = [
+                'room_id' => $rid,
+                'success' => (bool)($res['success'] ?? false),
+                'error'   => $res['error'] ?? ''
+            ];
+            if (empty($res['success'])) { $ok = false; }
+        }
+
+        return $this->_json([
+            'success' => $ok,
+            'message' => $ok ? 'ส่งทดสอบสำเร็จ' : 'ส่งทดสอบบางห้องไม่สำเร็จ',
+            'results' => $results
+        ]);
+    }
+
     // ── Task: upload image ─────────────────────────────────────────
     public function task_upload_image() {
         $task_id = (int)$this->request->getPost('task_id');

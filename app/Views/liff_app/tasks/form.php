@@ -127,6 +127,13 @@
     </div>
   </div>
 
+  <div class="form-group">
+    <button type="button" class="btn btn-default btn-sm" onclick="testNotifyGroup()">
+      ทดสอบส่งไปยังห้อง/กลุ่ม
+    </button>
+    <div id="notify-test-log" style="display:none;margin-top:8px;background:#0F172A;color:#E2E8F0;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-all"></div>
+  </div>
+
   <button type="submit" class="btn btn-primary btn-block btn-lg" id="submit-btn">
     บันทึก
   </button>
@@ -156,5 +163,29 @@ async function submitTask(e) {
     btn.textContent = 'บันทึก';
     btn.disabled = false;
   }
+}
+
+async function testNotifyGroup() {
+  const logEl = document.getElementById('notify-test-log');
+  logEl.style.display = 'none';
+  logEl.textContent = '';
+
+  const data = {
+    id: document.querySelector('[name="id"]').value,
+    title: document.querySelector('[name="title"]').value,
+    start_date: document.querySelector('[name="start_date"]').value,
+    start_time: document.querySelector('[name="start_time"]').value,
+    deadline: document.querySelector('[name="deadline"]').value,
+    end_time: document.querySelector('[name="end_time"]').value
+  };
+
+  const res = await LiffApp.api('liff/api/tasks/test_notify', 'POST', data);
+  if (res.success) {
+    LiffApp.toast(res.message || 'ส่งทดสอบสำเร็จ', 'success');
+  } else {
+    LiffApp.toast(res.message || 'ส่งทดสอบไม่สำเร็จ', 'error');
+  }
+  logEl.textContent = JSON.stringify(res, null, 2);
+  logEl.style.display = 'block';
 }
 </script>

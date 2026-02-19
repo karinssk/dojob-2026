@@ -91,6 +91,7 @@ $routes->post('liff/api/tasks/update_status', 'Liff_api::task_update_status');
 $routes->post('liff/api/tasks/upload_image', 'Liff_api::task_upload_image');
 $routes->post('liff/api/tasks/quick_update', 'Liff_api::task_quick_update');
 $routes->post('liff/api/tasks/comment_save', 'Liff_api::task_comment_save');
+$routes->post('liff/api/tasks/test_notify', 'Liff_api::task_notify_test');
 $routes->post('liff/api/events/save', 'Liff_api::event_save');
 $routes->post('liff/api/events/delete', 'Liff_api::event_delete');
 $routes->post('liff/api/events/comment_save', 'Liff_api::event_comment_save');
