@@ -255,19 +255,43 @@ class Liff_api extends Security_Controller {
         if (!$start || !$end) {
             return $this->_json(['success' => false, 'message' => 'Missing date range'], 400);
         }
+        $options = [
+            "user_id"          => $user_id,
+            "team_ids"         => $this->login_user->team_ids,
+            "start_date"       => $start,
+            "end_date"         => $end,
+            "include_recurring"=> true,
+            "type"             => "event",
+        ];
 
-        $events = $this->db->query(
-            "SELECT e.id, e.title, e.start_date, e.end_date, e.start_time, e.end_time, e.color, e.share_with, e.line_notify_enabled
-             FROM rise_events e
-             WHERE e.deleted=0
-               AND e.start_date <= ?
-               AND (e.end_date IS NULL OR e.end_date = '' OR e.end_date >= ?)
-               AND (e.created_by=? OR e.share_with LIKE '%all_team%' OR e.share_with LIKE '%$user_id%')
-             ORDER BY e.start_date ASC, e.start_time ASC",
-            [$end, $start, $user_id]
-        )->getResult();
+        $list = $this->Events_model->get_details($options)->getResult();
+        $result = [];
 
-        return $this->_json(['success' => true, 'events' => $events]);
+        foreach ($list as $event) {
+            $base_start = $event->start_date;
+            $base_end   = $event->end_date ?: $event->start_date;
+
+            if ($this->_event_in_range($base_start, $base_end, $start, $end)) {
+                $result[] = $this->_map_liff_event($event, $base_start, $base_end);
+            }
+
+            if (!empty($event->recurring)) {
+                $no_of_cycles = $this->Events_model->get_no_of_cycles($event->repeat_type, $event->no_of_cycles);
+                $cycle_start = $base_start;
+                $cycle_end   = $base_end;
+
+                for ($i = 1; $i <= $no_of_cycles; $i++) {
+                    $cycle_start = add_period_to_date($cycle_start, $event->repeat_every, $event->repeat_type);
+                    $cycle_end   = add_period_to_date($cycle_end, $event->repeat_every, $event->repeat_type);
+
+                    if ($this->_event_in_range($cycle_start, $cycle_end, $start, $end)) {
+                        $result[] = $this->_map_liff_event($event, $cycle_start, $cycle_end);
+                    }
+                }
+            }
+        }
+
+        return $this->_json(['success' => true, 'events' => $result]);
     }
 
     // ── Todo: save ─────────────────────────────────────────────────
@@ -348,6 +372,24 @@ class Liff_api extends Security_Controller {
 
         $this->Project_comments_model->save_comment($comment_data);
         return ['success' => true];
+    }
+
+    private function _event_in_range($event_start, $event_end, $range_start, $range_end) {
+        if (!$event_start) { return false; }
+        $event_end = $event_end ?: $event_start;
+        return ($event_start <= $range_end) && ($event_end >= $range_start);
+    }
+
+    private function _map_liff_event($event, $start_date, $end_date) {
+        return (object)[
+            "id"        => $event->id,
+            "title"     => $event->title,
+            "start_date"=> $start_date,
+            "end_date"  => $end_date,
+            "start_time"=> $event->start_time,
+            "end_time"  => $event->end_time,
+            "color"     => $event->color ?: "#4F7DF3",
+        ];
     }
 
     private function _notify_assignment($task_id, $assigned_to, $task_title) {
