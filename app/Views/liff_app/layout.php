@@ -14,6 +14,10 @@
 </head>
 <body>
 
+<button class="liff-back-btn" onclick="liffBack()" aria-label="Back">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+
 <!-- Page content -->
 <div class="liff-page" id="liff-page-content">
   <?= $content ?? '' ?>
@@ -63,5 +67,14 @@
 <?php if (!empty($extra_js)): ?>
 <script><?= $extra_js ?></script>
 <?php endif; ?>
+<script>
+function liffBack() {
+  if (window.history.length > 1) {
+    window.history.back();
+  } else {
+    window.location.href = '<?= get_uri('liff/app') ?>';
+  }
+}
+</script>
 </body>
 </html>

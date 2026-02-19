@@ -420,6 +420,27 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 .page-header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .edit-btn { box-shadow: 0 6px 16px rgba(79,125,243,0.25); }
 
+/* --- Back button ----------------------------------------- */
+.liff-back-btn {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  left: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid #E8EEF7;
+  color: var(--text);
+  box-shadow: 0 8px 20px rgba(15,23,42,0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(8px);
+}
+.liff-back-btn svg { width: 20px; height: 20px; }
+.liff-back-btn:active { transform: scale(0.95); }
+
 /* --- Empty state ------------------------------------------- */
 .empty-state { text-align: center; padding: 60px 20px; }
 .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
