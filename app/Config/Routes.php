@@ -31,6 +31,10 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 $routes->get('/', 'Dashboard::index');
 
+// Auth shortcuts
+$routes->get('logout', 'Signin::sign_out');
+$routes->post('logout', 'Signin::sign_out');
+
 // Project Management Routes - Must come before generic controller routing
 $routes->get('projectManagement', 'ProjectManagement::index');
 $routes->get('projects/(:num)/list', 'ProjectManagement::task_list/$1');
