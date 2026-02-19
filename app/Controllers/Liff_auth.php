@@ -8,10 +8,12 @@ namespace App\Controllers;
  */
 class Liff_auth extends App_Controller {
 
+    protected $db;
     protected $Liff_pending_model;
 
     public function __construct() {
         parent::__construct();
+        $this->db = \Config\Database::connect();
         $this->Liff_pending_model = model('App\Models\Liff_pending_model');
     }
 
