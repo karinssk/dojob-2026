@@ -42,10 +42,10 @@ function reopenRequest(id) {
   $.post('<?= get_uri('liff_settings/reopen_line_liff_request') ?>', { id },
     function(r) {
       if (r.success) {
-        app_show_success_message(r.message);
+        appAlert.success(r.message);
         setTimeout(() => location.reload(), 1000);
       } else {
-        app_show_failure_message(r.message);
+        appAlert.error(r.message);
       }
     }
   );

@@ -8,7 +8,7 @@
   <div class="col-md-6">
     <div class="form-group">
       <label class="control-label">Channel Access Token</label>
-      <input class="form-control" type="password" name="line_channel_access_token" autocomplete="off"
+      <input class="form-control" type="text" name="line_channel_access_token" autocomplete="off"
         value="<?= esc($line_channel_access_token ?? '') ?>"
         placeholder="Channel Access Token จาก LINE Developers Console">
     </div>
@@ -16,7 +16,7 @@
   <div class="col-md-6">
     <div class="form-group">
       <label class="control-label">Channel Secret</label>
-      <input class="form-control" type="password" name="line_channel_secret" autocomplete="off"
+      <input class="form-control" type="text" name="line_channel_secret" autocomplete="off"
         value="<?= esc($line_channel_secret ?? '') ?>"
         placeholder="Channel Secret จาก LINE Developers Console">
     </div>
@@ -50,7 +50,7 @@
   <div class="col-md-6">
     <div class="form-group">
       <label class="control-label">Login Channel Secret</label>
-      <input class="form-control" type="password" name="line_login_channel_secret" autocomplete="off"
+      <input class="form-control" type="text" name="line_login_channel_secret" autocomplete="off"
         value="<?= esc($line_login_channel_secret ?? '') ?>"
         placeholder="Channel Secret ของ LINE Login">
     </div>
@@ -139,18 +139,25 @@
 $(document).ready(function(){
   $('#liff-cred-form').on('submit', function(e){
     e.preventDefault();
+    var formData = $(this).serialize();
+    var formObj  = {};
+    $(this).serializeArray().forEach(function(f){ formObj[f.name] = f.value; });
+    console.log('[LIFF Cred] POST URL:', $(this).attr('action'));
+    console.log('[LIFF Cred] Form data object:', formObj);
+    console.log('[LIFF Cred] Serialized:', formData);
     $.ajax({
       url: $(this).attr('action'),
       method: 'POST',
-      data: $(this).serialize(),
+      data: formData,
       success: function(r){
+        console.log('[LIFF Cred] Response:', r);
         if (r.success) {
-          app_show_success_message(r.message);
+          appAlert.success(r.message);
         } else {
-          app_show_failure_message(r.message);
+          appAlert.error(r.message);
         }
       },
-      error: function(){ app_show_failure_message('เกิดข้อผิดพลาด'); }
+      error: function(xhr){ console.error('[LIFF Cred] AJAX error:', xhr.status, xhr.responseText); appAlert.error('เกิดข้อผิดพลาด'); }
     });
   });
 });

@@ -47,10 +47,10 @@ function approveUser(id) {
     function(r) {
       if (r.success) {
         $('#row-' + id).fadeOut(300, function(){ $(this).remove(); });
-        app_show_success_message(r.message);
+        appAlert.success(r.message);
         updatePendingBadge();
       } else {
-        app_show_failure_message(r.message);
+        appAlert.error(r.message);
       }
     }
   );
@@ -62,10 +62,10 @@ function rejectUser(id) {
     function(r) {
       if (r.success) {
         $('#row-' + id).fadeOut(300, function(){ $(this).remove(); });
-        app_show_success_message(r.message);
+        appAlert.success(r.message);
         updatePendingBadge();
       } else {
-        app_show_failure_message(r.message);
+        appAlert.error(r.message);
       }
     }
   );
