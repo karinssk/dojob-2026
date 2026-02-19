@@ -10,7 +10,7 @@
 <title>DoJob — <?= esc($page_title ?? 'App') ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="<?= get_uri('assets/css/liff-ui.css') ?>?v=<?= time() ?>">
+<link rel="stylesheet" href="<?= get_file_uri('assets/css/liff-ui.css') ?>?v=<?= time() ?>">
 </head>
 <body>
 
@@ -43,7 +43,7 @@
   </a>
 </nav>
 
-<script src="<?= get_uri('assets/js/liff-app.js') ?>"></script>
+<script src="<?= get_file_uri('assets/js/liff-app.js') ?>"></script>
 <?php if (!empty($extra_js)): ?>
 <script><?= $extra_js ?></script>
 <?php endif; ?>
