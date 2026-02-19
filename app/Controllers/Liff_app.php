@@ -12,6 +12,7 @@ class Liff_app extends Security_Controller {
 
     public function __construct() {
         parent::__construct();
+        $this->db = \Config\Database::connect();
         $this->Liff_pending_model = model('App\Models\Liff_pending_model');
     }
 
@@ -64,10 +65,12 @@ class Liff_app extends Security_Controller {
         // Recent tasks
         $recent_tasks = $this->db->query(
             "SELECT t.*, ts.title AS status_title, ts.color AS status_color,
-                    tp.title AS priority_title, tp.color AS priority_color
+                    tp.title AS priority_title, tp.color AS priority_color,
+                    p.title AS project_title
              FROM rise_tasks t
              LEFT JOIN rise_task_status ts ON ts.id = t.status_id
              LEFT JOIN rise_task_priority tp ON tp.id = t.priority_id
+             LEFT JOIN rise_projects p ON p.id = t.project_id
              WHERE t.assigned_to=? AND t.deleted=0
              ORDER BY t.deadline ASC
              LIMIT 5",

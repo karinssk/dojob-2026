@@ -16,13 +16,13 @@
         <li class="nav-item">
           <a class="nav-link <?= $current_tab === 'credentials' ? 'active' : '' ?>"
             href="<?= get_uri('settings/approve_line_liff_users?tab=credentials') ?>">
-            🔑 Credentials
+             Credentials
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link <?= $current_tab === 'pending' ? 'active' : '' ?>"
             href="<?= get_uri('settings/approve_line_liff_users?tab=pending') ?>">
-            ⏳ รออนุมัติ
+            รออนุมัติ
             <?php if ($pending_count > 0): ?>
             <span class="badge bg-danger ms-1"><?= $pending_count ?></span>
             <?php endif; ?>
@@ -31,13 +31,13 @@
         <li class="nav-item">
           <a class="nav-link <?= $current_tab === 'approved' ? 'active' : '' ?>"
             href="<?= get_uri('settings/approve_line_liff_users?tab=approved') ?>">
-            ✅ อนุมัติแล้ว
+             อนุมัติแล้ว
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link <?= $current_tab === 'rejected' ? 'active' : '' ?>"
             href="<?= get_uri('settings/approve_line_liff_users?tab=rejected') ?>">
-            ❌ ปฏิเสธ
+             ปฏิเสธ
           </a>
         </li>
       </ul>
