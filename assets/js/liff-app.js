@@ -4,6 +4,7 @@
 
 const LiffApp = (() => {
   const BASE = document.documentElement.dataset.base || '';
+  const BASE_URL = BASE.endsWith('/') ? BASE : BASE + '/';
 
   /* ── API fetch ── */
   async function api(path, method = 'GET', body = null) {
@@ -19,7 +20,7 @@ const LiffApp = (() => {
         opts.body = new URLSearchParams(body).toString();
       }
     }
-    const res  = await fetch(BASE + 'index.php/' + path, opts);
+    const res  = await fetch(BASE_URL + path, opts);
     const text = await res.text();
     try { return JSON.parse(text); } catch { return { success: false, message: text }; }
   }
