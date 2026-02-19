@@ -64,6 +64,11 @@ async function init() {
     const data = await res.json();
 
     if (!data.success) {
+      // Auto-relogin once if ID token expired
+      if (shouldRelogin(data)) {
+        await forceRelogin();
+        return;
+      }
       showError(data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่', data.debug || null);
       return;
     }
@@ -109,6 +114,27 @@ function showError(msg, debug) {
     dbg.textContent = JSON.stringify(debug, null, 2);
     dbg.style.display = 'block';
   }
+}
+
+function shouldRelogin(data) {
+  if (!data) return false;
+  const msg = (data.message || '').toLowerCase();
+  const desc = (data.debug && data.debug.response_json && data.debug.response_json.error_description) ? data.debug.response_json.error_description.toLowerCase() : '';
+  return msg.includes('idtoken expired') || desc.includes('idtoken expired');
+}
+
+async function forceRelogin() {
+  const key = 'liff_relogin_attempted';
+  if (sessionStorage.getItem(key)) return;
+  sessionStorage.setItem(key, '1');
+  try {
+    if (liff.isLoggedIn()) {
+      liff.logout();
+    }
+  } catch (e) {
+    console.warn('LIFF logout failed:', e);
+  }
+  liff.login({ redirectUri: window.location.href });
 }
 
 init();
