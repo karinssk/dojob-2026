@@ -421,6 +421,17 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 .page-header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .edit-btn { box-shadow: 0 6px 16px rgba(79,125,243,0.25); }
 
+/* Sticky header fallback (fixed) */
+body.liff-header-fixed .page-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  margin: 0;
+  padding-top: calc(18px + env(safe-area-inset-top));
+}
+body.liff-header-fixed .liff-page {
+  padding-top: calc(var(--pad) + var(--liff-header-h, 64px));
+}
+
 /* --- Back button ----------------------------------------- */
 .liff-back-btn {
   position: absolute;

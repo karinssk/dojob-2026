@@ -74,14 +74,25 @@ function liffBack() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const header = document.querySelector('.page-header');
-  if (!header || header.querySelector('.liff-back-btn')) return;
-  header.classList.add('has-back');
-  const btn = document.createElement('button');
-  btn.className = 'liff-back-btn';
-  btn.setAttribute('aria-label', 'Back');
-  btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  btn.addEventListener('click', liffBack);
-  header.appendChild(btn);
+  if (!header) return;
+
+  if (!header.querySelector('.liff-back-btn')) {
+    header.classList.add('has-back');
+    const btn = document.createElement('button');
+    btn.className = 'liff-back-btn';
+    btn.setAttribute('aria-label', 'Back');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    btn.addEventListener('click', liffBack);
+    header.appendChild(btn);
+  }
+
+  const setHeaderHeight = () => {
+    const h = header.getBoundingClientRect().height || 64;
+    document.documentElement.style.setProperty('--liff-header-h', `${h}px`);
+  };
+  setHeaderHeight();
+  window.addEventListener('resize', setHeaderHeight);
+  document.body.classList.add('liff-header-fixed');
 });
 </script>
 </body>
