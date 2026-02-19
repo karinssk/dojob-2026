@@ -100,7 +100,7 @@
       </div>
       <label class="toggle">
         <input type="checkbox" id="notify-toggle" name="line_notify_enabled" value="1"
-          <?= !empty($task->line_notify_enabled) ? 'checked' : '' ?> onchange="LiffApp.initNotifyToggle('notify-toggle','notify-section')">
+          <?= !empty($task->line_notify_enabled) ? 'checked' : '' ?>>
         <span class="toggle-slider"></span>
       </label>
     </div>
@@ -128,6 +128,15 @@
   </div>
 
   <div class="form-group">
+    <div class="card" style="padding:12px">
+      <div style="font-weight:600;margin-bottom:6px">ตัวอย่างเวลาที่ระบบจะส่ง (LIFF)</div>
+      <div style="font-size:12px;color:#64748B" id="notify-preview-start">ก่อนเริ่ม: —</div>
+      <div style="font-size:12px;color:#64748B" id="notify-preview-end">ก่อนสิ้นสุด: —</div>
+      <div style="font-size:12px;color:#64748B" id="notify-preview-update">ไม่อัปเดต: —</div>
+    </div>
+  </div>
+
+  <div class="form-group">
     <button type="button" class="btn btn-default btn-sm" onclick="testNotifyGroup()">
       ทดสอบส่งไปยังห้อง/กลุ่ม
     </button>
@@ -141,10 +150,17 @@
 
 <script>
 LiffApp.initImageUpload('img-input', 'img-previews');
-// init notify section if already checked
-if (document.getElementById('notify-toggle').checked) {
-  document.getElementById('notify-section').classList.add('open');
-}
+LiffApp.initNotifyToggle('notify-toggle','notify-section');
+
+const notifyInputs = [
+  'start_date','start_time','deadline','end_time',
+  'line_notify_before_start','line_notify_before_end','line_notify_no_update_hours'
+];
+notifyInputs.forEach(name => {
+  const el = document.querySelector(`[name="${name}"]`);
+  if (el) el.addEventListener('input', updateNotifyPreview);
+});
+updateNotifyPreview();
 
 async function submitTask(e) {
   e.preventDefault();
@@ -163,6 +179,47 @@ async function submitTask(e) {
     btn.textContent = 'บันทึก';
     btn.disabled = false;
   }
+}
+
+function updateNotifyPreview() {
+  const startDate = document.querySelector('[name="start_date"]').value;
+  const startTime = document.querySelector('[name="start_time"]').value;
+  const endDate = document.querySelector('[name="deadline"]').value;
+  const endTime = document.querySelector('[name="end_time"]').value;
+  const beforeStart = parseInt(document.querySelector('[name="line_notify_before_start"]').value || '', 10);
+  const beforeEnd = parseInt(document.querySelector('[name="line_notify_before_end"]').value || '', 10);
+  const noUpdate = parseInt(document.querySelector('[name="line_notify_no_update_hours"]').value || '', 10);
+
+  const startEl = document.getElementById('notify-preview-start');
+  const endEl = document.getElementById('notify-preview-end');
+  const updEl = document.getElementById('notify-preview-update');
+
+  startEl.textContent = 'ก่อนเริ่ม: —';
+  endEl.textContent = 'ก่อนสิ้นสุด: —';
+  updEl.textContent = 'ไม่อัปเดต: —';
+
+  if (startDate && startTime && !isNaN(beforeStart)) {
+    const dt = new Date(`${startDate}T${startTime}`);
+    dt.setMinutes(dt.getMinutes() - beforeStart);
+    startEl.textContent = `ก่อนเริ่ม: ${formatDateTime(dt)}`;
+  }
+
+  if (endDate && endTime && !isNaN(beforeEnd)) {
+    const dt = new Date(`${endDate}T${endTime}`);
+    dt.setMinutes(dt.getMinutes() - beforeEnd);
+    endEl.textContent = `ก่อนสิ้นสุด: ${formatDateTime(dt)}`;
+  }
+
+  if (!isNaN(noUpdate) && noUpdate > 0) {
+    const now = new Date();
+    const dt = new Date(now.getTime() + noUpdate * 60 * 60 * 1000);
+    updEl.textContent = `ไม่อัปเดต: ${formatDateTime(dt)} (จากตอนนี้)`;
+  }
+}
+
+function formatDateTime(dt) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(dt.getDate())}/${pad(dt.getMonth()+1)} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 }
 
 async function testNotifyGroup() {
