@@ -13,8 +13,7 @@ $img  = $user->image ? get_uri('files/' . $user->image) : get_uri('assets/images
 
   <?php if (!empty($mapping)): ?>
   <div style="margin-top:12px;padding:8px 16px;background:#F0FDF4;border-radius:12px;display:inline-block">
-    <span style="font-size:12px;color:#16A34A;font-weight:600">เชื่อมต่อ LINE แล้ว</span>
-    <div style="font-size:11px;color:#64748B;margin-top:2px"><?= esc($mapping->line_display_name ?? '') ?></div>
+    <span style="font-size:12px;color:#16A34A;font-weight:600">เชื่อมต่อ LINE (LIFF) แล้ว</span>
   </div>
   <?php else: ?>
   <div style="margin-top:12px;padding:8px 16px;background:#FFF7ED;border-radius:12px;display:inline-block">
@@ -40,8 +39,8 @@ $img  = $user->image ? get_uri('files/' . $user->image) : get_uri('assets/images
   </div>
   <?php if (!empty($mapping)): ?>
   <div class="info-row">
-    <span class="info-label">LINE UID</span>
-    <span class="info-val" style="font-size:11px;word-break:break-all"><?= esc($mapping->line_user_id ?? '—') ?></span>
+    <span class="info-label">LINE LIFF UID</span>
+    <span class="info-val" style="font-size:11px;word-break:break-all"><?= esc($mapping->line_liff_user_id ?? '—') ?></span>
   </div>
   <?php endif; ?>
 </div>

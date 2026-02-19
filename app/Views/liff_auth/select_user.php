@@ -61,7 +61,7 @@
   <div class="user-card" data-id="<?= $u['id'] ?>" data-name="<?= esc($u['name']) ?>" onclick="selectUser(this)">
     <div class="avatar">
       <?php if (!empty($u['image'])): ?>
-        <img src="<?= get_uri('files/thumbnails/' . $u['image']) ?>" alt="">
+        <img src="<?= get_avatar($u['image']) ?>" alt="">
       <?php else: ?>
         <?= mb_substr($u['name'], 0, 1) ?>
       <?php endif; ?>

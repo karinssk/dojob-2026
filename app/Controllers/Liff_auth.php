@@ -67,7 +67,7 @@ class Liff_auth extends App_Controller {
         // Check if LINE UID already has an approved mapping
         $map_t   = get_user_mappings_table();
         $mapping = $this->db->query(
-            "SELECT * FROM $map_t WHERE line_user_id=? AND is_active=1 LIMIT 1",
+            "SELECT * FROM $map_t WHERE line_liff_user_id=? AND is_active=1 LIMIT 1",
             [$line_uid]
         )->getRow();
 
@@ -131,7 +131,11 @@ class Liff_auth extends App_Controller {
         // Check if selected app user already linked to a DIFFERENT LINE UID
         $map_t   = get_user_mappings_table();
         $conflict = $this->db->query(
-            "SELECT line_user_id FROM $map_t WHERE rise_user_id=? AND is_active=1 AND line_user_id!=? LIMIT 1",
+            "SELECT line_liff_user_id FROM $map_t
+             WHERE rise_user_id=? AND is_active=1
+             AND line_liff_user_id IS NOT NULL
+             AND line_liff_user_id!=?
+             LIMIT 1",
             [$rise_user_id, $line_uid]
         )->getRow();
 

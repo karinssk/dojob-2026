@@ -30,6 +30,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `user_mappings_arr` (
   `id` int(11) NOT NULL,
   `line_user_id` varchar(255) NOT NULL,
+  `line_liff_user_id` varchar(255) DEFAULT NULL,
   `rise_user_id` int(11) NOT NULL,
   `nick_name` varchar(255) DEFAULT NULL,
   `line_display_name` varchar(255) DEFAULT NULL,

@@ -230,18 +230,18 @@ class Liff_api extends Security_Controller {
     private function _notify_assignment($task_id, $assigned_to, $task_title) {
         $map_t  = get_user_mappings_table();
         $mapping = $this->db->query(
-            "SELECT line_user_id FROM $map_t WHERE rise_user_id=? AND is_active=1 LIMIT 1",
+            "SELECT line_liff_user_id FROM $map_t WHERE rise_user_id=? AND is_active=1 LIMIT 1",
             [$assigned_to]
         )->getRow();
 
-        if (!$mapping) { return; }
+        if (!$mapping || empty($mapping->line_liff_user_id)) { return; }
 
         $msg  = "📋 คุณได้รับมอบหมายงานใหม่\n";
         $msg .= "งาน: $task_title\n";
         $msg .= "ดูรายละเอียด: " . get_uri("liff/app/tasks/$task_id");
 
         $Line = new \App\Libraries\Line_webhook();
-        $Line->send_push_message($mapping->line_user_id, $msg, 'user');
+        $Line->send_push_message($mapping->line_liff_user_id, $msg, 'user');
     }
 
     private function _json($data, $code = 200) {

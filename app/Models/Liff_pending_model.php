@@ -75,23 +75,24 @@ class Liff_pending_model extends Crud_model {
             'approved_at' => date('Y-m-d H:i:s'),
         ], $id);
 
-        // 2. Upsert into user_mappings_arr
+        // 2. Upsert into user_mappings_arr (LIFF uses line_liff_user_id)
         $map_t = get_user_mappings_table();
         $existing = $this->db->query(
-            "SELECT id FROM $map_t WHERE line_user_id=? LIMIT 1",
-            [$line_uid]
+            "SELECT id FROM $map_t WHERE rise_user_id=? LIMIT 1",
+            [$rise_user_id]
         )->getRow();
 
         if ($existing) {
             $this->db->query(
-                "UPDATE $map_t SET rise_user_id=?, line_display_name=?, is_active=1, updated_at=NOW() WHERE id=?",
-                [$rise_user_id, $line_display_name, $existing->id]
+                "UPDATE $map_t SET line_liff_user_id=?, updated_at=NOW() WHERE id=?",
+                [$line_uid, $existing->id]
             );
         } else {
+            // line_user_id is NOT NULL in schema; use line_uid for first-time mapping
             $this->db->query(
-                "INSERT INTO $map_t (line_user_id, rise_user_id, line_display_name, nick_name, is_active, line_user_ids, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, 1, ?, NOW(), NOW())",
-                [$line_uid, $rise_user_id, $line_display_name, $line_display_name, json_encode([$line_uid])]
+                "INSERT INTO $map_t (line_user_id, line_liff_user_id, rise_user_id, line_display_name, nick_name, is_active, line_user_ids, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, 1, ?, NOW(), NOW())",
+                [$line_uid, $line_uid, $rise_user_id, $line_display_name, $line_display_name, json_encode([$line_uid])]
             );
         }
 
@@ -108,7 +109,7 @@ class Liff_pending_model extends Crud_model {
     function revoke_by_line_uid($line_uid) {
         $map_t = get_user_mappings_table();
         $this->db->query(
-            "UPDATE $map_t SET is_active=0, updated_at=NOW() WHERE line_user_id=?",
+            "UPDATE $map_t SET line_liff_user_id=NULL, updated_at=NOW() WHERE line_liff_user_id=?",
             [$line_uid]
         );
     }
