@@ -192,6 +192,12 @@
 </form>
 
 <script>
+// One shared handler: close all open custom dropdowns when clicking outside
+document.addEventListener('click', () => {
+  document.querySelectorAll('.custom-dropdown.open')
+    .forEach(d => d.classList.remove('open'));
+});
+
 function initTaskForm() {
   if (!window.LiffApp) {
     setTimeout(initTaskForm, 50);
@@ -201,9 +207,9 @@ function initTaskForm() {
   LiffApp.initImageUpload('img-input', 'img-previews');
   LiffApp.initNotifyToggle('notify-toggle','notify-section');
 
-  initCustomProjectDropdown();
-  initCustomDropdown('assignee-dd', 'assignee-trigger', 'assignee-menu', 'assigned_to');
-  initCustomDropdown('priority-dd', 'priority-trigger', 'priority-menu', 'priority_id');
+  initDropdown('project-dd',  'project-trigger',  'project-menu',  'project_id');
+  initDropdown('assignee-dd', 'assignee-trigger', 'assignee-menu', 'assigned_to');
+  initDropdown('priority-dd', 'priority-trigger', 'priority-menu', 'priority_id');
 
   const notifyInputs = [
     'start_date','start_time','deadline','end_time',
@@ -241,58 +247,25 @@ async function submitTask(e) {
   }
 }
 
-function initCustomProjectDropdown() {
-  const wrap = document.getElementById('project-dd');
-  if (!wrap) return;
-  const trigger = document.getElementById('project-trigger');
-  const menu = document.getElementById('project-menu');
-  const input = wrap.querySelector('input[name="project_id"]');
-
-  trigger.addEventListener('click', () => {
-    wrap.classList.toggle('open');
-  });
-
-  menu.querySelectorAll('.dropdown-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const val = item.dataset.value || '';
-      input.value = val;
-      trigger.querySelector('span').textContent = item.textContent.trim();
-      menu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      wrap.classList.remove('open');
-    });
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!wrap.contains(e.target)) {
-      wrap.classList.remove('open');
-    }
-  });
-
-  // highlight current selection
-  const current = input.value || '';
-  menu.querySelectorAll('.dropdown-item').forEach(item => {
-    if ((item.dataset.value || '') === current) {
-      item.classList.add('active');
-    }
-  });
-}
-
-function initCustomDropdown(wrapId, triggerId, menuId, inputName) {
-  const wrap = document.getElementById(wrapId);
+function initDropdown(wrapId, triggerId, menuId, inputName) {
+  const wrap    = document.getElementById(wrapId);
   if (!wrap) return;
   const trigger = document.getElementById(triggerId);
-  const menu = document.getElementById(menuId);
-  const input = wrap.querySelector(`input[name="${inputName}"]`);
+  const menu    = document.getElementById(menuId);
+  const input   = wrap.querySelector(`input[name="${inputName}"]`);
 
-  trigger.addEventListener('click', () => {
-    wrap.classList.toggle('open');
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation(); // prevent shared document handler from immediately closing
+    const opening = !wrap.classList.contains('open');
+    // Close all other open dropdowns first
+    document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
+    if (opening) wrap.classList.add('open');
   });
 
   menu.querySelectorAll('.dropdown-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const val = item.dataset.value || '';
-      input.value = val;
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      input.value = item.dataset.value || '';
       trigger.querySelector('span').textContent = item.textContent.trim();
       menu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
@@ -300,17 +273,10 @@ function initCustomDropdown(wrapId, triggerId, menuId, inputName) {
     });
   });
 
-  document.addEventListener('click', (e) => {
-    if (!wrap.contains(e.target)) {
-      wrap.classList.remove('open');
-    }
-  });
-
+  // Highlight current selection
   const current = input.value || '';
   menu.querySelectorAll('.dropdown-item').forEach(item => {
-    if ((item.dataset.value || '') === current) {
-      item.classList.add('active');
-    }
+    if ((item.dataset.value || '') === current) item.classList.add('active');
   });
 }
 
