@@ -114,6 +114,8 @@ class Liff_app extends Security_Controller {
              LIMIT 50"
         )->getResult();
 
+        $this->_attach_task_comment_files($tasks);
+
         $statuses = $this->Task_status_model->get_details()->getResult();
 
         return $this->_liff_view('liff_app/tasks/index', [
@@ -161,6 +163,7 @@ class Liff_app extends Security_Controller {
         )->getResult();
 
         $statuses = $this->Task_status_model->get_details()->getResult();
+        $comment_files = $this->_get_task_comment_files($task_id);
 
         return $this->_liff_view('liff_app/tasks/detail', [
             'page_title' => $task->title,
@@ -168,6 +171,7 @@ class Liff_app extends Security_Controller {
             'task'       => $task,
             'activity'   => $activity,
             'statuses'   => $statuses,
+            'comment_files' => $comment_files,
         ]);
     }
 
@@ -394,5 +398,56 @@ class Liff_app extends Security_Controller {
              WHERE p.deleted=0 AND (p.created_by=$user_id OR pm.id IS NOT NULL)
              ORDER BY p.title"
         )->getResult();
+    }
+
+    private function _get_task_comment_files($task_id) {
+        $rows = $this->Project_comments_model->get_files_for_tasks([(int)$task_id]);
+        if (!$rows) {
+            return [];
+        }
+        $files = [];
+        foreach ($rows as $row) {
+            if (!$row->files) { continue; }
+            $items = @unserialize($row->files);
+            if (!$items || !is_array($items)) { continue; }
+            foreach ($items as $file) {
+                if (!is_array($file) || !get_array_value($file, "file_name")) { continue; }
+                $files[] = $file;
+            }
+        }
+        return $files;
+    }
+
+    private function _attach_task_comment_files(&$tasks = []) {
+        if (!$tasks || !is_array($tasks)) {
+            return;
+        }
+
+        $task_ids = [];
+        foreach ($tasks as $task) {
+            if (is_object($task) && isset($task->id)) {
+                $task_ids[] = (int)$task->id;
+                $task->all_comment_files_array = [];
+            }
+        }
+        if (!$task_ids) { return; }
+
+        $comment_files = $this->Project_comments_model->get_files_for_tasks($task_ids);
+        if (!$comment_files) { return; }
+
+        $files_map = [];
+        foreach ($comment_files as $comment_row) {
+            if (!$comment_row->files) { continue; }
+            $items = @unserialize($comment_row->files);
+            if (!$items || !is_array($items)) { continue; }
+            foreach ($items as $file) {
+                if (!is_array($file) || !get_array_value($file, "file_name")) { continue; }
+                $files_map[$comment_row->task_id][] = $file;
+            }
+        }
+
+        foreach ($tasks as $task) {
+            $task->all_comment_files_array = array_values(get_array_value($files_map, $task->id, []));
+        }
     }
 }

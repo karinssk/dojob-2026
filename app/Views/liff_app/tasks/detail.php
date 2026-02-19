@@ -93,15 +93,18 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
 </div>
 
 <!-- Images -->
-<?php $imgs = $task->images ? json_decode($task->images, true) : []; ?>
-<?php if (!empty($imgs)): ?>
+<?php if (!empty($comment_files)): ?>
 <div class="section-title">รูปภาพ</div>
 <div class="card">
   <div class="card-body">
     <div style="display:flex;flex-wrap:wrap;gap:8px">
-      <?php foreach ($imgs as $img): ?>
-      <a href="<?= get_file_uri('files/' . $img) ?>" target="_blank">
-        <img src="<?= get_file_uri('files/thumbnails/' . $img) ?>" style="width:72px;height:72px;border-radius:10px;object-fit:cover" alt="">
+      <?php foreach ($comment_files as $file): ?>
+        <?php
+          $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
+          $url   = get_source_url_of_file($file, get_setting("timeline_file_path"));
+        ?>
+      <a href="<?= esc($url) ?>" target="_blank">
+        <img src="<?= esc($thumb) ?>" style="width:72px;height:72px;border-radius:10px;object-fit:cover" alt="">
       </a>
       <?php endforeach; ?>
     </div>

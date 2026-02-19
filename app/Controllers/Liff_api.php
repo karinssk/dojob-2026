@@ -64,8 +64,8 @@ class Liff_api extends Security_Controller {
             return $this->_json(['success' => false, 'message' => 'บันทึกไม่สำเร็จ']);
         }
 
-        // Handle image uploads
-        $this->_handle_task_images($save_id);
+        // Handle image uploads (store as project_comments files)
+        $this->_save_task_comment_files($save_id, $data['project_id'] ?? 0);
 
         // Notify assigned user if changed
         if (!$id && $data['assigned_to'] && $data['assigned_to'] != $user_id) {
@@ -96,7 +96,7 @@ class Liff_api extends Security_Controller {
     // ── Task: upload image ─────────────────────────────────────────
     public function task_upload_image() {
         $task_id = (int)$this->request->getPost('task_id');
-        $result  = $this->_handle_task_images($task_id);
+        $result  = $this->_save_task_comment_files($task_id, (int)$this->request->getPost('project_id'));
         return $this->_json($result);
     }
 
@@ -208,23 +208,30 @@ class Liff_api extends Security_Controller {
     }
 
     // ── Helpers ────────────────────────────────────────────────────
-    private function _handle_task_images($task_id) {
-        $files = $this->request->getFiles();
-        if (empty($files['images'])) { return ['success' => true]; }
+    private function _save_task_comment_files($task_id, $project_id = 0) {
+        $target_path = get_setting("timeline_file_path");
+        $files_data  = move_files_from_temp_dir_to_permanent_dir($target_path, "project_comment");
 
-        $task       = $this->Tasks_model->get_one($task_id);
-        $existing   = $task->images ? json_decode($task->images, true) : [];
-        $upload_dir = FCPATH . 'files/';
-
-        foreach ($files['images'] as $file) {
-            if (!$file->isValid() || $file->hasMoved()) continue;
-            $name = $file->getRandomName();
-            $file->move($upload_dir, $name);
-            $existing[] = $name;
+        if (!$files_data || $files_data === "a:0:{}") {
+            return ['success' => true, 'files' => []];
         }
 
-        $this->Tasks_model->ci_save(['images' => json_encode($existing)], $task_id);
-        return ['success' => true, 'images' => $existing];
+        $comment_data = [
+            "created_by" => $this->login_user->id,
+            "created_at" => get_current_utc_time(),
+            "project_id" => (int)$project_id,
+            "file_id"    => 0,
+            "task_id"    => (int)$task_id,
+            "customer_feedback_id" => 0,
+            "comment_id" => 0,
+            "description" => ""
+        ];
+
+        $comment_data = clean_data($comment_data);
+        $comment_data["files"] = $files_data; // don't clean serialized data
+
+        $this->Project_comments_model->save_comment($comment_data);
+        return ['success' => true];
     }
 
     private function _notify_assignment($task_id, $assigned_to, $task_title) {

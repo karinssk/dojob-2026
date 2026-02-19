@@ -42,10 +42,11 @@
     <span class="task-meta-item"><?= esc($t->project_title) ?></span>
     <?php endif; ?>
   </div>
-  <?php if ($t->images): ?>
+  <?php if (!empty($t->all_comment_files_array)): ?>
   <div class="task-images">
-    <?php foreach (array_slice(json_decode($t->images, true) ?: [], 0, 3) as $img): ?>
-    <img class="task-thumb" src="<?= get_file_uri('files/thumbnails/' . $img) ?>" alt="" onerror="this.style.display='none'">
+    <?php foreach (array_slice($t->all_comment_files_array, 0, 3) as $file): ?>
+      <?php $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail"); ?>
+      <img class="task-thumb" src="<?= esc($thumb) ?>" alt="" onerror="this.style.display='none'">
     <?php endforeach; ?>
   </div>
   <?php endif; ?>

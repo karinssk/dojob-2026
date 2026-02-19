@@ -87,7 +87,7 @@
     <div class="upload-zone" onclick="document.getElementById('img-input').click()">
       <p>แตะเพื่ออัปโหลดรูปภาพ</p>
     </div>
-    <input type="file" id="img-input" name="images[]" accept="image/*" multiple hidden>
+    <input type="file" id="img-input" name="manualFiles[]" accept="image/*" multiple hidden>
     <div class="upload-previews" id="img-previews"></div>
   </div>
 
@@ -146,13 +146,7 @@ async function submitTask(e) {
   btn.disabled = true;
 
   const form = new FormData(e.target);
-  // Convert FormData to URLSearchParams (files handled separately)
-  const params = {};
-  for (const [k, v] of form.entries()) {
-    if (!(v instanceof File)) params[k] = v;
-  }
-
-  const res = await LiffApp.api('liff/api/tasks/save', 'POST', params);
+  const res = await LiffApp.api('liff/api/tasks/save', 'POST', form);
   if (res.success) {
     LiffApp.toast('บันทึกสำเร็จ', 'success');
     setTimeout(() => location.href = res.redirect, 800);
