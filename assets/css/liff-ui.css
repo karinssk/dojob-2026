@@ -415,6 +415,7 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   box-shadow: 0 4px 16px rgba(15,23,42,0.06);
   position: sticky; top: 0; z-index: 50;
 }
+.page-header.has-back { padding-left: 54px; }
 .page-header h1 { font-size: 20px; font-weight: 700; color: var(--text); }
 .page-header p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .page-header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -422,21 +423,20 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 
 /* --- Back button ----------------------------------------- */
 .liff-back-btn {
-  position: fixed;
-  top: calc(10px + env(safe-area-inset-top));
+  position: absolute;
   left: 12px;
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.92);
-  border: 1px solid #E8EEF7;
-  color: var(--text);
-  box-shadow: 0 8px 20px rgba(15,23,42,0.12);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #EEF2FF;
+  border: none;
+  color: var(--blue);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
-  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 16px rgba(79,125,243,0.22);
 }
 .liff-back-btn svg { width: 20px; height: 20px; }
 .liff-back-btn:active { transform: scale(0.95); }

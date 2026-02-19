@@ -14,10 +14,6 @@
 </head>
 <body>
 
-<button class="liff-back-btn" onclick="liffBack()" aria-label="Back">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-</button>
-
 <!-- Page content -->
 <div class="liff-page" id="liff-page-content">
   <?= $content ?? '' ?>
@@ -75,6 +71,18 @@ function liffBack() {
     window.location.href = '<?= get_uri('liff/app') ?>';
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const header = document.querySelector('.page-header');
+  if (!header || header.querySelector('.liff-back-btn')) return;
+  header.classList.add('has-back');
+  const btn = document.createElement('button');
+  btn.className = 'liff-back-btn';
+  btn.setAttribute('aria-label', 'Back');
+  btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  btn.addEventListener('click', liffBack);
+  header.appendChild(btn);
+});
 </script>
 </body>
 </html>
