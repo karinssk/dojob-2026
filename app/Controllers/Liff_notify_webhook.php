@@ -8,31 +8,62 @@ class Liff_notify_webhook extends Controller {
 
     public function webhook() {
         $this->response->setContentType('text/plain');
+        $debug = [
+            'timestamp' => date('c'),
+            'ip' => $this->request->getIPAddress(),
+            'user_agent' => (string)$this->request->getUserAgent(),
+            'headers' => $this->get_headers_array(),
+        ];
 
-        $input = file_get_contents('php://input');
-        if (empty($input)) {
-            return $this->response->setBody('OK');
-        }
+        try {
+            $input = file_get_contents('php://input');
+            $debug['raw_length'] = $input ? strlen($input) : 0;
+            $debug['raw_preview'] = $input ? substr($input, 0, 2000) : '';
 
-        $channel_secret = get_setting('liff_line_channel_secret') ?: get_setting('line_channel_secret');
-        if ($channel_secret) {
-            $signature = $this->request->getHeaderLine('X-Line-Signature');
-            if (!$this->verify_line_signature($input, $signature, $channel_secret)) {
-                log_message('error', 'LIFF Webhook: Invalid signature');
-                return $this->response->setStatusCode(401)->setBody('Invalid signature');
+            if (empty($input)) {
+                $debug['status'] = 200;
+                $debug['message'] = 'Empty input';
+                $this->save_debug($debug);
+                return $this->response->setBody('OK');
             }
-        }
 
-        $events = json_decode($input, true);
-        if (!$events || !isset($events['events'])) {
+            $channel_secret = get_setting('liff_line_channel_secret') ?: get_setting('line_channel_secret');
+            if ($channel_secret) {
+                $signature = $this->request->getHeaderLine('X-Line-Signature');
+                if (!$this->verify_line_signature($input, $signature, $channel_secret)) {
+                    $debug['status'] = 401;
+                    $debug['message'] = 'Invalid signature';
+                    $this->save_debug($debug);
+                    log_message('error', 'LIFF Webhook: Invalid signature');
+                    return $this->response->setStatusCode(401)->setBody('Invalid signature');
+                }
+            }
+
+            $events = json_decode($input, true);
+            if (!$events || !isset($events['events'])) {
+                $debug['status'] = 200;
+                $debug['message'] = 'No events array';
+                $this->save_debug($debug);
+                return $this->response->setBody('OK');
+            }
+
+            foreach ($events['events'] as $event) {
+                $this->capture_line_room($event);
+            }
+
+            $debug['status'] = 200;
+            $debug['message'] = 'OK';
+            $debug['events_count'] = count($events['events']);
+            $this->save_debug($debug);
             return $this->response->setBody('OK');
+        } catch (\Throwable $e) {
+            $debug['status'] = 500;
+            $debug['message'] = $e->getMessage();
+            $debug['trace'] = substr($e->getTraceAsString(), 0, 2000);
+            $this->save_debug($debug);
+            log_message('error', 'LIFF Webhook exception: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setBody('Internal Server Error');
         }
-
-        foreach ($events['events'] as $event) {
-            $this->capture_line_room($event);
-        }
-
-        return $this->response->setBody('OK');
     }
 
     private function verify_line_signature($body, $signature, $channel_secret) {
@@ -142,5 +173,22 @@ class Liff_notify_webhook extends Controller {
         }
 
         return '';
+    }
+
+    private function get_headers_array() {
+        $out = [];
+        foreach ($this->request->getHeaders() as $name => $header) {
+            $out[$name] = $header->getValueLine();
+        }
+        return $out;
+    }
+
+    private function save_debug($debug) {
+        try {
+            $settings_model = model('App\Models\Settings_model');
+            $settings_model->save_setting('liff_webhook_last_debug', json_encode($debug));
+        } catch (\Throwable $e) {
+            // ignore
+        }
     }
 }

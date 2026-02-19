@@ -189,6 +189,18 @@ class Liff_settings extends Security_Controller {
     }
 
     // ──────────────────────────────────────────────────────────────
+    // LIFF webhook debug (last request)
+    // ──────────────────────────────────────────────────────────────
+    public function get_liff_webhook_debug() {
+        $raw = get_setting('liff_webhook_last_debug');
+        $data = $raw ? json_decode($raw, true) : null;
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
+
+    // ──────────────────────────────────────────────────────────────
     // Toggle direct LIFF notifications per user
     // ──────────────────────────────────────────────────────────────
     public function toggle_liff_user_notify() {

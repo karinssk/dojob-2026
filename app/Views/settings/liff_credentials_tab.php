@@ -51,6 +51,15 @@
   </div>
 </div>
 
+<div class="row">
+  <div class="col-md-12">
+    <button type="button" class="btn btn-default btn-sm" onclick="loadLiffWebhookDebug()">
+      ดู Log ล่าสุดของ LIFF Webhook
+    </button>
+    <div id="liff-webhook-log" style="display:none;margin-top:8px;background:#0F172A;color:#E2E8F0;padding:10px;border-radius:8px;font-size:12px;white-space:pre-wrap;word-break:break-all"></div>
+  </div>
+</div>
+
 <hr style="margin:20px 0">
 
 <!-- ── LINE Login / LIFF ──────────────────────────────────────────── -->
@@ -274,5 +283,25 @@ function renderDebugLog(target, data) {
   if (!data) { return; }
   var text = JSON.stringify(data, null, 2);
   $(target).text(text).show();
+}
+
+function loadLiffWebhookDebug() {
+  $.ajax({
+    url: '<?= get_uri('liff_settings/get_liff_webhook_debug') ?>',
+    method: 'GET',
+    dataType: 'json',
+    success: function(r){
+      console.log('[LIFF Webhook Debug]', r);
+      if (r.data) {
+        renderDebugLog('#liff-webhook-log', r.data);
+      } else {
+        $('#liff-webhook-log').text('ยังไม่มี log').show();
+      }
+    },
+    error: function(xhr){
+      console.log('[LIFF Webhook Debug] AJAX error', xhr.status, xhr.responseText);
+      $('#liff-webhook-log').text('ดึง log ไม่สำเร็จ').show();
+    }
+  });
 }
 </script>
