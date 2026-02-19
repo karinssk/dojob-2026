@@ -3145,3 +3145,17 @@ if (!function_exists('custom_nl2br')) {
         }
     }
 }
+
+/**
+ * Resolve the actual table name for user_mappings_arr.
+ * Some installations have it with the DB prefix, some without.
+ */
+if (!function_exists('get_user_mappings_table')) {
+    function get_user_mappings_table() {
+        $db = \Config\Database::connect();
+        $prefixed = $db->getPrefix() . 'user_mappings_arr';
+        $res = $db->query("SHOW TABLES LIKE ?", [$prefixed])->getResultArray();
+        if ($res) { return $prefixed; }
+        return 'user_mappings_arr';
+    }
+}

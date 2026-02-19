@@ -115,6 +115,27 @@ class Cron_job {
                 echo $e;
             }
 
+            // LINE LIFF push notifications
+            if (get_setting('line_channel_access_token')) {
+                try {
+                    $this->liff_notify_before_start();
+                } catch (\Exception $e) {
+                    log_message('error', 'LIFF notify before_start: ' . $e->getMessage());
+                }
+
+                try {
+                    $this->liff_notify_before_end();
+                } catch (\Exception $e) {
+                    log_message('error', 'LIFF notify before_end: ' . $e->getMessage());
+                }
+
+                try {
+                    $this->liff_notify_no_update();
+                } catch (\Exception $e) {
+                    log_message('error', 'LIFF notify no_update: ' . $e->getMessage());
+                }
+            }
+
             $this->ci->Settings_model->save_setting("last_hourly_job_time", $this->current_time);
         }
     }
@@ -639,6 +660,182 @@ class Cron_job {
     private function _send_available_reminders() {
         $reminders = new Reminders();
         $reminders->send_available_reminders();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // LINE LIFF Notification Engine
+    // Runs every hour. All three columns are nullable — skip if NULL.
+    // ─────────────────────────────────────────────────────────────
+
+    /** Resolve actual table name for user_mappings_arr (may or may not have rise_ prefix) */
+    private function _liff_mappings_table() {
+        $db = \Config\Database::connect();
+        $prefixed = $db->getPrefix() . 'user_mappings_arr';
+        $res = $db->query("SHOW TABLES LIKE ?", [$prefixed])->getResultArray();
+        if ($res) { return $prefixed; }
+        return 'user_mappings_arr';
+    }
+
+    /**
+     * Notify users X minutes before task/event start_time.
+     */
+    private function liff_notify_before_start() {
+        $db   = \Config\Database::connect();
+        $Line = new \App\Libraries\Line_webhook();
+        $now  = date('Y-m-d H:i:s');
+        $mt   = $this->_liff_mappings_table();
+
+        // ── Tasks ─────────────────────────────────────────────────
+        $tasks = $db->query(
+            "SELECT t.id, t.title, t.start_date, t.start_time, t.line_notify_before_start,
+                    m.line_user_id
+             FROM rise_tasks t
+             JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1
+             WHERE t.deleted = 0
+               AND t.line_notify_enabled = 1
+               AND t.line_notify_before_start IS NOT NULL
+               AND t.start_date IS NOT NULL
+               AND t.start_time IS NOT NULL
+               AND t.line_notify_sent_start IS NULL
+               AND TIMESTAMPDIFF(MINUTE, ?, CONCAT(t.start_date,' ',t.start_time))
+                   BETWEEN 0 AND t.line_notify_before_start",
+            [$now]
+        )->getResult();
+
+        foreach ($tasks as $t) {
+            $msg  = "⏰ แจ้งเตือนก่อนเริ่มงาน\n";
+            $msg .= "📋 {$t->title}\n";
+            $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($t->start_date . ' ' . $t->start_time)) . "\n";
+            $msg .= get_uri("liff/app/tasks/{$t->id}");
+            $Line->send_push_message($t->line_user_id, $msg, 'user');
+            $db->query("UPDATE rise_tasks SET line_notify_sent_start=? WHERE id=?", [$now, $t->id]);
+        }
+
+        // ── Events ────────────────────────────────────────────────
+        $events = $db->query(
+            "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start,
+                    m.line_user_id
+             FROM rise_events e
+             JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1
+             WHERE e.deleted = 0
+               AND e.line_notify_enabled = 1
+               AND e.line_notify_before_start IS NOT NULL
+               AND e.start_date IS NOT NULL
+               AND e.start_time IS NOT NULL
+               AND e.line_notify_sent_start IS NULL
+               AND TIMESTAMPDIFF(MINUTE, ?, CONCAT(e.start_date,' ',e.start_time))
+                   BETWEEN 0 AND e.line_notify_before_start",
+            [$now]
+        )->getResult();
+
+        foreach ($events as $ev) {
+            $msg  = "⏰ แจ้งเตือนก่อนเริ่ม Event\n";
+            $msg .= "📅 {$ev->title}\n";
+            $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($ev->start_date . ' ' . $ev->start_time)) . "\n";
+            $msg .= get_uri("liff/app/events/{$ev->id}");
+            $Line->send_push_message($ev->line_user_id, $msg, 'user');
+            $db->query("UPDATE rise_events SET line_notify_sent_start=? WHERE id=?", [$now, $ev->id]);
+        }
+    }
+
+    /**
+     * Notify users X minutes before task/event end_time.
+     */
+    private function liff_notify_before_end() {
+        $db   = \Config\Database::connect();
+        $Line = new \App\Libraries\Line_webhook();
+        $now  = date('Y-m-d H:i:s');
+        $mt   = $this->_liff_mappings_table();
+
+        // ── Tasks ─────────────────────────────────────────────────
+        $tasks = $db->query(
+            "SELECT t.id, t.title, t.deadline, t.end_time, t.line_notify_before_end,
+                    m.line_user_id
+             FROM rise_tasks t
+             JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1
+             JOIN rise_task_status ts ON ts.id = t.status_id
+             WHERE t.deleted = 0
+               AND t.line_notify_enabled = 1
+               AND t.line_notify_before_end IS NOT NULL
+               AND t.deadline IS NOT NULL
+               AND t.end_time IS NOT NULL
+               AND ts.key_name != 'closed'
+               AND t.line_notify_sent_end IS NULL
+               AND TIMESTAMPDIFF(MINUTE, ?, CONCAT(t.deadline,' ',t.end_time))
+                   BETWEEN 0 AND t.line_notify_before_end",
+            [$now]
+        )->getResult();
+
+        foreach ($tasks as $t) {
+            $msg  = "⚠️ แจ้งเตือนก่อนสิ้นสุดงาน\n";
+            $msg .= "📋 {$t->title}\n";
+            $msg .= "🔚 สิ้นสุด: " . date('d/m H:i', strtotime($t->deadline . ' ' . $t->end_time)) . "\n";
+            $msg .= get_uri("liff/app/tasks/{$t->id}");
+            $Line->send_push_message($t->line_user_id, $msg, 'user');
+            $db->query("UPDATE rise_tasks SET line_notify_sent_end=? WHERE id=?", [$now, $t->id]);
+        }
+
+        // ── Events ────────────────────────────────────────────────
+        $events = $db->query(
+            "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end,
+                    m.line_user_id
+             FROM rise_events e
+             JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1
+             WHERE e.deleted = 0
+               AND e.line_notify_enabled = 1
+               AND e.line_notify_before_end IS NOT NULL
+               AND e.end_date IS NOT NULL
+               AND e.end_time IS NOT NULL
+               AND e.line_notify_sent_end IS NULL
+               AND TIMESTAMPDIFF(MINUTE, ?, CONCAT(e.end_date,' ',e.end_time))
+                   BETWEEN 0 AND e.line_notify_before_end",
+            [$now]
+        )->getResult();
+
+        foreach ($events as $ev) {
+            $msg  = "⚠️ แจ้งเตือนก่อนสิ้นสุด Event\n";
+            $msg .= "📅 {$ev->title}\n";
+            $msg .= "🔚 สิ้นสุด: " . date('d/m H:i', strtotime($ev->end_date . ' ' . $ev->end_time)) . "\n";
+            $msg .= get_uri("liff/app/events/{$ev->id}");
+            $Line->send_push_message($ev->line_user_id, $msg, 'user');
+            $db->query("UPDATE rise_events SET line_notify_sent_end=? WHERE id=?", [$now, $ev->id]);
+        }
+    }
+
+    /**
+     * Notify when a task hasn't been updated in X hours.
+     */
+    private function liff_notify_no_update() {
+        $db   = \Config\Database::connect();
+        $Line = new \App\Libraries\Line_webhook();
+        $now  = date('Y-m-d H:i:s');
+        $mt   = $this->_liff_mappings_table();
+
+        $tasks = $db->query(
+            "SELECT t.id, t.title, t.updated_at, t.line_notify_no_update_hours,
+                    m.line_user_id
+             FROM rise_tasks t
+             JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1
+             JOIN rise_task_status ts ON ts.id = t.status_id
+             WHERE t.deleted = 0
+               AND t.line_notify_enabled = 1
+               AND t.line_notify_no_update_hours IS NOT NULL
+               AND ts.key_name != 'closed'
+               AND TIMESTAMPDIFF(HOUR, t.updated_at, ?) >= t.line_notify_no_update_hours
+               AND (t.line_notify_sent_no_update IS NULL
+                    OR TIMESTAMPDIFF(HOUR, t.line_notify_sent_no_update, ?) >= t.line_notify_no_update_hours)",
+            [$now, $now]
+        )->getResult();
+
+        foreach ($tasks as $t) {
+            $hours = (int)$t->line_notify_no_update_hours;
+            $msg   = "🔔 ไม่มีการอัปเดตงาน {$hours} ชั่วโมงแล้ว\n";
+            $msg  .= "📋 {$t->title}\n";
+            $msg  .= "อัปเดตล่าสุด: " . date('d/m H:i', strtotime($t->updated_at)) . "\n";
+            $msg  .= get_uri("liff/app/tasks/{$t->id}");
+            $Line->send_push_message($t->line_user_id, $msg, 'user');
+            $db->query("UPDATE rise_tasks SET line_notify_sent_no_update=? WHERE id=?", [$now, $t->id]);
+        }
     }
 
 }

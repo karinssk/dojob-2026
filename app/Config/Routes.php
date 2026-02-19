@@ -50,6 +50,52 @@ $routes->post('workflow/save', 'Workflow::save');
 $routes->post('workflow/delete', 'Workflow::delete');
 $routes->post('workflow/toggle_status', 'Workflow::toggle_status');
 
+// ─────────────────────────────────────────────────────────────────
+// LINE LIFF Routes — MUST be before the auto-routing loop below
+// so that settings/approve_line_liff_users is not swallowed by
+// the wildcard Settings::(:any) route.
+// ─────────────────────────────────────────────────────────────────
+
+// Auth flow (public — no session required)
+$routes->get('liff', 'Liff_auth::index');
+$routes->post('liff/verify', 'Liff_auth::verify');
+$routes->get('liff/select_user', 'Liff_auth::select_user');
+$routes->post('liff/request_link', 'Liff_auth::request_link');
+$routes->get('liff/pending', 'Liff_auth::pending');
+$routes->get('liff/rejected', 'Liff_auth::rejected');
+$routes->get('liff/check_status', 'Liff_auth::check_status');
+
+// LIFF App pages (protected)
+$routes->get('liff/app', 'Liff_app::dashboard');
+$routes->get('liff/app/tasks', 'Liff_app::tasks');
+$routes->get('liff/app/tasks/create', 'Liff_app::task_create');
+$routes->get('liff/app/tasks/(:num)', 'Liff_app::task_detail/$1');
+$routes->get('liff/app/tasks/(:num)/edit', 'Liff_app::task_edit/$1');
+$routes->get('liff/app/events', 'Liff_app::events');
+$routes->get('liff/app/events/create', 'Liff_app::event_create');
+$routes->get('liff/app/events/(:num)', 'Liff_app::event_detail/$1');
+$routes->get('liff/app/events/(:num)/edit', 'Liff_app::event_edit/$1');
+$routes->get('liff/app/projects', 'Liff_app::projects');
+$routes->get('liff/app/projects/(:num)', 'Liff_app::project_detail/$1');
+$routes->get('liff/app/projects/(:num)/task/create', 'Liff_app::project_task_create/$1');
+$routes->get('liff/app/todo', 'Liff_app::todo');
+$routes->get('liff/app/profile', 'Liff_app::profile');
+
+// LIFF JSON API (protected)
+$routes->post('liff/api/tasks/save', 'Liff_api::task_save');
+$routes->post('liff/api/tasks/update_status', 'Liff_api::task_update_status');
+$routes->post('liff/api/tasks/upload_image', 'Liff_api::task_upload_image');
+$routes->post('liff/api/tasks/quick_update', 'Liff_api::task_quick_update');
+$routes->post('liff/api/events/save', 'Liff_api::event_save');
+$routes->post('liff/api/events/delete', 'Liff_api::event_delete');
+$routes->post('liff/api/todo/save', 'Liff_api::todo_save');
+$routes->post('liff/api/todo/toggle', 'Liff_api::todo_toggle');
+
+// LIFF Admin Settings — must be before the auto-routing loop
+$routes->get('settings/approve_line_liff_users', 'Liff_settings::approve_line_liff_users');
+$routes->get('liff_settings/(:any)', 'Liff_settings::$1');
+$routes->post('liff_settings/(:any)', 'Liff_settings::$1');
+
 //custom routing for custom pages
 //this route will move 'about/any-text' to 'domain.com/about/index/any-text'
 $routes->add('about/(:any)', 'About::index/$1');

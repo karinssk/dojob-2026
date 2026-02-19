@@ -2766,4 +2766,5 @@ $lang["trigger_manually"] = "Trigger Manually";
 
 $lang['enabled'] = 'enabled';
 $lang['line_settings'] = 'Settings';
+$lang['approve_line_liff_users'] = 'LIFF Users';
 return $lang;

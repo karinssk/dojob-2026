@@ -11,6 +11,7 @@ $settings_menu = array(
         array("name" => "integration", "url" => "settings/integration"),
         array("name" => "line_settings", "url" => "line_settings/line_settings"),
         array("name" => "line_bot_expenses", "url" => "line_bot_expenses"),
+        array("name" => "approve_line_liff_users", "url" => "settings/approve_line_liff_users"),
         array("name" => "tasks_tracking", "url" => "tasks-tracking"),
         array("name" => "cron_job", "url" => "settings/cron_job"),
         array("name" => "updates", "url" => "Updates"),
