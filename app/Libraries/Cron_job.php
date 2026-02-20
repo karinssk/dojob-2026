@@ -937,21 +937,25 @@ class Cron_job {
         if ($mode === 'room') {
             if (empty($rooms)) { return; }
             $tasks = $db->query(
-                "SELECT t.id, t.title, t.updated_at, t.line_notify_no_update_hours
+                "SELECT t.id, t.title,
+                        COALESCE(t.status_changed_at, t.created_date) AS last_updated,
+                        t.line_notify_no_update_hours
                  FROM rise_tasks t
                  JOIN rise_task_status ts ON ts.id = t.status_id
                  WHERE t.deleted = 0
                    AND t.line_notify_enabled = 1
                    AND t.line_notify_no_update_hours IS NOT NULL
                    AND ts.key_name != 'closed'
-                   AND TIMESTAMPDIFF(HOUR, t.updated_at, ?) >= t.line_notify_no_update_hours
+                   AND TIMESTAMPDIFF(HOUR, COALESCE(t.status_changed_at, t.created_date), ?) >= t.line_notify_no_update_hours
                    AND (t.line_notify_sent_no_update IS NULL
                         OR TIMESTAMPDIFF(HOUR, t.line_notify_sent_no_update, ?) >= t.line_notify_no_update_hours)",
                 [$now, $now]
             )->getResult();
         } else {
             $tasks = $db->query(
-                "SELECT t.id, t.title, t.updated_at, t.line_notify_no_update_hours,
+                "SELECT t.id, t.title,
+                        COALESCE(t.status_changed_at, t.created_date) AS last_updated,
+                        t.line_notify_no_update_hours,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_tasks t
                  JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1 AND m.liff_notify_user = 1
@@ -960,7 +964,7 @@ class Cron_job {
                    AND t.line_notify_enabled = 1
                    AND t.line_notify_no_update_hours IS NOT NULL
                    AND ts.key_name != 'closed'
-                   AND TIMESTAMPDIFF(HOUR, t.updated_at, ?) >= t.line_notify_no_update_hours
+                   AND TIMESTAMPDIFF(HOUR, COALESCE(t.status_changed_at, t.created_date), ?) >= t.line_notify_no_update_hours
                    AND (t.line_notify_sent_no_update IS NULL
                         OR TIMESTAMPDIFF(HOUR, t.line_notify_sent_no_update, ?) >= t.line_notify_no_update_hours)",
                 [$now, $now]
@@ -971,7 +975,7 @@ class Cron_job {
             $hours = (int)$t->line_notify_no_update_hours;
             $msg   = "🔔 ไม่มีการอัปเดตงาน {$hours} ชั่วโมงแล้ว\n";
             $msg  .= " {$t->title}\n";
-            $msg  .= "อัปเดตล่าสุด: " . date('d/m H:i', strtotime($t->updated_at)) . "\n";
+            $msg  .= "อัปเดตล่าสุด: " . ($t->last_updated ? date('d/m H:i', strtotime($t->last_updated)) : '—') . "\n";
             $msg  .= get_uri("liff/app/tasks/{$t->id}");
             if ($mode === 'room') {
                 foreach ($rooms as $rid) {
