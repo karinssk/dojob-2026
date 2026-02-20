@@ -727,7 +727,7 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 .comment-name { font-weight: 700; color: var(--text); }
 .comment-text { font-size: 13px; color: var(--label); margin-top: 4px; line-height: 1.5; }
 .comment-attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.comment-attachments img { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; }
+.comment-attachments img { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; cursor: pointer; }
 .comment-form-card textarea { margin-bottom: 8px; }
 .comment-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .comment-attach {

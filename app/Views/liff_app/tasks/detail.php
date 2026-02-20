@@ -2,6 +2,23 @@
 $color = $task->status_color ?: '#6C8EF5';
 $bg    = $color . '22';
 $is_overdue = $task->deadline && strtotime($task->deadline) < time();
+
+// Pre-build full-size URLs for the image modal (detail images first, then comment attachments)
+$modalImgs = [];
+if (!empty($comment_files)) {
+    foreach ($comment_files as $f) {
+        $modalImgs[] = get_source_url_of_file($f, get_setting('timeline_file_path'));
+    }
+}
+foreach ($comments as $c) {
+    $cfiles = $c->files ? @unserialize($c->files) : [];
+    if (is_array($cfiles)) {
+        foreach ($cfiles as $f) {
+            if (is_array($f)) $modalImgs[] = get_source_url_of_file($f, get_setting('timeline_file_path'));
+        }
+    }
+}
+$modalIdx = 0;
 ?>
 <div class="page-header page-header-row">
   <div>
@@ -45,11 +62,8 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
     <div class="detail-images">
       <?php foreach ($comment_files as $file):
         $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
-        $url   = get_source_url_of_file($file, get_setting("timeline_file_path"));
       ?>
-      <a href="<?= esc($url) ?>" target="_blank">
-        <img src="<?= esc($thumb) ?>" alt="">
-      </a>
+      <img src="<?= esc($thumb) ?>" alt="" onclick="openImgModal(<?= $modalIdx++ ?>)">
       <?php endforeach; ?>
     </div>
     <div class="divider"></div>
@@ -143,9 +157,8 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
             <?php foreach ($files as $file):
               if (!is_array($file)) { continue; }
               $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
-              $url   = get_source_url_of_file($file, get_setting("timeline_file_path"));
             ?>
-            <a href="<?= esc($url) ?>" target="_blank"><img src="<?= esc($thumb) ?>" alt=""></a>
+            <img src="<?= esc($thumb) ?>" alt="" onclick="openImgModal(<?= $modalIdx++ ?>)">
             <?php endforeach; ?>
           </div>
           <?php endif; ?>
@@ -213,7 +226,8 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
 LiffApp.initImageUpload('task-comment-images', 'task-comment-previews');
 
 /* ── Image modal ── */
-let _imgs = [], _imgIdx = 0;
+const _imgs = <?= json_encode($modalImgs) ?>;
+let _imgIdx = 0;
 
 function openImgModal(idx) {
   _imgIdx = idx;
@@ -233,15 +247,6 @@ function _updateModal() {
   document.getElementById('img-modal-prev').hidden = _imgs.length < 2;
   document.getElementById('img-modal-next').hidden = _imgs.length < 2;
 }
-
-// Collect all image links from detail strip + comment attachments
-document.addEventListener('DOMContentLoaded', () => {
-  const links = [...document.querySelectorAll('.detail-images a, .comment-attachments a')];
-  _imgs = links.map(a => a.href);
-  links.forEach((a, idx) => {
-    a.addEventListener('click', e => { e.preventDefault(); openImgModal(idx); });
-  });
-});
 
 // Swipe left/right to navigate
 (function() {
