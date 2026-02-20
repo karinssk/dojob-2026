@@ -5,7 +5,7 @@
 <div id="form-alert"></div>
 
 <form id="task-form" onsubmit="submitTask(event)">
-  <?php $tid = $task->id ?? 0; ?>
+  <?php $tid = $task->id ?? 0; // used throughout this form ?>
   <input type="hidden" name="id" value="<?= $tid ?>">
 
   <div class="form-group">
@@ -18,14 +18,31 @@
     <textarea class="form-control" name="description" rows="3" placeholder="รายละเอียดเพิ่มเติม..."><?= esc($task->description ?? '') ?></textarea>
   </div>
 
+  <?php
+    // Determine which project_id to pre-select:
+    // - editing: use saved project_id
+    // - new task: use default_project_id (current month's งานรายวัน)
+    $preselect_project = $tid
+        ? ($task->project_id ?? 0)
+        : ($default_project_id ?? 0);
+  ?>
   <div class="form-group">
     <label class="form-label">โปรเจกต์</label>
+    <?php if (!empty($default_project_id) && !$tid): ?>
+    <div class="default-project-hint">
+      📌 ค่าเริ่มต้น: โปรเจกต์งานรายวันของเดือนนี้
+    </div>
+    <?php endif; ?>
     <div class="custom-dropdown">
       <div class="dropdown-trigger">
         <span id="project-label">
           <?php
             $lbl = '— ไม่ระบุโปรเจกต์ —';
-            foreach ($projects as $p) { if (($task->project_id ?? 0) == $p->id) { $lbl = esc($p->title); break; } }
+            foreach ($projects as $p) {
+                if ($preselect_project && $preselect_project == $p->id) {
+                    $lbl = esc($p->title); break;
+                }
+            }
             echo $lbl;
           ?>
         </span>
@@ -33,7 +50,7 @@
         <select name="project_id" class="dropdown-native-select" id="project-select" onchange="document.getElementById('project-label').textContent=this.options[this.selectedIndex].text">
           <option value="">— ไม่ระบุโปรเจกต์ —</option>
           <?php foreach ($projects as $p): ?>
-          <option value="<?= $p->id ?>" <?= ($task->project_id ?? 0) == $p->id ? 'selected' : '' ?>><?= esc($p->title) ?></option>
+          <option value="<?= $p->id ?>" <?= ($preselect_project == $p->id) ? 'selected' : '' ?>><?= esc($p->title) ?></option>
           <?php endforeach; ?>
         </select>
       </div>

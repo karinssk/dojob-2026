@@ -203,10 +203,10 @@ class Liff_app extends Security_Controller {
         )->getResult();
 
         $statuses = $this->Task_status_model->get_details()->getResult();
-        $comments = $this->Project_comments_model->get_details([
+        $comments = array_reverse($this->Project_comments_model->get_details([
             'task_id'    => (int)$task_id,
             'comment_id' => 0
-        ])->getResult();
+        ])->getResult());
         $comment_files = $this->_get_task_comment_files($task_id);
 
         return $this->_liff_view('liff_app/tasks/detail', [
@@ -227,14 +227,30 @@ class Liff_app extends Security_Controller {
         $statuses = $this->Task_status_model->get_details()->getResult();
         $priorities = $this->Task_priority_model->get_details()->getResult() ?? [];
 
+        // For new tasks: pre-select the current month's งานรายวัน project
+        $default_project = null;
+        if (!$task_id) {
+            $default_project = $this->_get_default_monthly_project(0);
+
+            // If the default project isn't in the user's project list, inject it
+            $found = false;
+            foreach ($projects as $p) {
+                if ($p->id == $default_project->id) { $found = true; break; }
+            }
+            if (!$found) {
+                array_unshift($projects, $default_project);
+            }
+        }
+
         return $this->_liff_view('liff_app/tasks/form', [
-            'page_title' => $task_id ? 'แก้ไข Task' : 'สร้าง Task',
-            'active_tab' => 'tasks',
-            'task'       => $task,
-            'users'      => $users,
-            'projects'   => $projects,
-            'statuses'   => $statuses,
-            'priorities' => $priorities,
+            'page_title'         => $task_id ? 'แก้ไข Task' : 'สร้าง Task',
+            'active_tab'         => 'tasks',
+            'task'               => $task,
+            'users'              => $users,
+            'projects'           => $projects,
+            'statuses'           => $statuses,
+            'priorities'         => $priorities,
+            'default_project_id' => $default_project ? $default_project->id : null,
         ]);
     }
 
@@ -401,13 +417,14 @@ class Liff_app extends Security_Controller {
         $priorities = $this->Task_priority_model->get_details()->getResult() ?? [];
 
         return $this->_liff_view('liff_app/tasks/form', [
-            'page_title' => 'สร้าง Task',
-            'active_tab' => 'projects',
-            'task'       => $task,
-            'users'      => $users,
-            'projects'   => $projects,
-            'statuses'   => $statuses,
-            'priorities' => $priorities,
+            'page_title'         => 'สร้าง Task',
+            'active_tab'         => 'projects',
+            'task'               => $task,
+            'users'              => $users,
+            'projects'           => $projects,
+            'statuses'           => $statuses,
+            'priorities'         => $priorities,
+            'default_project_id' => null, // project already set by context
         ]);
     }
 
@@ -432,11 +449,65 @@ class Liff_app extends Security_Controller {
             [$user_id]
         )->getRow();
 
+        // Show current and next month's งานรายวัน projects
+        $current_project = $this->_get_default_monthly_project(0);
+        $next_project    = $this->_get_default_monthly_project(1);
+
         return $this->_liff_view('liff_app/profile/index', [
-            'page_title' => 'Profile',
-            'active_tab' => 'profile',
-            'mapping'    => $mapping,
+            'page_title'      => 'Profile',
+            'active_tab'      => 'profile',
+            'mapping'         => $mapping,
+            'current_project' => $current_project,
+            'next_project'    => $next_project,
         ]);
+    }
+
+    // ── Default Monthly Project ────────────────────────────────────
+    /**
+     * Return the "งานรายวัน" project for a given month offset (0=current, 1=next).
+     * Searches by exact Thai title. Creates the project if not found.
+     * @param int $month_offset 0 for current month, 1 for next month
+     * @return object  project row with at least ->id and ->title
+     */
+    private function _get_default_monthly_project($month_offset = 0) {
+        $thai_months = [
+            1  => 'มกราคม',   2  => 'กุมภาพันธ์', 3  => 'มีนาคม',
+            4  => 'เมษายน',   5  => 'พฤษภาคม',    6  => 'มิถุนายน',
+            7  => 'กรกฎาคม',  8  => 'สิงหาคม',    9  => 'กันยายน',
+            10 => 'ตุลาคม',   11 => 'พฤศจิกายน',  12 => 'ธันวาคม',
+        ];
+
+        // Compute target month/year (Thai year = CE + 543)
+        $ts          = mktime(0, 0, 0, date('n') + $month_offset, 1, date('Y'));
+        $month_num   = (int)date('n', $ts);
+        $thai_year   = (int)date('Y', $ts) + 543;
+        $title       = 'งานรายวัน เดือน' . $thai_months[$month_num] . ' ' . $thai_year;
+
+        $t = $this->db->prefixTable('projects');
+
+        // Search — match exactly (LIKE is fine; titles are unique by convention)
+        $row = $this->db->query(
+            "SELECT id, title FROM $t WHERE title=? AND deleted=0 LIMIT 1",
+            [$title]
+        )->getRow();
+
+        if ($row) {
+            return $row;
+        }
+
+        // Not found — create it
+        $new_id = $this->Projects_model->ci_save([
+            'title'        => $title,
+            'client_id'    => 1,
+            'project_type' => 'client_project',
+            'status_id'    => 1,   // Open
+            'created_by'   => $this->login_user->id,
+            'created_date' => date('Y-m-d'),
+            'start_date'   => date('Y-m-01', $ts),
+            'deadline'     => date('Y-m-t', $ts),
+        ]);
+
+        return (object)['id' => $new_id, 'title' => $title];
     }
 
     // ── Helpers ────────────────────────────────────────────────────

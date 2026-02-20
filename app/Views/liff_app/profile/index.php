@@ -39,6 +39,19 @@ $img  = get_avatar($user->image);
   <?php endif; ?>
 </div>
 
+<!-- Default monthly projects -->
+<div class="card list-card profile-default-project">
+  <div class="card-header"><h3>📌 โปรเจกต์งานรายวัน</h3></div>
+  <div class="list-row">
+    <span>โปรเจกต์เดือนนี้</span>
+    <span class="project-name"><?= esc($current_project->title ?? '—') ?></span>
+  </div>
+  <div class="list-row">
+    <span>โปรเจกต์เดือนหน้า</span>
+    <span class="project-name"><?= esc($next_project->title ?? '—') ?></span>
+  </div>
+</div>
+
 <!-- Actions -->
 <div class="card list-card">
   <div class="card-header"><h3>การตั้งค่า</h3></div>
