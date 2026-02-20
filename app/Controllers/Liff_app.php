@@ -60,22 +60,33 @@ class Liff_app extends Security_Controller {
         )->getRow()->cnt ?? 0;
 
         $overdue_tasks = $this->db->query(
-            "SELECT COUNT(*) AS cnt FROM rise_tasks
-             WHERE assigned_to=? AND deleted=0 AND deadline < NOW()
-             AND status_id NOT IN (SELECT id FROM rise_task_status WHERE key_name='closed')",
+            "SELECT COUNT(*) AS cnt FROM rise_tasks t
+             LEFT JOIN rise_task_status ts ON ts.id = t.status_id
+             WHERE t.assigned_to=? AND t.deleted=0
+             AND t.deadline IS NOT NULL AND t.deadline > '0000-00-00' AND t.deadline < CURDATE()
+             AND (ts.key_name IS NULL OR ts.key_name != 'done')",
             [$user_id]
         )->getRow()->cnt ?? 0;
 
-        // Recent tasks
+        $pending_tasks = $this->db->query(
+            "SELECT COUNT(*) AS cnt FROM rise_tasks t
+             LEFT JOIN rise_task_status ts ON ts.id = t.status_id
+             WHERE t.assigned_to=? AND t.deleted=0
+             AND (ts.key_name IS NULL OR ts.key_name != 'done')",
+            [$user_id]
+        )->getRow()->cnt ?? 0;
+
+        // Recent tasks (not done, ordered by deadline)
         $recent_tasks = $this->db->query(
             "SELECT t.*, ts.title AS status_title, ts.color AS status_color,
-                    tp.title AS priority_title, tp.color AS priority_color,
+                    tp.title AS priority_title,
                     p.title AS project_title
              FROM rise_tasks t
              LEFT JOIN rise_task_status ts ON ts.id = t.status_id
              LEFT JOIN rise_task_priority tp ON tp.id = t.priority_id
              LEFT JOIN rise_projects p ON p.id = t.project_id
              WHERE t.assigned_to=? AND t.deleted=0
+               AND (ts.key_name IS NULL OR ts.key_name != 'done')
              ORDER BY t.deadline ASC
              LIMIT 5",
             [$user_id]
@@ -88,6 +99,7 @@ class Liff_app extends Security_Controller {
             'events_today'   => $events_today,
             'todos_pending'  => $todos_pending,
             'overdue_tasks'  => $overdue_tasks,
+            'pending_tasks'  => $pending_tasks,
             'recent_tasks'   => $recent_tasks,
         ]);
     }

@@ -382,6 +382,121 @@ html, body {
 .avatar-sm  { width: 28px; height: 28px; font-size: 11px; }
 .avatar-lg  { width: 48px; height: 48px; font-size: 18px; }
 
+/* --- Dashboard hero ---------------------------------------- */
+.dash-hero {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  margin: calc(-1 * var(--pad)) calc(-1 * var(--pad)) 0;
+  padding: calc(env(safe-area-inset-top) + 24px) var(--pad) 64px;
+  position: relative;
+  z-index: 0;
+  color: #fff;
+}
+.dash-hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+.dash-hero-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.dash-hero-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid rgba(255,255,255,0.5);
+  display: block;
+}
+.dash-hero-initials {
+  background: rgba(255,255,255,0.25);
+  font-size: 18px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+.dash-hero-greeting {
+  font-size: 16px; font-weight: 700; color: #fff;
+}
+.dash-hero-date {
+  font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 1px;
+}
+.dash-hero-main {
+  text-align: center;
+  padding-bottom: 8px;
+}
+.dash-hero-num {
+  font-size: 58px; font-weight: 800; color: #fff;
+  letter-spacing: -3px; line-height: 1;
+}
+.dash-hero-label {
+  font-size: 13px; color: rgba(255,255,255,0.7);
+  margin-top: 6px; letter-spacing: 0.02em;
+}
+
+/* --- Dashboard white body ---------------------------------- */
+.dash-body {
+  background: var(--bg);
+  border-radius: 28px 28px 0 0;
+  margin: -36px calc(-1 * var(--pad)) 0;
+  padding: 20px var(--pad) 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Dashboard stat cards ---------------------------------- */
+.dash-stats-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin: 0 calc(-1 * var(--pad));
+  padding: 0 var(--pad) 4px;
+}
+.dash-stats-scroll::-webkit-scrollbar { display: none; }
+.dash-stat-card {
+  flex-shrink: 0;
+  background: var(--card);
+  border-radius: 18px;
+  padding: 14px 16px;
+  min-width: 108px;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.dash-stat-card-danger {
+  border: 1.5px solid var(--pink-lt);
+}
+.dash-stat-icon {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.dash-stat-num {
+  font-size: 26px; font-weight: 800; line-height: 1;
+}
+.dash-stat-label {
+  font-size: 11px; color: var(--muted); white-space: nowrap;
+}
+
+/* --- Dashboard section ------------------------------------ */
+.dash-section { margin-top: 22px; }
+.dash-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.dash-section-title {
+  font-size: 15px; font-weight: 700; color: var(--text);
+}
+.dash-section-link {
+  font-size: 13px; color: var(--blue); text-decoration: none; font-weight: 600;
+}
+
 /* --- Dashboard profile button (top-right) ---------------- */
 .dashboard-profile-btn {
   flex-shrink: 0;
