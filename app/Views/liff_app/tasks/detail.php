@@ -223,8 +223,6 @@ $modalIdx = 0;
 </div>
 
 <script>
-LiffApp.initImageUpload('task-comment-images', 'task-comment-previews');
-
 /* ── Image modal ── */
 const _imgs = <?= json_encode($modalImgs) ?>;
 let _imgIdx = 0;
@@ -257,6 +255,12 @@ function _updateModal() {
     const dx = e.changedTouches[0].clientX - tx;
     if (Math.abs(dx) > 50) imgModalNav(dx < 0 ? 1 : -1);
   });
+})();
+
+/* ── Init image upload (wait for LiffApp) ── */
+(function waitForLiffApp() {
+  if (!window.LiffApp) { setTimeout(waitForLiffApp, 50); return; }
+  LiffApp.initImageUpload('task-comment-images', 'task-comment-previews');
 })();
 
 /* ── Comment submit ── */
