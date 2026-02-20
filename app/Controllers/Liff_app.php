@@ -76,6 +76,15 @@ class Liff_app extends Security_Controller {
             [$user_id]
         )->getRow()->cnt ?? 0;
 
+        $total_tasks = $this->db->query(
+            "SELECT COUNT(*) AS cnt FROM rise_tasks
+             WHERE assigned_to=? AND deleted=0",
+            [$user_id]
+        )->getRow()->cnt ?? 0;
+
+        $done_tasks = max(0, $total_tasks - $pending_tasks);
+        $progress_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
+
         // Recent tasks (not done, ordered by deadline)
         $recent_tasks = $this->db->query(
             "SELECT t.*, ts.title AS status_title, ts.color AS status_color,
@@ -100,6 +109,9 @@ class Liff_app extends Security_Controller {
             'todos_pending'  => $todos_pending,
             'overdue_tasks'  => $overdue_tasks,
             'pending_tasks'  => $pending_tasks,
+            'total_tasks'    => $total_tasks,
+            'done_tasks'     => $done_tasks,
+            'progress_pct'   => $progress_pct,
             'recent_tasks'   => $recent_tasks,
         ]);
     }

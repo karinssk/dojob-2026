@@ -22,6 +22,15 @@ $avatar = get_avatar($login_user->image);
   <div class="dash-hero-main">
     <div class="dash-hero-num"><?= $pending_tasks ?></div>
     <div class="dash-hero-label">งานที่ยังไม่เสร็จ</div>
+
+    <?php if ($total_tasks > 0): ?>
+    <div class="dash-progress-wrap">
+      <div class="dash-progress-bar">
+        <div class="dash-progress-fill" style="width:<?= $progress_pct ?>%"></div>
+      </div>
+      <div class="dash-progress-text">เสร็จแล้ว <?= $done_tasks ?> จาก <?= $total_tasks ?> งาน · <?= $progress_pct ?>%</div>
+    </div>
+    <?php endif; ?>
   </div>
 </div>
 
@@ -104,3 +113,51 @@ $avatar = get_avatar($login_user->image);
   </div>
 
 </div>
+
+<script>
+(function () {
+  // ── 1. Count-up on pending number ────────────────────────────
+  var numEl  = document.querySelector('.dash-hero-num');
+  var target = numEl ? (parseInt(numEl.textContent) || 0) : 0;
+  if (numEl && target > 0) {
+    numEl.textContent = '0';
+    var start = null, dur = 600;
+    function countStep(ts) {
+      if (!start) start = ts;
+      var p    = Math.min((ts - start) / dur, 1);
+      var ease = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      numEl.textContent = Math.round(ease * target);
+      if (p < 1) requestAnimationFrame(countStep);
+    }
+    requestAnimationFrame(countStep);
+  }
+
+  // ── 2. Progress bar fill from 0 ──────────────────────────────
+  var fill    = document.querySelector('.dash-progress-fill');
+  var targetW = fill ? (parseFloat(fill.style.width) || 0) : 0;
+  if (fill) {
+    fill.style.transition = 'none';
+    fill.style.width      = '0%';
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        fill.style.transition = 'width 0.9s cubic-bezier(0.4, 0, 0.2, 1)';
+        fill.style.width      = targetW + '%';
+      });
+    });
+  }
+
+  // ── 3. Stat cards stagger fade + slide-up ────────────────────
+  var cards = document.querySelectorAll('.dash-stat-card');
+  cards.forEach(function (c) {
+    c.style.opacity    = '0';
+    c.style.transform  = 'translateY(20px)';
+    c.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+  });
+  cards.forEach(function (c, i) {
+    setTimeout(function () {
+      c.style.opacity   = '1';
+      c.style.transform = 'translateY(0)';
+    }, 220 + i * 70);
+  });
+})();
+</script>
