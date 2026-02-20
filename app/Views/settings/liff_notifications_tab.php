@@ -169,6 +169,58 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 3 — Fallback LINE Bot
+═══════════════════════════════════════════════════════════ -->
+<div class="panel panel-default" style="border:1px solid #FDE68A;border-radius:10px;margin-bottom:24px">
+  <div class="panel-heading" style="background:#FFFBEB;border-radius:10px 10px 0 0;padding:14px 18px;border-bottom:1px solid #FDE68A">
+    <h5 style="margin:0;font-size:14px;font-weight:600;color:#92400E">
+      🔄 Fallback LINE Bot (สำรอง)
+    </h5>
+    <p style="margin:4px 0 0;font-size:12px;color:#B45309">
+      ใช้เมื่อ LIFF Bot หลักส่งไม่สำเร็จ (เช่น Quota เต็ม / Token ผิด) — ส่งข้อความธรรมดาไปยังห้องที่กำหนด
+    </p>
+  </div>
+  <div class="panel-body" style="padding:18px">
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group" style="margin-bottom:14px">
+          <label style="font-size:13px;font-weight:600;color:#374151">
+            Fallback Channel Access Token
+          </label>
+          <input type="text" name="liff_fallback_token"
+            class="form-control" autocomplete="off"
+            value="<?= esc(get_setting('liff_fallback_token') ?: get_setting('line_channel_access_token') ?: '') ?>"
+            placeholder="Token ของ LINE Bot สำรอง (ถ้าว่างจะใช้ line_channel_access_token)">
+          <p class="help-block" style="font-size:11px">ถ้าว่าง จะใช้ <code>line_channel_access_token</code> อัตโนมัติ</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group" style="margin-bottom:14px">
+          <label style="font-size:13px;font-weight:600;color:#374151">
+            Fallback Room / Group ID
+          </label>
+          <input type="text" name="liff_fallback_room_id"
+            class="form-control" autocomplete="off"
+            value="<?= esc(get_setting('liff_fallback_room_id') ?: get_setting('line_default_room_id') ?: '') ?>"
+            placeholder="Room ID หรือ Group ID เช่น C7a110af...">
+          <p class="help-block" style="font-size:11px">ถ้าว่าง จะใช้ <code>line_default_room_id</code> อัตโนมัติ</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test fallback -->
+    <div style="margin-top:4px">
+      <button type="button" class="btn btn-sm btn-warning" onclick="testFallback()">
+        ทดสอบ Fallback Bot
+      </button>
+      <span id="test-fallback-result" style="margin-left:10px;font-size:13px"></span>
+    </div>
+
+  </div>
+</div>
+
 <!-- Save -->
 <div style="margin-top:4px">
   <button type="submit" class="btn btn-primary">บันทึกการตั้งค่า</button>
@@ -348,6 +400,24 @@ function loadQuota() {
     },
     error: function(xhr) {
       el.innerHTML = '<span style="color:#EF4444">❌ ดึงข้อมูลไม่สำเร็จ (' + xhr.status + ')</span>';
+    }
+  });
+}
+
+// ── Fallback bot test ────────────────────────────────────────────
+function testFallback() {
+  var resultEl = document.getElementById('test-fallback-result');
+  resultEl.innerHTML = '<i>กำลังส่ง...</i>';
+  $.ajax({
+    url: '<?= get_uri('liff_settings/test_liff_fallback') ?>',
+    method: 'POST',
+    dataType: 'json',
+    success: function(r){
+      resultEl.innerHTML = (r.success ? '✅ ' : '❌ ') + r.message;
+      setTimeout(function(){ resultEl.innerHTML = ''; }, 6000);
+    },
+    error: function(xhr){
+      resultEl.innerHTML = '❌ AJAX error (' + xhr.status + ')';
     }
   });
 }

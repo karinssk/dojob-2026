@@ -241,6 +241,8 @@ class Liff_settings extends Security_Controller {
             'liff_summary_enabled',
             'liff_summary_time',
             'liff_summary_days',     // already JSON-encoded by JS
+            'liff_fallback_token',
+            'liff_fallback_room_id',
         ];
 
         foreach ($plain as $key) {
@@ -250,6 +252,62 @@ class Liff_settings extends Security_Controller {
         }
 
         echo json_encode(['success' => true, 'message' => 'บันทึกการตั้งค่าแจ้งเตือนสำเร็จ']);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Test fallback bot — send a real text message to fallback room
+    // ──────────────────────────────────────────────────────────────
+    public function test_liff_fallback() {
+        $token   = get_setting('liff_fallback_token')   ?: get_setting('line_channel_access_token');
+        $room_id = get_setting('liff_fallback_room_id') ?: get_setting('line_default_room_id');
+
+        if (!$token) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'ยังไม่ได้ตั้งค่า Fallback Token',
+            ]);
+        }
+        if (!$room_id) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'ยังไม่ได้ตั้งค่า Fallback Room ID',
+            ]);
+        }
+
+        $msg = '[Fallback Test] ทดสอบระบบแจ้งเตือนสำรอง — ' . date('d/m/Y H:i:s');
+
+        $payload = json_encode([
+            'to'       => $room_id,
+            'messages' => [['type' => 'text', 'text' => $msg]],
+        ]);
+
+        $ch = curl_init('https://api.line.me/v2/bot/message/push');
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token,
+                'User-Agent: DoJob-LIFF/1.0',
+            ],
+        ]);
+        $response  = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_err  = curl_error($ch);
+        curl_close($ch);
+
+        if ($curl_err) {
+            return $this->response->setJSON(['success' => false, 'message' => 'cURL error: ' . $curl_err]);
+        }
+        if ($http_code >= 200 && $http_code < 300) {
+            return $this->response->setJSON(['success' => true, 'message' => 'ส่งสำเร็จ (HTTP ' . $http_code . ')']);
+        }
+
+        $decoded = json_decode($response, true);
+        $detail  = $decoded['message'] ?? ('HTTP ' . $http_code . ': ' . $response);
+        return $this->response->setJSON(['success' => false, 'message' => $detail]);
     }
 
     // ──────────────────────────────────────────────────────────────
