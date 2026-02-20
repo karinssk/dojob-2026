@@ -624,6 +624,38 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 /* --- Divider ----------------------------------------------- */
 .divider { height: 1px; background: var(--border); margin: 12px 0; }
 
+/* --- Task list filter chips -------------------------------- */
+.filter-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 0 16px 12px;
+  margin: 0 -16px;
+}
+.filter-scroll::-webkit-scrollbar { display: none; }
+.filter-scroll .chip {
+  flex-shrink: 0;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--label);
+}
+.chip-active {
+  background: var(--blue) !important;
+  color: #fff !important;
+  border-color: var(--blue) !important;
+}
+.filter-divider {
+  width: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+  align-self: stretch;
+  margin: 2px 0;
+}
+
 /* --- Status chips (horizontal scroll row) ------------------ */
 .status-scroll {
   display: flex;

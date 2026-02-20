@@ -94,15 +94,27 @@ class Liff_app extends Security_Controller {
 
     // ── Tasks ──────────────────────────────────────────────────────
     public function tasks() {
-        $user_id = $this->login_user->id;
-        $filter  = $this->request->getGet('filter') ?: 'mine';
+        $user_id   = $this->login_user->id;
+        $filter    = $this->request->getGet('filter') ?: 'mine';
+        $status_id = (int)($this->request->getGet('status_id') ?: 0);
+        $overdue   = $this->request->getGet('overdue') ? 1 : 0;
 
         $where = $filter === 'assigned_by_me'
             ? "t.created_by=$user_id"
             : "t.assigned_to=$user_id";
 
+        if ($status_id) {
+            $where .= " AND t.status_id=$status_id";
+        } else {
+            // Default: hide done tasks; user must explicitly tap Done chip to see them
+            $where .= " AND (ts.key_name IS NULL OR ts.key_name != 'done')";
+        }
+        if ($overdue) $where .= " AND t.deadline IS NOT NULL AND t.deadline > '0000-00-00' AND t.deadline < CURDATE()";
+
+        $order = $overdue ? "t.deadline ASC" : "t.deadline ASC, t.id DESC";
+
         $tasks = $this->db->query(
-            "SELECT t.*, ts.title AS status_title, ts.color AS status_color,
+            "SELECT t.*, ts.title AS status_title, ts.color AS status_color, ts.key_name AS status_key,
                     tp.title AS priority_title, tp.color AS priority_color,
                     CONCAT(u.first_name,' ',u.last_name) AS assigned_name, u.image AS assigned_img,
                     p.title AS project_title
@@ -112,8 +124,8 @@ class Liff_app extends Security_Controller {
              LEFT JOIN rise_users u ON u.id = t.assigned_to
              LEFT JOIN rise_projects p ON p.id = t.project_id
              WHERE $where AND t.deleted=0
-             ORDER BY t.deadline ASC, t.id DESC
-             LIMIT 50"
+             ORDER BY $order
+             LIMIT 100"
         )->getResult();
 
         $this->_attach_task_comment_files($tasks);
@@ -127,6 +139,8 @@ class Liff_app extends Security_Controller {
             'tasks'      => $tasks,
             'statuses'   => $statuses,
             'filter'     => $filter,
+            'status_id'  => $status_id,
+            'overdue'    => $overdue,
         ]);
     }
 

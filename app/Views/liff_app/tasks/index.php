@@ -2,9 +2,30 @@
   <h1>Tasks</h1>
 </div>
 
+<!-- Mine / Assigned tabs -->
 <div class="tabs" data-tabs style="margin-top:0">
-  <button class="tab-btn <?= $filter==='mine' ? 'active':'' ?>" data-tab="mine" onclick="location.href='<?= get_uri('liff/app/tasks?filter=mine') ?>'">งานของฉัน</button>
-  <button class="tab-btn <?= $filter==='assigned_by_me' ? 'active':'' ?>" data-tab="assigned_by_me" onclick="location.href='<?= get_uri('liff/app/tasks?filter=assigned_by_me') ?>'">มอบหมาย</button>
+  <button class="tab-btn <?= $filter==='mine' ? 'active':'' ?>" onclick="location.href='<?= get_uri('liff/app/tasks?filter=mine') ?>'">งานของฉัน</button>
+  <button class="tab-btn <?= $filter==='assigned_by_me' ? 'active':'' ?>" onclick="location.href='<?= get_uri('liff/app/tasks?filter=assigned_by_me') ?>'">มอบหมาย</button>
+</div>
+
+<!-- Filter chips -->
+<?php
+$base = get_uri('liff/app/tasks') . '?filter=' . $filter;
+$noFilter  = !$status_id && !$overdue;
+?>
+<div class="filter-scroll">
+  <button class="chip <?= $noFilter ? 'chip-active' : '' ?>" onclick="location.href='<?= $base ?>'">ยังไม่เสร็จ</button>
+  <button class="chip <?= $overdue ? 'chip-active' : '' ?>" onclick="location.href='<?= $base . '&overdue=1' ?>'">⚠ เกินกำหนด</button>
+  <div class="filter-divider"></div>
+  <?php foreach ($statuses as $s):
+    $sc = $s->color ?: '#6C8EF5';
+    $isActive = $status_id == $s->id;
+  ?>
+  <button class="chip" style="background:<?= $isActive ? $sc : $sc.'22' ?>;color:<?= $isActive ? '#fff' : $sc ?>"
+    onclick="location.href='<?= $base . '&status_id=' . $s->id ?>'">
+    <?= esc($s->title) ?>
+  </button>
+  <?php endforeach; ?>
 </div>
 
 <?php if (empty($tasks)): ?>
@@ -15,7 +36,7 @@
 <?php foreach ($tasks as $t):
   $color = $t->status_color ?: '#6C8EF5';
   $bg    = $color . '22';
-  $is_overdue = $t->deadline && strtotime($t->deadline) < time();
+  $is_overdue = $t->deadline && strtotime($t->deadline) < time() && ($t->status_key ?? '') !== 'done';
 ?>
 <div class="task-card" onclick="location.href='<?= get_uri('liff/app/tasks/' . $t->id) ?>'">
   <div class="task-card-top">
