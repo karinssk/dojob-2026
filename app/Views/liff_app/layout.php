@@ -59,7 +59,7 @@
   </a>
 </nav>
 
-<script src="<?= get_file_uri('assets/js/liff-app.js') ?>"></script>
+<script src="<?= get_file_uri('assets/js/liff-app.js') ?>?v=<?= time() ?>"></script>
 <?php if (!empty($extra_js)): ?>
 <script><?= $extra_js ?></script>
 <?php endif; ?>
