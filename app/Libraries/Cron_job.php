@@ -992,32 +992,59 @@ class Cron_job {
     //  LIFF: แจ้งเตือนงานค้าง (scheduled reminder)
     // ══════════════════════════════════════════════════════════════════
     private function liff_task_reminder() {
-        if (get_setting('liff_reminder_enabled') !== '1') { return; }
+        $enabled = get_setting('liff_reminder_enabled');
+        if ($enabled !== '1') {
+            $this->_liff_log("REMINDER: disabled (value='" . $enabled . "'), skipped");
+            return;
+        }
 
-        // Check if current local time matches any configured reminder slot (within the hour)
-        $times   = json_decode(get_setting('liff_reminder_times') ?: '[]', true) ?: [];
-        $repeat  = get_setting('liff_reminder_repeat') === '1';
-        $days    = json_decode(get_setting('liff_reminder_days')  ?: '[]', true) ?: [1,2,3,4,5];
+        $times  = json_decode(get_setting('liff_reminder_times') ?: '[]', true) ?: [];
+        $repeat = get_setting('liff_reminder_repeat') === '1';
+        $days   = json_decode(get_setting('liff_reminder_days')  ?: '[]', true) ?: [1,2,3,4,5];
 
-        if (!$this->_is_notify_time_now($times, $days, $repeat, 'liff_reminder_last_sent')) { return; }
+        $reason = '';
+        if (!$this->_is_notify_time_now($times, $days, $repeat, 'liff_reminder_last_sent', $reason)) {
+            $this->_liff_log("REMINDER: skipped — {$reason}");
+            return;
+        }
 
-        $this->_send_task_reminder_flex(false);
-        $this->ci->Settings_model->save_setting('liff_reminder_last_sent', date('Y-m-d H:i:s'));
+        $this->_liff_log("REMINDER: firing — {$reason}");
+        try {
+            $count = $this->_send_task_reminder_flex(false);
+            $this->ci->Settings_model->save_setting('liff_reminder_last_sent', date('Y-m-d H:i:s'));
+            $this->_liff_log("REMINDER: sent OK — {$count} task(s)");
+        } catch (\Exception $e) {
+            $this->_liff_log("REMINDER: ERROR — " . $e->getMessage());
+        }
     }
 
     // ══════════════════════════════════════════════════════════════════
     //  LIFF: สรุปงานเสร็จ 7 วัน (scheduled summary)
     // ══════════════════════════════════════════════════════════════════
     private function liff_task_summary() {
-        if (get_setting('liff_summary_enabled') !== '1') { return; }
+        $enabled = get_setting('liff_summary_enabled');
+        if ($enabled !== '1') {
+            $this->_liff_log("SUMMARY: disabled (value='" . $enabled . "'), skipped");
+            return;
+        }
 
         $times = [get_setting('liff_summary_time') ?: '08:00'];
         $days  = json_decode(get_setting('liff_summary_days') ?: '[]', true) ?: [1,2,3,4,5];
 
-        if (!$this->_is_notify_time_now($times, $days, true, 'liff_summary_last_sent')) { return; }
+        $reason = '';
+        if (!$this->_is_notify_time_now($times, $days, true, 'liff_summary_last_sent', $reason)) {
+            $this->_liff_log("SUMMARY: skipped — {$reason}");
+            return;
+        }
 
-        $this->_send_task_summary_flex(false);
-        $this->ci->Settings_model->save_setting('liff_summary_last_sent', date('Y-m-d H:i:s'));
+        $this->_liff_log("SUMMARY: firing — {$reason}");
+        try {
+            $count = $this->_send_task_summary_flex(false);
+            $this->ci->Settings_model->save_setting('liff_summary_last_sent', date('Y-m-d H:i:s'));
+            $this->_liff_log("SUMMARY: sent OK — {$count} task(s)");
+        } catch (\Exception $e) {
+            $this->_liff_log("SUMMARY: ERROR — " . $e->getMessage());
+        }
     }
 
     // ── Public test entry-points (called from Liff_settings controller) ──
@@ -1396,17 +1423,25 @@ class Cron_job {
      * @param bool   $repeat     if false, only fire once per slot ever (not needed here but kept)
      * @param string $last_key   settings key that stores last-sent datetime
      */
-    private function _is_notify_time_now($times, $days, $repeat, $last_key) {
-        if (empty($times)) { return false; }
+    private function _is_notify_time_now($times, $days, $repeat, $last_key, &$reason = '') {
+        if (empty($times)) { $reason = 'no times configured'; return false; }
 
-        $now_ts  = time(); // local server time
-        $dow     = (int)date('N'); // 1=Mon, 7=Sun
+        $dow = (int)date('N'); // 1=Mon, 7=Sun
 
-        if (!in_array($dow, $days)) { return false; }
+        if (!in_array($dow, $days)) {
+            $reason = "today=day{$dow} not in allowed=[" . implode(',', $days) . "]";
+            return false;
+        }
 
         // Check last sent — skip if already sent within 45 min
         $last_sent = get_setting($last_key);
-        if ($last_sent && (time() - strtotime($last_sent)) < 2700) { return false; }
+        if ($last_sent) {
+            $diff = time() - strtotime($last_sent);
+            if ($diff < 2700) {
+                $reason = "cooldown: sent {$diff}s ago (need 2700s), last={$last_sent}";
+                return false;
+            }
+        }
 
         $now_hm  = date('H:i');
         $now_min = (int)date('H') * 60 + (int)date('i');
@@ -1415,12 +1450,26 @@ class Cron_job {
             $parts = explode(':', $t);
             if (count($parts) < 2) { continue; }
             $slot_min = (int)$parts[0] * 60 + (int)$parts[1];
-            // Match if within ±30 minutes of slot
-            if (abs($now_min - $slot_min) <= 30) {
+            $diff = abs($now_min - $slot_min);
+            if ($diff <= 30) {
+                $reason = "matched slot={$t} now={$now_hm} diff={$diff}min";
                 return true;
             }
         }
+
+        $reason = "no match: now={$now_hm}({$now_min}min) slots=[" . implode(',', $times) . "]";
         return false;
+    }
+
+    /** Prepend a line to the LIFF notification debug log (keeps last 80 lines) */
+    private function _liff_log($msg) {
+        $raw   = get_setting('liff_notify_debug_log') ?: '';
+        $lines = $raw ? explode("\n", $raw) : [];
+        array_unshift($lines, '[' . date('d/m H:i:s') . '] ' . $msg);
+        $this->ci->Settings_model->save_setting(
+            'liff_notify_debug_log',
+            implode("\n", array_slice($lines, 0, 80))
+        );
     }
 
     private function _get_liff_room_ids() {

@@ -283,6 +283,25 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
 
   </div>
 
+  <!-- Debug Log -->
+  <div style="margin-top:16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:12px;font-weight:600;color:#64748B">📋 Debug Log</span>
+      <button type="button" onclick="loadNotifyLog()"
+        style="background:none;border:1px solid #CBD5E1;border-radius:5px;cursor:pointer;color:#64748B;font-size:11px;padding:2px 8px">
+        ↻ โหลด
+      </button>
+      <button type="button" onclick="clearNotifyLog()"
+        style="background:none;border:1px solid #FECACA;border-radius:5px;cursor:pointer;color:#EF4444;font-size:11px;padding:2px 8px">
+        ล้าง
+      </button>
+    </div>
+    <pre id="lnf-debug-log"
+      style="background:#0F172A;color:#94A3B8;font-size:11px;line-height:1.6;padding:12px;border-radius:8px;
+             max-height:220px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;margin:0">
+กดปุ่ม ↻ โหลด เพื่อดู log</pre>
+  </div>
+
   <!-- Cron setup hint (shown when cron not running) -->
   <div id="lnf-cron-hint" style="display:none;margin-top:14px;padding:12px 16px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;font-size:12px;color:#92400E">
     <b>⚠️ Cron Job ยังไม่ทำงาน</b><br>
@@ -579,6 +598,38 @@ function forceRun(type) {
   });
 }
 
+// ── Debug Log ─────────────────────────────────────────────────────
+function loadNotifyLog() {
+  var el = document.getElementById('lnf-debug-log');
+  el.textContent = 'กำลังโหลด...';
+  $.ajax({
+    url: '<?= get_uri('liff_settings/get_liff_notify_log') ?>',
+    method: 'GET',
+    dataType: 'json',
+    success: function(r) {
+      el.textContent = r.log || '(ยังไม่มี log — รอ cron รอบถัดไป)';
+      // Highlight lines
+      el.innerHTML = (r.log || '(ยังไม่มี log — รอ cron รอบถัดไป)')
+        .replace(/\[.*?\]/g, function(m){ return '<span style="color:#64748B">' + m + '</span>'; })
+        .replace(/matched|sent OK|firing/g, function(m){ return '<span style="color:#4ADE80">' + m + '</span>'; })
+        .replace(/skipped|disabled|ERROR/g, function(m){ return '<span style="color:#F87171">' + m + '</span>'; })
+        .replace(/cooldown|no match|not in/g, function(m){ return '<span style="color:#FB923C">' + m + '</span>'; });
+    },
+    error: function(){ el.textContent = 'โหลดไม่สำเร็จ'; }
+  });
+}
+
+function clearNotifyLog() {
+  $.ajax({
+    url: '<?= get_uri('liff_settings/clear_liff_notify_log') ?>',
+    method: 'POST',
+    dataType: 'json',
+    success: function() {
+      document.getElementById('lnf-debug-log').textContent = '(log ถูกล้างแล้ว)';
+    }
+  });
+}
+
 // Auto-load on tab open
-$(document).ready(function(){ loadQuota(); loadScheduleStatus(); });
+$(document).ready(function(){ loadQuota(); loadScheduleStatus(); loadNotifyLog(); });
 </script>

@@ -460,6 +460,19 @@ class Liff_settings extends Security_Controller {
         }
     }
 
+    // ──────────────────────────────────────────────────────────────
+    // Get/clear LIFF notification debug log
+    // ──────────────────────────────────────────────────────────────
+    public function get_liff_notify_log() {
+        $log = get_setting('liff_notify_debug_log') ?: '';
+        return $this->response->setJSON(['success' => true, 'log' => $log]);
+    }
+
+    public function clear_liff_notify_log() {
+        $this->Settings_model->save_setting('liff_notify_debug_log', '');
+        return $this->response->setJSON(['success' => true]);
+    }
+
     /** Calculate next scheduled slot from a list of times and allowed ISO weekdays (1=Mon,7=Sun) */
     private function _calc_next_slot($times, $days) {
         if (empty($times) || empty($days)) { return null; }
