@@ -229,6 +229,71 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
 
 </form>
 
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 4 — Schedule Status
+═══════════════════════════════════════════════════════════ -->
+<div style="margin-top:32px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <h6 style="margin:0;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em">
+      📅 สถานะการส่งแจ้งเตือนตามกำหนดเวลา
+    </h6>
+    <button type="button" onclick="loadScheduleStatus()"
+      style="background:none;border:1px solid #CBD5E1;border-radius:6px;cursor:pointer;color:#64748B;font-size:12px;padding:4px 10px">
+      ↻ รีเฟรช
+    </button>
+  </div>
+
+  <!-- Cron health row -->
+  <div id="lnf-cron-banner" style="display:none;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px"></div>
+
+  <!-- Status cards -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="lnf-status-grid">
+
+    <!-- Reminder card -->
+    <div style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden">
+      <div style="background:#FFF7ED;padding:10px 14px;border-bottom:1px solid #FED7AA">
+        <div style="font-size:12px;font-weight:700;color:#92400E">🔔 แจ้งเตือนงานค้าง</div>
+      </div>
+      <div style="padding:12px 14px;font-size:12px" id="lnf-reminder-status">
+        <div style="color:#94A3B8">กำลังโหลด...</div>
+      </div>
+      <div style="padding:0 14px 12px">
+        <button type="button" class="btn btn-xs btn-default" onclick="forceRun('reminder')" id="btn-force-reminder">
+          ส่งเดี๋ยวนี้ &amp; อัปเดตเวลา
+        </button>
+        <span id="force-reminder-result" style="margin-left:8px;font-size:12px"></span>
+      </div>
+    </div>
+
+    <!-- Summary card -->
+    <div style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden">
+      <div style="background:#F0FDF4;padding:10px 14px;border-bottom:1px solid #BBF7D0">
+        <div style="font-size:12px;font-weight:700;color:#14532D">📊 รายงานสรุปงาน</div>
+      </div>
+      <div style="padding:12px 14px;font-size:12px" id="lnf-summary-status">
+        <div style="color:#94A3B8">กำลังโหลด...</div>
+      </div>
+      <div style="padding:0 14px 12px">
+        <button type="button" class="btn btn-xs btn-default" onclick="forceRun('summary')" id="btn-force-summary">
+          ส่งเดี๋ยวนี้ &amp; อัปเดตเวลา
+        </button>
+        <span id="force-summary-result" style="margin-left:8px;font-size:12px"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Cron setup hint (shown when cron not running) -->
+  <div id="lnf-cron-hint" style="display:none;margin-top:14px;padding:12px 16px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;font-size:12px;color:#92400E">
+    <b>⚠️ Cron Job ยังไม่ทำงาน</b><br>
+    การแจ้งเตือนตามเวลาต้องการ Cron Job ของระบบ กรุณาตั้งค่า Cron ให้เรียก URL นี้ทุก 30 นาที:<br>
+    <code style="display:inline-block;margin-top:6px;background:#fff;padding:4px 8px;border-radius:4px;border:1px solid #FDE68A">
+      <?= get_uri('cron_job/index') ?>
+    </code>
+    <br><span style="color:#B45309;margin-top:4px;display:block">หรือกด "ส่งเดี๋ยวนี้" ด้านบนเพื่อบังคับส่งทันที</span>
+  </div>
+</div>
+
 <!-- ─── Styles ───────────────────────────────────────────────────── -->
 <style>
 /* Toggle switch */
@@ -422,6 +487,98 @@ function testFallback() {
   });
 }
 
+// ── Schedule Status ──────────────────────────────────────────────
+function loadScheduleStatus() {
+  $.ajax({
+    url: '<?= get_uri('liff_settings/get_liff_notification_schedule_status') ?>',
+    method: 'GET',
+    dataType: 'json',
+    success: function(r) {
+      if (!r.success) return;
+      var d = r.data;
+
+      // Cron banner
+      var banner = document.getElementById('lnf-cron-banner');
+      var hint   = document.getElementById('lnf-cron-hint');
+      banner.style.display = 'block';
+      if (d.cron_ok) {
+        banner.style.background = '#F0FDF4';
+        banner.style.border     = '1px solid #BBF7D0';
+        banner.style.color      = '#14532D';
+        banner.innerHTML = '✅ Cron Job ทำงานปกติ — รันล่าสุดเมื่อ ' + (d.last_hourly_ago || d.last_hourly_run || '—');
+        hint.style.display = 'none';
+      } else {
+        banner.style.background = '#FEF2F2';
+        banner.style.border     = '1px solid #FECACA';
+        banner.style.color      = '#991B1B';
+        banner.innerHTML = '❌ Cron Job ไม่ได้รันมากกว่า 2 ชั่วโมง' + (d.last_hourly_run ? ' (ครั้งสุดท้าย: ' + d.last_hourly_run + ')' : ' (ยังไม่เคยรัน)');
+        hint.style.display = 'block';
+      }
+
+      // Reminder card
+      var rEl = document.getElementById('lnf-reminder-status');
+      if (!d.reminder_enabled) {
+        rEl.innerHTML = '<span style="color:#94A3B8">ปิดอยู่</span>';
+      } else {
+        rEl.innerHTML = renderStatusRows(d.reminder_last, d.reminder_next);
+      }
+
+      // Summary card
+      var sEl = document.getElementById('lnf-summary-status');
+      if (!d.summary_enabled) {
+        sEl.innerHTML = '<span style="color:#94A3B8">ปิดอยู่</span>';
+      } else {
+        sEl.innerHTML = renderStatusRows(d.summary_last, d.summary_next);
+      }
+    }
+  });
+}
+
+function renderStatusRows(lastSent, nextTime) {
+  var html = '';
+  if (lastSent) {
+    html += '<div style="display:flex;gap:6px;margin-bottom:6px">' +
+      '<span style="color:#4F7DF3;min-width:24px">✅</span>' +
+      '<div><div style="color:#64748B;font-size:11px">ส่งล่าสุด</div>' +
+      '<div style="font-weight:600;color:#1E293B">' + lastSent.replace(' ','&nbsp;') + '</div></div>' +
+      '</div>';
+  } else {
+    html += '<div style="color:#94A3B8;margin-bottom:6px">ยังไม่เคยส่งตามกำหนด</div>';
+  }
+  if (nextTime) {
+    html += '<div style="display:flex;gap:6px">' +
+      '<span style="color:#F97316;min-width:24px">⏰</span>' +
+      '<div><div style="color:#64748B;font-size:11px">รอบถัดไป</div>' +
+      '<div style="font-weight:600;color:#1E293B">' + nextTime + '</div></div>' +
+      '</div>';
+  } else {
+    html += '<div style="color:#94A3B8;font-size:11px">ไม่มีวันที่กำหนด</div>';
+  }
+  return html;
+}
+
+function forceRun(type) {
+  var resultEl = document.getElementById('force-' + type + '-result');
+  resultEl.innerHTML = '<i>กำลังส่ง...</i>';
+  $.ajax({
+    url: '<?= get_uri('liff_settings/force_run_liff_scheduled') ?>',
+    method: 'POST',
+    data: { type: type },
+    dataType: 'json',
+    success: function(r) {
+      resultEl.innerHTML = (r.success ? '✅ ' : '❌ ') + r.message;
+      setTimeout(function() { resultEl.innerHTML = ''; }, 6000);
+      if (r.success) {
+        setTimeout(loadScheduleStatus, 500);
+        setTimeout(loadQuota, 1500);
+      }
+    },
+    error: function(xhr) {
+      resultEl.innerHTML = '❌ AJAX error (' + xhr.status + ')';
+    }
+  });
+}
+
 // Auto-load on tab open
-$(document).ready(function(){ loadQuota(); });
+$(document).ready(function(){ loadQuota(); loadScheduleStatus(); });
 </script>

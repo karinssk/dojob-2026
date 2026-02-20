@@ -399,6 +399,99 @@ class Liff_settings extends Security_Controller {
         return $this->response->setJSON(['success' => true, 'data' => $data]);
     }
 
+    // ──────────────────────────────────────────────────────────────
+    // Get schedule status for notifications tab (AJAX)
+    // ──────────────────────────────────────────────────────────────
+    public function get_liff_notification_schedule_status() {
+        $now = time();
+        $last_hourly = (int)get_setting('last_hourly_job_time');
+        $cron_ok = $last_hourly && ($now - $last_hourly) < 7200; // ran within 2 hours
+
+        $reminder_enabled = get_setting('liff_reminder_enabled') === '1';
+        $r_times = json_decode(get_setting('liff_reminder_times') ?: '[]', true) ?: [];
+        $r_days  = json_decode(get_setting('liff_reminder_days')  ?: '[]', true) ?: [];
+        $reminder_last = get_setting('liff_reminder_last_sent');
+
+        $summary_enabled = get_setting('liff_summary_enabled') === '1';
+        $s_time = get_setting('liff_summary_time') ?: '08:00';
+        $s_days = json_decode(get_setting('liff_summary_days') ?: '[]', true) ?: [];
+        $summary_last = get_setting('liff_summary_last_sent');
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => [
+                'cron_ok'          => $cron_ok,
+                'last_hourly_run'  => $last_hourly ? date('d/m/Y H:i:s', $last_hourly) : null,
+                'last_hourly_ago'  => $last_hourly ? $this->_human_diff($now - $last_hourly) : null,
+                'reminder_enabled' => $reminder_enabled,
+                'reminder_last'    => $reminder_last ?: null,
+                'reminder_next'    => $reminder_enabled ? $this->_calc_next_slot($r_times, $r_days) : null,
+                'summary_enabled'  => $summary_enabled,
+                'summary_last'     => $summary_last ?: null,
+                'summary_next'     => $summary_enabled ? $this->_calc_next_slot([$s_time], $s_days) : null,
+            ],
+        ]);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Force-run scheduled notification now (bypasses time check)
+    // ──────────────────────────────────────────────────────────────
+    public function force_run_liff_scheduled() {
+        $type = $this->request->getPost('type'); // 'reminder' | 'summary'
+        $has_token = get_setting('liff_line_channel_access_token') || get_setting('line_channel_access_token');
+        if (!$has_token) {
+            return $this->response->setJSON(['success' => false, 'message' => 'ยังไม่ได้ตั้งค่า Channel Access Token']);
+        }
+
+        try {
+            $cron = new \App\Libraries\Cron_job();
+            if ($type === 'reminder') {
+                $count = $cron->run_task_reminder_test();
+                $this->Settings_model->save_setting('liff_reminder_last_sent', date('Y-m-d H:i:s'));
+                $msg = $count > 0 ? "ส่งแจ้งเตือนสำเร็จ ({$count} ราย)" : 'ไม่มีงานค้าง (ไม่ส่ง)';
+            } else {
+                $count = $cron->run_task_summary_test();
+                $this->Settings_model->save_setting('liff_summary_last_sent', date('Y-m-d H:i:s'));
+                $msg = $count > 0 ? "ส่งรายงานสำเร็จ ({$count} รายการ)" : 'ไม่มีงานเสร็จใน 7 วัน (ไม่ส่ง)';
+            }
+            return $this->response->setJSON(['success' => true, 'message' => $msg]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /** Calculate next scheduled slot from a list of times and allowed ISO weekdays (1=Mon,7=Sun) */
+    private function _calc_next_slot($times, $days) {
+        if (empty($times) || empty($days)) { return null; }
+        $now = time();
+        $min_future = PHP_INT_MAX;
+        for ($d = 0; $d <= 7; $d++) {
+            $check_date = strtotime('+' . $d . ' days', strtotime(date('Y-m-d')));
+            $dow = (int)date('N', $check_date);
+            if (!in_array($dow, $days)) { continue; }
+            foreach ($times as $t) {
+                $parts = explode(':', $t);
+                if (count($parts) < 2) { continue; }
+                $slot_ts = mktime((int)$parts[0], (int)$parts[1], 0,
+                    (int)date('n', $check_date),
+                    (int)date('j', $check_date),
+                    (int)date('Y', $check_date));
+                if ($slot_ts > $now && $slot_ts < $min_future) {
+                    $min_future = $slot_ts;
+                }
+            }
+        }
+        return $min_future === PHP_INT_MAX ? null : date('d/m/Y H:i', $min_future);
+    }
+
+    /** Human-readable time diff in Thai */
+    private function _human_diff($seconds) {
+        if ($seconds < 60)   { return $seconds . ' วินาทีที่แล้ว'; }
+        if ($seconds < 3600) { return floor($seconds / 60) . ' นาทีที่แล้ว'; }
+        if ($seconds < 86400){ return floor($seconds / 3600) . ' ชั่วโมงที่แล้ว'; }
+        return floor($seconds / 86400) . ' วันที่แล้ว';
+    }
+
     private function _decode_json_setting($key) {
         $raw = get_setting($key);
         if (!$raw) { return []; }
