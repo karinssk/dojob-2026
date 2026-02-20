@@ -5,7 +5,28 @@
 <div id="form-alert"></div>
 
 <form id="task-form" onsubmit="submitTask(event)">
-  <?php $tid = $task->id ?? 0; // used throughout this form ?>
+  <?php
+    $tid = $task->id ?? 0; // used throughout this form
+
+    // ── New task defaults (only applied when creating, not editing) ──
+    $today = date('Y-m-d');
+    $default_start_date = '09:00';   // time strings used below
+    $default_end_time   = '17:30';
+
+    // Resolve values: editing → saved value | new → default
+    $val_start_date = $tid ? (($task->start_date ?? '') ? date('Y-m-d', strtotime($task->start_date)) : '') : $today;
+    $val_start_time = $tid ? esc($task->start_time ?? '')  : $default_start_date;
+    $val_deadline   = $tid ? (($task->deadline   ?? '') ? date('Y-m-d', strtotime($task->deadline))   : '') : $today;
+    $val_end_time   = $tid ? esc($task->end_time  ?? '')  : $default_end_time;
+
+    // "To Do" status: find id where key_name='to_do'; fall back to first status
+    $default_status_id = 0;
+    foreach ($statuses as $s) {
+        if (($s->key_name ?? '') === 'to_do') { $default_status_id = $s->id; break; }
+    }
+    if (!$default_status_id && !empty($statuses)) { $default_status_id = $statuses[0]->id; }
+    $val_status_id = $tid ? ($task->status_id ?? $default_status_id) : $default_status_id;
+  ?>
   <input type="hidden" name="id" value="<?= $tid ?>">
 
   <div class="form-group">
@@ -81,22 +102,22 @@
   <div class="d-flex gap-8">
     <div class="form-group flex-1">
       <label class="form-label">วันเริ่ม</label>
-      <input class="form-control" type="date" name="start_date" value="<?= esc(($task->start_date ?? '') ? date('Y-m-d', strtotime($task->start_date)) : '') ?>" oninput="updateNotifyPreview()">
+      <input class="form-control" type="date" name="start_date" value="<?= esc($val_start_date) ?>" oninput="updateNotifyPreview()">
     </div>
     <div class="form-group flex-1">
       <label class="form-label">เวลาเริ่ม</label>
-      <input class="form-control" type="time" name="start_time" value="<?= esc($task->start_time ?? '') ?>" oninput="updateNotifyPreview()">
+      <input class="form-control" type="time" name="start_time" value="<?= esc($val_start_time) ?>" oninput="updateNotifyPreview()">
     </div>
   </div>
 
   <div class="d-flex gap-8">
     <div class="form-group flex-1">
       <label class="form-label">วันสิ้นสุด</label>
-      <input class="form-control" type="date" name="deadline" value="<?= esc(($task->deadline ?? '') ? date('Y-m-d', strtotime($task->deadline)) : '') ?>" oninput="updateNotifyPreview()">
+      <input class="form-control" type="date" name="deadline" value="<?= esc($val_deadline) ?>" oninput="updateNotifyPreview()">
     </div>
     <div class="form-group flex-1">
       <label class="form-label">เวลาสิ้นสุด</label>
-      <input class="form-control" type="time" name="end_time" value="<?= esc($task->end_time ?? '') ?>" oninput="updateNotifyPreview()">
+      <input class="form-control" type="time" name="end_time" value="<?= esc($val_end_time) ?>" oninput="updateNotifyPreview()">
     </div>
   </div>
 
@@ -126,7 +147,7 @@
       <label class="form-label">สถานะ</label>
       <select class="form-control" name="status_id">
         <?php foreach ($statuses as $s): ?>
-        <option value="<?= $s->id ?>" <?= ($task->status_id ?? 0) == $s->id ? 'selected' : '' ?>><?= esc($s->title) ?></option>
+        <option value="<?= $s->id ?>" <?= $val_status_id == $s->id ? 'selected' : '' ?>><?= esc($s->title) ?></option>
         <?php endforeach; ?>
       </select>
     </div>
