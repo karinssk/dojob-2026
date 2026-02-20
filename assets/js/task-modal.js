@@ -2,11 +2,11 @@
  * Task Modal Component - Jira-style task editing modal
  */
 
-console.log("🔄 Loading TaskModal class...");
+console.log(" Loading TaskModal class...");
 
 class TaskModal {
   constructor() {
-    console.log("🔄 TaskModal constructor called");
+    console.log(" TaskModal constructor called");
     console.log("🔍 Constructor - this:", this);
     this.currentTask = null;
     this.currentUser = null;
@@ -728,7 +728,7 @@ class TaskModal {
       // Show loading state
       this.showLoading();
 
-      console.log("🔄 Loading task data...");
+      console.log(" Loading task data...");
       // Load current user and task data
       await Promise.all([this.loadCurrentUser(), this.loadTaskData(taskId)]);
 
@@ -774,7 +774,7 @@ class TaskModal {
 
   async loadCurrentUser() {
     try {
-      console.log("🔄 Loading current user from local API...");
+      console.log(" Loading current user from local API...");
 
       // First check authentication status
       const authResponse = await fetch(
@@ -826,13 +826,13 @@ class TaskModal {
 
         // If not authenticated, redirect to login
         if (!result.authenticated) {
-          console.log("🔄 Redirecting to login page...");
+          console.log(" Redirecting to login page...");
           window.location.href = "/signin";
           return;
         }
 
         // Fallback to external API if local fails but user is authenticated
-        console.log("🔄 Falling back to external API...");
+        console.log(" Falling back to external API...");
         const externalResponse = await fetch(`${this.apiBase}/current-user`, {
           credentials: "include",
         });
@@ -858,10 +858,10 @@ class TaskModal {
 
   async loadTaskData(taskId) {
     try {
-      console.log(`🔄 Loading task data for ID: ${taskId}`);
+      console.log(` Loading task data for ID: ${taskId}`);
 
       // Try local API first since it has session access
-      console.log(`🔄 Trying local API first...`);
+      console.log(` Trying local API first...`);
       const localUrl = `${this.localApiBase}/api/task/${taskId}`;
       console.log(`🔗 Local API URL: ${localUrl}`);
 
@@ -912,7 +912,7 @@ class TaskModal {
 
       // Fallback to external API
       try {
-        console.log(`🔄 Trying external API...`);
+        console.log(` Trying external API...`);
         const externalUrl = `${this.apiBase}/task/${taskId}`;
         console.log(`🔗 External API URL: ${externalUrl}`);
 
@@ -979,7 +979,7 @@ class TaskModal {
       throw new Error("Invalid task data for modal population");
     }
 
-    console.log("🔄 Populating modal with task data:", {
+    console.log(" Populating modal with task data:", {
       id: task.id,
       title: task.title,
       status_id: task.status_id,
@@ -1352,7 +1352,7 @@ class TaskModal {
 
       if (taskIdFromModal) {
         console.log(
-          "🔄 Attempting to reload task from modal attribute:",
+          " Attempting to reload task from modal attribute:",
           taskIdFromModal
         );
         try {
@@ -1374,7 +1374,7 @@ class TaskModal {
 
     try {
       console.log(
-        "🔄 Deleting image:",
+        " Deleting image:",
         filename,
         "from task:",
         this.currentTask.id
@@ -1827,7 +1827,7 @@ class TaskModal {
       if (taskKey) {
         const taskIdFromModal = taskKey.replace("TASK-", "");
         console.log(
-          "🔄 Attempting to reload task from modal:",
+          " Attempting to reload task from modal:",
           taskIdFromModal
         );
 
@@ -1856,7 +1856,7 @@ class TaskModal {
 
       // Try to reload current user
       try {
-        console.log("🔄 Attempting to reload current user...");
+        console.log(" Attempting to reload current user...");
         await this.loadCurrentUser();
         if (this.currentUser && this.currentUser.id) {
           console.log(" User reloaded successfully, retrying comment");
@@ -2000,7 +2000,7 @@ class TaskModal {
     }
 
     try {
-      console.log("🔄 Reloading task:", this.currentTask.id);
+      console.log(" Reloading task:", this.currentTask.id);
 
       // Try local API first
       let response = await fetch(
@@ -2095,7 +2095,7 @@ class TaskModal {
 
       if (taskIdFromModal) {
         console.log(
-          "🔄 Found task ID in modal attribute, attempting to load task:",
+          " Found task ID in modal attribute, attempting to load task:",
           taskIdFromModal
         );
         try {
@@ -2118,7 +2118,7 @@ class TaskModal {
     }
 
     try {
-      console.log("🔄 Loading subtasks for task:", this.currentTask.id);
+      console.log(" Loading subtasks for task:", this.currentTask.id);
 
       // Try local API first since it has session access
       let response = await fetch(
@@ -2300,7 +2300,7 @@ class TaskModal {
 
       if (taskIdFromModal) {
         console.log(
-          "🔄 Found task ID in modal attribute, attempting to load task:",
+          " Found task ID in modal attribute, attempting to load task:",
           taskIdFromModal
         );
         try {
@@ -2334,8 +2334,8 @@ class TaskModal {
         assigned_to: 0, // Unassigned
       };
 
-      console.log("🔄 Creating subtask for task ID:", this.currentTask.id);
-      console.log("🔄 Subtask data:", subtaskData);
+      console.log(" Creating subtask for task ID:", this.currentTask.id);
+      console.log(" Subtask data:", subtaskData);
 
       // Try local API first (more reliable)
       const localUrl = `${this.localApiBase}/api/create_subtask/${this.currentTask.id}`;
@@ -2537,7 +2537,7 @@ class TaskModal {
       const updateData = {};
       updateData[field] = value;
 
-      console.log("🔄 Updating subtask field:", {
+      console.log(" Updating subtask field:", {
         subtaskId,
         field,
         value,
@@ -3088,7 +3088,7 @@ console.log(
 // Initialize global instance when DOM is ready
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", function () {
-    console.log("🔄 DOM ready, initializing global TaskModal instance");
+    console.log(" DOM ready, initializing global TaskModal instance");
     try {
       window.taskModal = window.getTaskModalInstance();
       console.log(" Global TaskModal instance ready");
@@ -3101,7 +3101,7 @@ if (document.readyState === "loading") {
   });
 } else {
   // DOM already ready
-  console.log("🔄 DOM already ready, initializing global TaskModal instance");
+  console.log(" DOM already ready, initializing global TaskModal instance");
   try {
     window.taskModal = window.getTaskModalInstance();
     console.log(" Global TaskModal instance ready");

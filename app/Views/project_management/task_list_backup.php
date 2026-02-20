@@ -1534,7 +1534,7 @@ $(document).ready(function() {
                 dragClass: 'dragging',
                 filter: 'th:first-child', // Don't allow dragging the checkbox column
                 onStart: function(evt) {
-                    console.log('🔄 Started dragging column:', evt.item.dataset.column);
+                    console.log(' Started dragging column:', evt.item.dataset.column);
                 },
                 onEnd: function(evt) {
                     console.log(' Finished dragging column');
@@ -1545,7 +1545,7 @@ $(document).ready(function() {
     };
     
     window.reorderTableColumns = function(oldIndex, newIndex) {
-        console.log(`🔄 Reordering column from ${oldIndex} to ${newIndex}`);
+        console.log(` Reordering column from ${oldIndex} to ${newIndex}`);
         
         // Reorder all table body cells to match header
         $('#task-table tbody tr').each(function() {
@@ -1585,7 +1585,7 @@ $(document).ready(function() {
     };
     
     window.sortColumn = function(columnName, direction) {
-        console.log(`🔄 Sorting column ${columnName} ${direction}`);
+        console.log(` Sorting column ${columnName} ${direction}`);
         
         const $table = $('#task-table');
         const $tbody = $table.find('tbody');
@@ -1938,7 +1938,7 @@ $(document).ready(function() {
                 dragClass: 'dragging',
                 filter: 'th:first-child', // Don't allow dragging the checkbox column
                 onStart: function(evt) {
-                    console.log('🔄 Started dragging column:', evt.item.dataset.column);
+                    console.log(' Started dragging column:', evt.item.dataset.column);
                 },
                 onEnd: function(evt) {
                     console.log(' Finished dragging column');
@@ -1949,7 +1949,7 @@ $(document).ready(function() {
     };
     
     window.reorderTableColumns = function(oldIndex, newIndex) {
-        console.log(`🔄 Reordering column from ${oldIndex} to ${newIndex}`);
+        console.log(` Reordering column from ${oldIndex} to ${newIndex}`);
         
         // Reorder all table body cells to match header
         $('#task-table tbody tr').each(function() {
@@ -1989,7 +1989,7 @@ $(document).ready(function() {
     };
     
     window.sortColumn = function(columnName, direction) {
-        console.log(`🔄 Sorting column ${columnName} ${direction}`);
+        console.log(` Sorting column ${columnName} ${direction}`);
         
         const $table = $('#task-table');
         const $tbody = $table.find('tbody');
@@ -2164,7 +2164,7 @@ $(document).ready(function() {
     
     // Add function to reset table customization
     window.resetTableCustomization = function() {
-        console.log('🔄 Resetting table customization...');
+        console.log(' Resetting table customization...');
         
         // Show all columns first
         $('.draggable-column.table-column-hidden').each(function() {
@@ -2266,7 +2266,7 @@ $(document).ready(function() {
             $(this).addClass('resizing');
             $('body').addClass('col-resize');
             
-            console.log('🔄 Started resizing column:', currentColumn.data('column'));
+            console.log(' Started resizing column:', currentColumn.data('column'));
         });
         
         $(document).on('mousemove', function(e) {
@@ -2365,7 +2365,7 @@ $(document).ready(function() {
     
     // Apply column order function
     window.applyColumnOrder = function(columnOrder) {
-        console.log('🔄 Applying saved column order:', columnOrder);
+        console.log(' Applying saved column order:', columnOrder);
         
         try {
             const $table = $('#task-table');
@@ -2398,7 +2398,7 @@ $(document).ready(function() {
                 }
             });
             
-            console.log('🔄 New column order indices:', newOrder);
+            console.log(' New column order indices:', newOrder);
             
             // Reorder header columns
             const $originalHeaders = $headerRow.children('th').detach();

@@ -292,7 +292,7 @@ function createStatusDropdownFallback(taskId, $badge) {
 
 // Convert static status badges to clickable dropdowns
 function convertStatusBadgesToDropdowns() {
-  console.log("🔄 Converting static status badges to dropdowns...");
+  console.log(" Converting static status badges to dropdowns...");
 
   // Find all static status badges that aren't already dropdowns
   $(".jira-status-badge, .status-badge").each(function () {
@@ -335,11 +335,11 @@ function convertStatusBadgesToDropdowns() {
 
 // Convert static priority icons to clickable dropdowns using real database data
 function convertPriorityIconsToDropdowns() {
-  console.log("🔄 Converting static priority icons to dropdowns...");
+  console.log(" Converting static priority icons to dropdowns...");
 
   // First, fetch priorities from database with cache busting
   var apiUrl = window.location.origin + '/dojob/update-new-feature/get_priorities_direct.php?v=' + Date.now();
-  console.log("🔄 Fetching priorities from:", apiUrl);
+  console.log(" Fetching priorities from:", apiUrl);
   
   $.ajax({
     url: apiUrl,
@@ -470,7 +470,7 @@ function getPriorityIcon(iconName) {
 
 // Fallback function with hardcoded priorities (in case API fails)
 function renderPriorityDropdownsFallback() {
-  console.log("🔄 Using fallback hardcoded priorities...");
+  console.log(" Using fallback hardcoded priorities...");
 
   // Find all priority cells that contain SVG icons
   $("td").each(function () {

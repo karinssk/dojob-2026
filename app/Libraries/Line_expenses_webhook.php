@@ -945,7 +945,7 @@ class Line_expenses_webhook {
             'header' => array(
                 'type' => 'box', 'layout' => 'vertical', 'backgroundColor' => $header_color, 'paddingAll' => '20px',
                 'contents' => array(
-                    array('type' => 'text', 'text' => '📊 สรุปค่าใช้จ่ายประจำวัน', 'weight' => 'bold', 'color' => '#ffffff', 'size' => 'lg'),
+                    array('type' => 'text', 'text' => ' สรุปค่าใช้จ่ายประจำวัน', 'weight' => 'bold', 'color' => '#ffffff', 'size' => 'lg'),
                     array('type' => 'text', 'text' => "วันที่ {$daily_data['thaiDate']}", 'color' => '#ffffff', 'size' => 'md', 'margin' => 'sm')
                 )
             ),
@@ -1223,7 +1223,7 @@ class Line_expenses_webhook {
                 'type' => 'box', 'layout' => 'vertical', 'backgroundColor' => '#27ACB2',
                 'paddingTop' => '19px', 'paddingAll' => '12px', 'paddingBottom' => '16px',
                 'contents' => array(
-                    array('type' => 'text', 'text' => '📊 รายงานค่าใช้จ่ายประจำเดือน', 'weight' => 'bold', 'color' => '#ffffff', 'size' => 'lg', 'align' => 'center'),
+                    array('type' => 'text', 'text' => ' รายงานค่าใช้จ่ายประจำเดือน', 'weight' => 'bold', 'color' => '#ffffff', 'size' => 'lg', 'align' => 'center'),
                     array('type' => 'text', 'text' => "เดือน{$month_data['monthName']} {$month_data['buddhistYear']}", 'weight' => 'bold', 'color' => '#ffffff', 'size' => 'md', 'align' => 'center')
                 )
             ),

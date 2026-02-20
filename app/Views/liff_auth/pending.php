@@ -55,7 +55,7 @@
   </div>
   <?php endif; ?>
 
-  <button class="btn btn-primary" id="check-btn" onclick="checkStatus()">🔄 ตรวจสอบสถานะ</button>
+  <button class="btn btn-primary" id="check-btn" onclick="checkStatus()"> ตรวจสอบสถานะ</button>
   <p class="status-text" id="status-msg">กดปุ่มเพื่อตรวจสอบว่าได้รับการอนุมัติหรือยัง</p>
 </div>
 
@@ -79,7 +79,7 @@ async function checkStatus() {
     const data = await res.json();
 
     if (data.status === 'approved') {
-      msg.textContent = '✅ ได้รับการอนุมัติแล้ว! กำลังเข้าสู่ระบบ...';
+      msg.textContent = 'ได้รับการอนุมัติแล้ว! กำลังเข้าสู่ระบบ...';
       window.location.href = data.redirect;
       return;
     }
@@ -92,7 +92,7 @@ async function checkStatus() {
     msg.textContent = 'เกิดข้อผิดพลาด กรุณาลองใหม่';
   }
 
-  btn.textContent = '🔄 ตรวจสอบสถานะ';
+  btn.textContent = ' ตรวจสอบสถานะ';
   btn.style.opacity = '1';
   checking = false;
 }

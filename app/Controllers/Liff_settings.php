@@ -132,7 +132,7 @@ class Liff_settings extends Security_Controller {
         if ($debug['http_code'] === 200 && isset($data['displayName'])) {
             return $this->response->setJSON([
                 'success' => true,
-                'message' => '✅ เชื่อมต่อสำเร็จ — Bot: ' . $data['displayName'],
+                'message' => 'เชื่อมต่อสำเร็จ — Bot: ' . $data['displayName'],
                 'debug'   => $debug,
             ]);
         }
@@ -182,7 +182,7 @@ class Liff_settings extends Security_Controller {
             ]);
         }
 
-        $msg = '✅ ค่า LIFF ID และ Login Channel ID ถูกบันทึกแล้ว (ทดสอบจริงต้องใช้งานผ่าน LINE)';
+        $msg = 'ค่า LIFF ID และ Login Channel ID ถูกบันทึกแล้ว (ทดสอบจริงต้องใช้งานผ่าน LINE)';
         if (!$format_ok) {
             $msg = '⚠️ รูปแบบ LIFF ID ไม่ถูกต้อง (ควรเป็น {ChannelId}-xxxx)';
         } elseif ($debug['prefix_matches_channel'] === false) {
@@ -610,7 +610,7 @@ class Liff_settings extends Security_Controller {
     // Private: notify user approved/rejected via LINE push
     // ──────────────────────────────────────────────────────────────
     private function _notify_user_approved($line_uid, $display_name) {
-        $msg  = "✅ คำขอเชื่อมต่อ LINE ของคุณได้รับการอนุมัติแล้ว!\n";
+        $msg  = "คำขอเชื่อมต่อ LINE ของคุณได้รับการอนุมัติแล้ว!\n";
         $msg .= "ตอนนี้คุณสามารถเข้าใช้งาน DoJob ผ่าน LINE ได้\n";
         $msg .= get_uri('liff');
 

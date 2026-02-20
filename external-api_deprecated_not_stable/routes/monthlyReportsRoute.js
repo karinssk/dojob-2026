@@ -80,7 +80,7 @@ router.get('/send-other-projects-to-line', async (req, res) => {
         contents: [
           {
             type: "text",
-            text: "📊 โครงการอื่นๆ ที่มีค่าใช้จ่าย",
+            text: " โครงการอื่นๆ ที่มีค่าใช้จ่าย",
             weight: "bold",
             color: "#ffffff",
             size: "lg",
@@ -393,7 +393,7 @@ async function generateMonthlyExpenseSummary(dbPool, client_and_project, formatN
     const buddhistYear = currentYear + 543;
     const monthName = monthNames[currentMonth - 1];
     
-    let summaryReport = `📊 สรุปค่าใช้จ่ายประจำเดือน\n`;
+    let summaryReport = ` สรุปค่าใช้จ่ายประจำเดือน\n`;
     summaryReport += `🗓️ เดือน${monthName} ${buddhistYear}\n`;
     summaryReport += `📅 ช่วงวันที่: ${firstDayOfMonth.split('-').reverse().join('/')} - ${currentDay.split('-').reverse().join('/')}\n\n`;
     
@@ -467,7 +467,7 @@ async function generateMonthlyExpenseSummary(dbPool, client_and_project, formatN
               ORDER BY expense_date DESC, id DESC
             `, [project.id, firstDayOfMonth, currentDay]);
             
-            console.log(`📊 Found ${expenseDetails.length} expenses for project "${project.title}"`);
+            console.log(` Found ${expenseDetails.length} expenses for project "${project.title}"`);
             
             if (expenseDetails.length > 0) {
               // Process each expense
@@ -520,7 +520,7 @@ async function generateMonthlyExpenseSummary(dbPool, client_and_project, formatN
     }
     
     // Add total summary
-    summaryReport += `📊 สรุปรวมทั้งเดือน\n`;
+    summaryReport += ` สรุปรวมทั้งเดือน\n`;
     if (hasExpenses) {
       summaryReport += `💰 รวมค่าใช้จ่ายทั้งหมด: ${formatNumberWithCommas(totalMonthExpense)} บาท\n`;
       summaryReport += `📈 เฉลี่ยต่อวัน: ${formatNumberWithCommas(totalMonthExpense / today.getDate())} บาท`;
@@ -949,7 +949,7 @@ async function createMonthlyHeaderFlexMessage(monthData, dbPool, client_and_proj
       contents: [
         {
           type: "text",
-          text: "📊 รายงานค่าใช้จ่ายประจำเดือน",
+          text: " รายงานค่าใช้จ่ายประจำเดือน",
           weight: "bold",
           color: "#ffffff",
           size: "lg",
@@ -1332,7 +1332,7 @@ function createRemainingProjectsSummaryCard(remainingProjects, formatNumberWithC
       contents: [
         {
           type: "text",
-          text: `📊 โครงการอื่นๆ`,
+          text: ` โครงการอื่นๆ`,
           weight: "bold",
           color: "#ffffff",
           size: "sm"

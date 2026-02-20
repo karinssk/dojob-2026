@@ -20,7 +20,7 @@ console.log("🔧 Task modals module loaded - using native Rise CRM modal system
 // Ensure TaskModal is initialized
 function ensureTaskModal() {
   if (!window.taskModal) {
-    console.log("🔄 Ensuring TaskModal is initialized...");
+    console.log(" Ensuring TaskModal is initialized...");
     try {
       if (window.getTaskModalInstance) {
         window.taskModal = window.getTaskModalInstance();

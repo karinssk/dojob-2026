@@ -5,7 +5,7 @@
 
 // Initialize task data display from database values
 function initTaskDataDisplay() {
-  console.log("🔄 Initializing task data display from database values...");
+  console.log(" Initializing task data display from database values...");
   
   // Get users list to populate assignee and collaborator displays
   getUsersList(function(users) {
@@ -779,7 +779,7 @@ function testAllFunctionality() {
   console.log(" === COMPREHENSIVE FUNCTIONALITY TEST ===");
 
   // Test 1: Check if all elements exist
-  console.log("📊 Element Count Test:");
+  console.log(" Element Count Test:");
   console.log("- Total tasks:", $(".task-row").length);
   console.log(
     "- Expand/collapse buttons (.expand-toggle):",
@@ -834,7 +834,7 @@ function testAllFunctionality() {
 
   // Test 3: Simulate events (if any buttons exist)
   if (expandButtons.length > 0) {
-    console.log("\n🔄 Testing expand/collapse...");
+    console.log("\n Testing expand/collapse...");
     var firstExpand = expandButtons.first();
     console.log("- First expand button:", firstExpand.length);
     console.log("- Class names:", firstExpand.attr("class"));
@@ -926,7 +926,7 @@ function testHierarchicalView() {
     );
   });
 
-  console.log("📊 Tasks by level:", tasksByLevel);
+  console.log(" Tasks by level:", tasksByLevel);
   console.log("👁️ Visible tasks:", visibleTasks);
   console.log("🙈 Hidden tasks:", hiddenTasks);
 
@@ -937,7 +937,7 @@ function testHierarchicalView() {
     }
   );
 
-  console.log("🔄 Visible expand buttons:", expandableButtons.length);
+  console.log(" Visible expand buttons:", expandableButtons.length);
 
   // Debug expand buttons in detail
   $(".expand-toggle, .expand-toggle-jira").each(function (index) {

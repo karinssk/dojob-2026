@@ -43,7 +43,7 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
 <div class="panel panel-default" style="border:1px solid #E2E8F0;border-radius:10px;margin-bottom:24px">
   <div class="panel-heading" style="background:#F8FAFC;border-radius:10px 10px 0 0;padding:14px 18px;border-bottom:1px solid #E2E8F0">
     <h5 style="margin:0;font-size:14px;font-weight:600;color:#1E293B">
-      🔔 แจ้งเตือนงานที่ยังไม่เสร็จ
+       แจ้งเตือนงานที่ยังไม่เสร็จ
     </h5>
     <p style="margin:4px 0 0;font-size:12px;color:#64748B">
       ส่งสรุปงานค้างแบ่งตามชื่อผู้รับผิดชอบ (ข้ามผู้ใช้ที่ไม่มีงานค้าง)
@@ -115,7 +115,7 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
 <div class="panel panel-default" style="border:1px solid #E2E8F0;border-radius:10px;margin-bottom:24px">
   <div class="panel-heading" style="background:#F8FAFC;border-radius:10px 10px 0 0;padding:14px 18px;border-bottom:1px solid #E2E8F0">
     <h5 style="margin:0;font-size:14px;font-weight:600;color:#1E293B">
-      📊 รายงานสรุปงานเสร็จ (7 วันย้อนหลัง)
+       รายงานสรุปงานเสร็จ (7 วันย้อนหลัง)
     </h5>
     <p style="margin:4px 0 0;font-size:12px;color:#64748B">
       นับงานที่เสร็จในช่วง 7 วันที่ผ่านมา — ไม่ส่งถ้าไม่มีงานเสร็จเลย
@@ -175,7 +175,7 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
 <div class="panel panel-default" style="border:1px solid #FDE68A;border-radius:10px;margin-bottom:24px">
   <div class="panel-heading" style="background:#FFFBEB;border-radius:10px 10px 0 0;padding:14px 18px;border-bottom:1px solid #FDE68A">
     <h5 style="margin:0;font-size:14px;font-weight:600;color:#92400E">
-      🔄 Fallback LINE Bot (สำรอง)
+       Fallback LINE Bot (สำรอง)
     </h5>
     <p style="margin:4px 0 0;font-size:12px;color:#B45309">
       ใช้เมื่อ LIFF Bot หลักส่งไม่สำเร็จ (เช่น Quota เต็ม / Token ผิด) — ส่งข้อความธรรมดาไปยังห้องที่กำหนด
@@ -252,7 +252,7 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
     <!-- Reminder card -->
     <div style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden">
       <div style="background:#FFF7ED;padding:10px 14px;border-bottom:1px solid #FED7AA">
-        <div style="font-size:12px;font-weight:700;color:#92400E">🔔 แจ้งเตือนงานค้าง</div>
+        <div style="font-size:12px;font-weight:700;color:#92400E"> แจ้งเตือนงานค้าง</div>
       </div>
       <div style="padding:12px 14px;font-size:12px" id="lnf-reminder-status">
         <div style="color:#94A3B8">กำลังโหลด...</div>
@@ -268,7 +268,7 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
     <!-- Summary card -->
     <div style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden">
       <div style="background:#F0FDF4;padding:10px 14px;border-bottom:1px solid #BBF7D0">
-        <div style="font-size:12px;font-weight:700;color:#14532D">📊 รายงานสรุปงาน</div>
+        <div style="font-size:12px;font-weight:700;color:#14532D"> รายงานสรุปงาน</div>
       </div>
       <div style="padding:12px 14px;font-size:12px" id="lnf-summary-status">
         <div style="color:#94A3B8">กำลังโหลด...</div>
@@ -389,7 +389,7 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
       data: data,
       dataType: 'json',
       success: function(r){
-        resultEl.innerHTML = r.success ? '✅ ' + r.message : '❌ ' + r.message;
+        resultEl.innerHTML = r.success ? '' + r.message : '❌ ' + r.message;
         setTimeout(function(){ resultEl.innerHTML = ''; }, 4000);
       },
       error: function(){ resultEl.innerHTML = '❌ เกิดข้อผิดพลาด'; }
@@ -426,7 +426,7 @@ function testNotify(type) {
     data: { type: type },
     dataType: 'json',
     success: function(r){
-      resultEl.innerHTML = (r.success ? '✅ ' : '❌ ') + r.message;
+      resultEl.innerHTML = (r.success ? '' : '❌ ') + r.message;
       setTimeout(function(){ resultEl.innerHTML = ''; }, 6000);
       // Refresh quota after sending test
       setTimeout(loadQuota, 1500);
@@ -497,7 +497,7 @@ function testFallback() {
     method: 'POST',
     dataType: 'json',
     success: function(r){
-      resultEl.innerHTML = (r.success ? '✅ ' : '❌ ') + r.message;
+      resultEl.innerHTML = (r.success ? '' : '❌ ') + r.message;
       setTimeout(function(){ resultEl.innerHTML = ''; }, 6000);
     },
     error: function(xhr){
@@ -524,7 +524,7 @@ function loadScheduleStatus() {
         banner.style.background = '#F0FDF4';
         banner.style.border     = '1px solid #BBF7D0';
         banner.style.color      = '#14532D';
-        banner.innerHTML = '✅ Cron Job ทำงานปกติ — รันล่าสุดเมื่อ ' + (d.last_hourly_ago || d.last_hourly_run || '—');
+        banner.innerHTML = 'Cron Job ทำงานปกติ — รันล่าสุดเมื่อ ' + (d.last_hourly_ago || d.last_hourly_run || '—');
         hint.style.display = 'none';
       } else {
         banner.style.background = '#FEF2F2';
@@ -566,7 +566,7 @@ function renderStatusRows(lastSent, nextTime) {
   }
   if (nextTime) {
     html += '<div style="display:flex;gap:6px">' +
-      '<span style="color:#F97316;min-width:24px">⏰</span>' +
+      '<span style="color:#F97316;min-width:24px"></span>' +
       '<div><div style="color:#64748B;font-size:11px">รอบถัดไป</div>' +
       '<div style="font-weight:600;color:#1E293B">' + nextTime + '</div></div>' +
       '</div>';
@@ -585,7 +585,7 @@ function forceRun(type) {
     data: { type: type },
     dataType: 'json',
     success: function(r) {
-      resultEl.innerHTML = (r.success ? '✅ ' : '❌ ') + r.message;
+      resultEl.innerHTML = (r.success ? '' : '❌ ') + r.message;
       setTimeout(function() { resultEl.innerHTML = ''; }, 6000);
       if (r.success) {
         setTimeout(loadScheduleStatus, 500);

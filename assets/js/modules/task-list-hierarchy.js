@@ -18,7 +18,7 @@ function initExpandCollapse() {
     var $icon = $toggle.find(".expand-icon");
     var $row = $toggle.closest("tr");
 
-    console.log("🔄 Expand/collapse clicked for task:", taskId);
+    console.log(" Expand/collapse clicked for task:", taskId);
 
     if (!taskId) {
       console.error("No task ID found for expand toggle");
@@ -281,7 +281,7 @@ function testHierarchicalView() {
     );
   });
 
-  console.log("📊 Tasks by level:", tasksByLevel);
+  console.log(" Tasks by level:", tasksByLevel);
   console.log("👁️ Visible tasks:", visibleTasks);
   console.log("🙈 Hidden tasks:", hiddenTasks);
 
@@ -292,7 +292,7 @@ function testHierarchicalView() {
     }
   );
 
-  console.log("🔄 Visible expand buttons:", expandableButtons.length);
+  console.log(" Visible expand buttons:", expandableButtons.length);
 
   // Debug expand buttons in detail
   $(".expand-toggle, .expand-toggle-jira").each(function (index) {

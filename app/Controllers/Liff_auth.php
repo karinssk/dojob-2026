@@ -340,7 +340,7 @@ class Liff_auth extends App_Controller {
         }
 
         $approve_url = get_uri('settings/approve_line_liff_users');
-        $message     = "🔔 New LIFF Login Request\n"
+        $message     = " New LIFF Login Request\n"
                      . "LINE: $display_name\n"
                      . "Wants to link to: $rise_user_name\n"
                      . "➡️ Review: $approve_url";

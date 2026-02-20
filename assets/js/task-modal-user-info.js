@@ -32,7 +32,7 @@
             }
         }
         
-        console.log('%c📊 Complete User Data:', 'color: #795548;', user);
+        console.log('%c Complete User Data:', 'color: #795548;', user);
         console.groupEnd();
         
         // Store globally for use in comments

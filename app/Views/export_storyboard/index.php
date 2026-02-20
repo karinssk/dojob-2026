@@ -129,7 +129,7 @@
                                                 <option value="png">📸 Professional PNG Storyboard</option>
                                                 <option value="png-exact">🎯 PNG with 100% Exact Image Sizes</option>
                                                 <option value="json">📄 JSON Data Format</option>
-                                                <option value="csv">📊 CSV Data Format</option>
+                                                <option value="csv"> CSV Data Format</option>
                                             </select>
                                             <small class="form-text text-muted">Choose the export format for your storyboard data</small>
                                         </div>
@@ -558,7 +558,7 @@ $(document).ready(function () {
 
         var apiBaseUrl = getApiBaseUrl();
         
-        console.log('🔄 Loading storyboard data for project:', projectId, 'sub-project:', subProjectId);
+        console.log(' Loading storyboard data for project:', projectId, 'sub-project:', subProjectId);
         console.log('📡 Using Node.js API for storyboard export');
         console.log('🌐 API Base URL:', apiBaseUrl);
         console.log('🏠 Current hostname:', window.location.hostname);
@@ -914,7 +914,7 @@ $(document).ready(function () {
                     errorMessage = "Node.js API server error occurred during export.";
                 } else if (xhr.status === 200 && status === 'error') {
                     // This is the specific case we're dealing with - 200 OK but treated as error
-                    console.log('🔄 Attempting fallback method for export...');
+                    console.log(' Attempting fallback method for export...');
                     
                     // Try fallback method using window.open for direct download
                     try {
@@ -929,7 +929,7 @@ $(document).ready(function () {
                             include_camera_info: exportData.include_camera_info
                         });
                         
-                        console.log('🔄 Trying fallback URL:', fallbackUrl);
+                        console.log(' Trying fallback URL:', fallbackUrl);
                         
                         // Create a temporary form and submit it
                         var form = $('<form>', {

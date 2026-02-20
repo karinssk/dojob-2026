@@ -16,7 +16,7 @@ class KanbanBoard {
 
   async loadTasks() {
     try {
-      console.log("🔄 Loading tasks from Node.js API...");
+      console.log(" Loading tasks from Node.js API...");
 
       // Use Node.js API instead of PHP
       const response = await fetch(
@@ -33,7 +33,7 @@ class KanbanBoard {
       console.log("📡 API Response status:", response.status);
 
       const result = await response.json();
-      console.log("📊 API Result:", result);
+      console.log(" API Result:", result);
 
       if (result.success) {
         console.log(" API data received:", result.data);
@@ -161,7 +161,7 @@ class KanbanBoard {
       ? this.boardData
       : Object.values(this.boardData);
 
-    console.log("📊 Columns to render:", columns);
+    console.log(" Columns to render:", columns);
 
     if (!columns || columns.length === 0) {
       console.error("❌ No columns to render");
@@ -556,7 +556,7 @@ class KanbanBoard {
   }
 
   handleInColumnReorder(taskId, container, dropEvent) {
-    console.log(`🔄 Handling in-column reorder for task ${taskId}`);
+    console.log(` Handling in-column reorder for task ${taskId}`);
 
     // Get all task cards in this container (excluding create-only cards)
     const taskCards = Array.from(
@@ -690,7 +690,7 @@ class KanbanBoard {
   }
 
   async reorderTaskMultipleSteps(taskId, direction, steps) {
-    console.log(`🔄 Moving task ${taskId} ${direction} ${steps} steps`);
+    console.log(` Moving task ${taskId} ${direction} ${steps} steps`);
 
     for (let i = 0; i < steps; i++) {
       await this.reorderTask(taskId, direction);
@@ -700,7 +700,7 @@ class KanbanBoard {
   }
 
   async reorderTask(taskId, direction) {
-    console.log(`🔄 Reordering Task ${taskId} ${direction}`);
+    console.log(` Reordering Task ${taskId} ${direction}`);
     console.log(` Project ID: ${this.projectId}`);
 
     try {

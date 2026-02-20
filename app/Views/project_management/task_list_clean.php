@@ -245,7 +245,7 @@ $(document).ready(function() {
     
     // Reorder table columns
     window.reorderTableColumns = function(oldIndex, newIndex) {
-        console.log(`🔄 Reordering column from ${oldIndex} to ${newIndex}`);
+        console.log(` Reordering column from ${oldIndex} to ${newIndex}`);
         
         const $table = $('#task-table');
         
@@ -286,7 +286,7 @@ $(document).ready(function() {
     
     // Sort column
     window.sortColumn = function(columnName, direction) {
-        console.log(`🔄 Sorting column ${columnName} ${direction}`);
+        console.log(` Sorting column ${columnName} ${direction}`);
         
         const $table = $('#task-table');
         const $tbody = $table.find('tbody');

@@ -890,7 +890,7 @@ function initCollaboratorsDisplay() {
 
     if (currentCollaborators && currentCollaborators.trim() !== "") {
       console.log(
-        "🔄 Loading collaborators for container:",
+        " Loading collaborators for container:",
         currentCollaborators
       );
       loadAndDisplayCollaborators($container, currentCollaborators);
@@ -908,7 +908,7 @@ function initAssigneesDisplay() {
     var currentAssignee = $container.data("current-assignee");
 
     if (currentAssignee && currentAssignee > 0) {
-      console.log("🔄 Loading assignee for container:", currentAssignee);
+      console.log(" Loading assignee for container:", currentAssignee);
       loadAndDisplayAssignee($container, currentAssignee);
     }
   });

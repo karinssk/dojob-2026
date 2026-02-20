@@ -43,7 +43,7 @@
             console.log('🖼️ Profile Image:', user.image);
         }
         
-        console.log('📊 Full User Object:', user);
+        console.log(' Full User Object:', user);
         console.groupEnd();
 
         // Store the last known user to avoid duplicate logs
@@ -92,7 +92,7 @@
             retryCount++;
             if (retryCount <= CONFIG.maxRetries) {
                 if (CONFIG.debug) {
-                    console.log(`🔄 Retry ${retryCount}/${CONFIG.maxRetries} - Error fetching user:`, error.message);
+                    console.log(` Retry ${retryCount}/${CONFIG.maxRetries} - Error fetching user:`, error.message);
                 }
             } else {
                 console.error('❌ Failed to fetch user after maximum retries:', error);

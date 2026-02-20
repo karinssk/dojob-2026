@@ -36,7 +36,7 @@
   <?php endif; ?>
 
   <a class="btn btn-primary" href="<?= get_uri('liff/select_user') ?>?uid=<?= urlencode($line_uid) ?>&name=<?= urlencode($pending->line_display_name ?? '') ?>">
-    🔄 ลองเลือกบัญชีใหม่
+     ลองเลือกบัญชีใหม่
   </a>
   <p style="font-size:13px;color:#94A3B8;margin-top:8px">หากมีข้อสงสัย กรุณาติดต่อแอดมิน</p>
 </div>

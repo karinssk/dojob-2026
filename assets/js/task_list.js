@@ -1046,7 +1046,7 @@ function getUsersList(callback) {
       console.error("❌ Response text:", xhr.responseText);
 
       // Use fallback data
-      console.warn("🔄 Using fallback user data");
+      console.warn(" Using fallback user data");
       var fallbackUsers = [
         {
           id: 1,
@@ -2524,7 +2524,7 @@ function updateDeadlineDisplay($container, deadline) {
 
 // Initialize task data display from database values
 function initTaskDataDisplay() {
-  console.log("🔄 Initializing task data display from database values...");
+  console.log(" Initializing task data display from database values...");
 
   // Get users list to populate assignee and collaborator displays
   getUsersList(function (users) {
@@ -2865,7 +2865,7 @@ function initPriorityDropdowns() {
 
 // Convert static status badges to clickable dropdowns
 function convertStatusBadgesToDropdowns() {
-  console.log("🔄 Converting static status badges to dropdowns...");
+  console.log(" Converting static status badges to dropdowns...");
 
   // Find all static status badges that aren't already dropdowns
   $(".jira-status-badge, .status-badge").each(function () {
@@ -2929,7 +2929,7 @@ function convertStatusBadgesToDropdowns() {
 
 // Convert static priority icons to clickable dropdowns
 function convertPriorityIconsToDropdowns() {
-  console.log("🔄 Converting priority icons using real database data...");
+  console.log(" Converting priority icons using real database data...");
 
   // Call the modular function that fetches real data
   if (typeof window.convertPriorityIconsToDropdowns === "function") {
@@ -2980,7 +2980,7 @@ function initExpandCollapse() {
     var $icon = $toggle.find(".expand-icon");
     var $row = $toggle.closest("tr");
 
-    console.log("🔄 Expand/collapse clicked for task:", taskId);
+    console.log(" Expand/collapse clicked for task:", taskId);
 
     if (!taskId) {
       console.error("No task ID found for expand toggle");
@@ -4047,7 +4047,7 @@ function openTaskModal(taskId) {
     console.log("🔍 Available globals:", Object.keys(window).filter(key => key.toLowerCase().includes('modal')));
     
     // Fallback: redirect to task view page
-    console.log("🔄 Fallback: redirecting to task view page");
+    console.log(" Fallback: redirecting to task view page");
     window.location.href = baseUrl + 'tasks/view/' + taskId;
   }
 }
@@ -4111,7 +4111,7 @@ var paginationTotalTasks = 0;
 
 // Global pagination refresh function
 function refreshPagination() {
-  console.log("🔄 Refreshing pagination...");
+  console.log(" Refreshing pagination...");
   if (typeof updatePaginationInfo === 'function' && typeof showCurrentPage === 'function') {
     paginationCurrentPage = 1; // Reset to first page when refreshing
     showCurrentPage();
@@ -4155,7 +4155,7 @@ function initPagination() {
     console.log("🔍 Pagination container visibility:", $('#task-pagination').is(':visible'));
     console.log("🔍 Pagination container display:", $('#task-pagination').css('display'));
     
-    console.log("📊 Pagination info updated:", {
+    console.log(" Pagination info updated:", {
       currentPage: paginationCurrentPage,
       pageSize: paginationPageSize,
       totalTasks: totalTasks,
@@ -4728,7 +4728,7 @@ function testAllFunctionality() {
   console.log(" === COMPREHENSIVE FUNCTIONALITY TEST ===");
 
   // Test 1: Check if all elements exist
-  console.log("📊 Element Count Test:");
+  console.log(" Element Count Test:");
   console.log("- Total tasks:", $(".task-row").length);
   console.log(
     "- Expand/collapse buttons (.expand-toggle):",
@@ -4783,7 +4783,7 @@ function testAllFunctionality() {
 
   // Test 3: Simulate events (if any buttons exist)
   if (expandButtons.length > 0) {
-    console.log("\n🔄 Testing expand/collapse...");
+    console.log("\n Testing expand/collapse...");
     var firstExpand = expandButtons.first();
     console.log("- First expand button:", firstExpand.length);
     console.log("- Class names:", firstExpand.attr("class"));
@@ -4875,7 +4875,7 @@ function testHierarchicalView() {
     );
   });
 
-  console.log("📊 Tasks by level:", tasksByLevel);
+  console.log(" Tasks by level:", tasksByLevel);
   console.log("👁️ Visible tasks:", visibleTasks);
   console.log("🙈 Hidden tasks:", hiddenTasks);
 
@@ -4886,7 +4886,7 @@ function testHierarchicalView() {
     }
   );
 
-  console.log("🔄 Visible expand buttons:", expandableButtons.length);
+  console.log(" Visible expand buttons:", expandableButtons.length);
 
   // Debug expand buttons in detail
   $(".expand-toggle, .expand-toggle-jira").each(function (index) {

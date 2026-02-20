@@ -12,7 +12,7 @@ function initLabelsDisplay() {
     var currentLabels = $container.data("current-labels");
 
     console.log(
-      "🔄 Loading labels for task:",
+      " Loading labels for task:",
       taskId,
       "Labels:",
       currentLabels
@@ -383,7 +383,7 @@ function renderLabelsDropdown(
             }
 
             // Update display - use the original container that was passed to the function
-            console.log("🔄 Updating labels display for task:", buttonTaskId);
+            console.log(" Updating labels display for task:", buttonTaskId);
 
             // Convert IDs to label objects for display
             var selectedLabels = [];
@@ -522,7 +522,7 @@ function renderLabelsDropdown(
 
                   // Update display to show empty state
                   console.log(
-                    "🔄 Clearing labels display for task:",
+                    " Clearing labels display for task:",
                     buttonTaskId
                   );
 

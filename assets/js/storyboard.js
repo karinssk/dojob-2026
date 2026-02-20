@@ -2840,7 +2840,7 @@ async function fetchEmojis() {
         { emoji: "🗂️", name: "card index dividers" },
         { emoji: "🗃️", name: "card file box" },
         { emoji: "🗄️", name: "file cabinet" },
-        { emoji: "📊", name: "bar chart" },
+        { emoji: "", name: "bar chart" },
         { emoji: "📈", name: "chart increasing" },
         { emoji: "📉", name: "chart decreasing" },
         { emoji: "⭐", name: "star" },

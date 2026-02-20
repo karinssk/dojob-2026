@@ -1619,7 +1619,7 @@ function scheduleDailyReport() {
     timezone: "Asia/Bangkok"
   });
   
-  console.log('⏰ Daily flex reports scheduled to run every day at 20:00 (Thailand time)');
+  console.log(' Daily flex reports scheduled to run every day at 20:00 (Thailand time)');
 }
 
 // API endpoint for monthly summary report
@@ -1847,7 +1847,7 @@ function scheduleMonthlyReports() {
     timezone: "Asia/Bangkok"
   });
   
-  console.log('⏰ Monthly summaries scheduled:');
+  console.log(' Monthly summaries scheduled:');
   console.log('  - Every Monday at 20:01 (Thailand time)');
   console.log('  - Every Saturday at 20:01 (Thailand time)');
   console.log('  - Every 1st day of month at 20:01 (Thailand time)');
@@ -1858,14 +1858,14 @@ app.listen(port, async () => {
   console.log(`🚀 Expense Bot Server running on port ${port}`);
   console.log(`📱 LINE Webhook URL: http://localhost:${port}/webhook/line`);
   console.log(` Test API: http://localhost:${port}/api/test-expense`);
-  console.log(`📊 View Expenses: http://localhost:${port}/api/expenses`);
+  console.log(` View Expenses: http://localhost:${port}/api/expenses`);
   console.log(`🔢 Test Amount Parsing: http://localhost:${port}/api/test-amount-parsing/1,500.50`);
   console.log(`📝 Test Expense Parsing: http://localhost:${port}/api/test-expense-parsing`);
   console.log(`💰 Test Number Formatting: http://localhost:${port}/api/test-number-formatting/10000`);
   console.log(`🗓️ Test Date Parsing: http://localhost:${port}/api/test-date-parsing/2/6/68`);
   console.log(`🔍 Test Project Lookup: http://localhost:${port}/api/test-project-lookup/ruby?date=2/6/68`);
   console.log(`📁 View Existing Projects: http://localhost:${port}/api/existing-projects`);
-  console.log(`📊 Daily Summary: http://localhost:${port}/api/daily/summary`);
+  console.log(` Daily Summary: http://localhost:${port}/api/daily/summary`);
   console.log(`📱 Daily Flex Summary: http://localhost:${port}/api/daily/flex-summary`);
   console.log(`📤 Send Daily Summary: http://localhost:${port}/api/daily/send-summary`);
   console.log(`📲 Send Daily Flex: http://localhost:${port}/api/daily/send-flex-summary`);
@@ -1880,7 +1880,7 @@ app.listen(port, async () => {
   console.log(`🗓️ Current Thai Date: ${getCurrentThaiDate()}`);
   
   // Generate and send startup summary report   if start will run auto
-  console.log('\n📊 Generating startup expense summary...');
+  console.log('\n Generating startup expense summary...');
   // await sendDailySummaryReport();
   
   // Schedule daily reports at 20:00

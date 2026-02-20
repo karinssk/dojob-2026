@@ -187,7 +187,7 @@ class Line_webhook {
             return false;
         }
 
-        $message = "🔄 **Recurring Task Created**\n\n";
+        $message = " **Recurring Task Created**\n\n";
         $message .= " **Task:** {$task->title}\n";
         
         if (!empty($task->project_title)) {
@@ -196,7 +196,7 @@ class Line_webhook {
         
         if (!empty($task->deadline)) {
             $deadline_formatted = date('M j, Y', strtotime($task->deadline));
-            $message .= "⏰ **Deadline:** {$deadline_formatted}\n";
+            $message .= " **Deadline:** {$deadline_formatted}\n";
         }
         
         if (!empty($task->assigned_to_user)) {
@@ -222,7 +222,7 @@ class Line_webhook {
      */
     private function format_task_reminder_message($task, $reminder_type) {
         $icons = [
-            'before_deadline' => '⏰',
+            'before_deadline' => '',
             'on_deadline' => '🚨',
             'overdue' => '🔴'
         ];
@@ -245,7 +245,7 @@ class Line_webhook {
 
         if (!empty($task->deadline)) {
             $deadline_formatted = date('M j, Y', strtotime($task->deadline));
-            $message .= "⏰ **Deadline:** {$deadline_formatted}\n";
+            $message .= " **Deadline:** {$deadline_formatted}\n";
             
             // Calculate days difference
             $today = date('Y-m-d');
@@ -648,7 +648,7 @@ class Line_webhook {
      */
     private function format_event_reminder_message($event, $reminder_type) {
         $icons = [
-            'before_event' => '⏰',
+            'before_event' => '',
             'on_event' => '🚨',
             'overdue' => '🔴'
         ];
@@ -736,7 +736,7 @@ class Line_webhook {
             return false;
         }
 
-        $message = "🔄 **Recurring Event Created**\n\n";
+        $message = " **Recurring Event Created**\n\n";
         $message .= "📅 **Event:** {$event->title}\n";
         
         if (!empty($event->start_date)) {

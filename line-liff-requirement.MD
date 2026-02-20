@@ -108,7 +108,7 @@ After submitting link request, user sees a **full-screen pending page**:
 │  request. You'll receive a LINE  │
 │  message when approved.          │
 │                                  │
-│  [🔄 Check Status]               │
+│  [ Check Status]               │
 └─────────────────────────────────┘
 ```
 
@@ -140,10 +140,10 @@ After submitting link request, user sees a **full-screen pending page**:
   ┌─────────────────────────────────────┐
   │ [Priority chip] [Status chip]       │
   │ Task Title                          │
-  │ 📅 19 Feb — ⏰ 09:00 → 17:00       │
+  │ 📅 19 Feb —  09:00 → 17:00       │
   │  Assigned to: พี่ mike            │
   │ 🖼 [thumbnail] [thumbnail]          │
-  │ [📝 Update] [✅ Done]               │
+  │ [📝 Update] [Done]               │
   └─────────────────────────────────────┘
   ```
 
@@ -162,9 +162,9 @@ Fields:
 - **LINE Notification Settings** (collapsible section — entirely optional, hidden by default):
   - Toggle: Enable LINE notification for this task *(default: OFF)*
   - When ON, three sub-fields appear — all individually optional:
-    - ⏰ Notify X minutes before start time *(leave blank = skip)*
-    - ⏰ Notify X minutes before end time *(leave blank = skip)*
-    - 🔔 Alert if no status update after X hours *(leave blank = no alert)*
+    -  Notify X minutes before start time *(leave blank = skip)*
+    -  Notify X minutes before end time *(leave blank = skip)*
+    -  Alert if no status update after X hours *(leave blank = no alert)*
   - Sub-fields pre-fill with system defaults from settings if user turns ON the toggle
   - User can clear any sub-field to disable just that specific notification
 
@@ -178,9 +178,9 @@ Fields:
 
 ### 3.4 Quick Update (from LINE message)
 - When LINE notification is sent, include **Flex Message** with:
-  - `[✅ Mark Done]` button → callback to `/liff/task_quick_update`
+  - `[Mark Done]` button → callback to `/liff/task_quick_update`
   - `[📝 Add Update]` button → opens LIFF task detail
-  - `[⏰ Snooze]` button → postpone next notification by 2h
+  - `[ Snooze]` button → postpone next notification by 2h
 
 ---
 
@@ -204,16 +204,16 @@ Fields:
 - **LINE Notification Settings** (collapsible — entirely optional, hidden by default):
   - Toggle: Enable LINE notification for this event *(default: OFF)*
   - When ON, sub-fields appear — all individually optional:
-    - ⏰ Notify X minutes before start *(leave blank = skip)*
-    - ⏰ Notify X minutes before end *(leave blank = skip)*
-    - 🔔 Alert if no update after X hours *(leave blank = no alert)*
+    -  Notify X minutes before start *(leave blank = skip)*
+    -  Notify X minutes before end *(leave blank = skip)*
+    -  Alert if no update after X hours *(leave blank = no alert)*
   - Sub-fields pre-fill with system defaults if toggle is turned ON
 
 ### 4.3 Event Detail View
 - Full event info
 - List of attendees with avatars
 - Image gallery
-- Quick RSVP: [✅ Attending] [❌ Can't go]
+- Quick RSVP: [Attending] [❌ Can't go]
 
 ---
 
@@ -229,7 +229,7 @@ Fields:
   │ 📅 Due: 28 Feb 2026                 │
   │ ████████░░ 78% complete             │
   │ 👥 5 members  |   12 tasks        │
-  │ 🔔 LINE notify: ON                  │
+  │  LINE notify: ON                  │
   └─────────────────────────────────────┘
   ```
 
@@ -251,10 +251,10 @@ Tabs inside project detail:
 
 ### 5.5 Project LINE Notification Settings
 Per-project toggles (stored in `project_settings` or new column):
-- 🔔 Notify all project members on new task created
-- 🔔 Notify assigned user on task assignment
-- 🔔 Notify all members on project status change
-- ⏰ Daily summary notification (configurable time)
+-  Notify all project members on new task created
+-  Notify assigned user on task assignment
+-  Notify all members on project status change
+-  Daily summary notification (configurable time)
 
 ---
 
@@ -310,15 +310,15 @@ Per-project toggles (stored in `project_settings` or new column):
 ### 7.3 Notification Message Format (LINE Flex Message)
 ```
 ┌─────────────────────────────────┐
-│ 🔔 Task Reminder                │
+│  Task Reminder                │
 │─────────────────────────────────│
 │ รายงานยอดขายประจำเดือน          │
 │ 📅 Start: 19 Feb 09:00          │
-│ ⏰ End:   19 Feb 17:00          │
+│  End:   19 Feb 17:00          │
 │  Assigned: พี่ mike           │
-│ 📊 Status: In Progress          │
+│  Status: In Progress          │
 │─────────────────────────────────│
-│ [📝 Open Task] [✅ Mark Done]   │
+│ [📝 Open Task] [Mark Done]   │
 └─────────────────────────────────┘
 ```
 
@@ -399,7 +399,7 @@ Full page wireframe:
 ┌──────────────────────────────────────────────────────────────────┐
 │  ⚙️ Settings > LINE LIFF                                         │
 │                                                                  │
-│  [🔑 Credentials] [⏳ Pending (3)] [✅ Approved] [❌ Rejected]   │
+│  [🔑 Credentials] [⏳ Pending (3)] [Approved] [❌ Rejected]   │
 │━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━│
 │                                                                  │
 │  ┌── 📡 Messaging API (LINE Bot) ─────────────────────────────┐ │
@@ -418,8 +418,8 @@ Full page wireframe:
 │  │                      (read-only, register in LINE console) │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
-│  ┌── 🔔 Notification Defaults ────────────────────────────────┐ │
-│  │  Enable LINE Notifications   [ ✅ ON  / OFF ]              │ │
+│  ┌──  Notification Defaults ────────────────────────────────┐ │
+│  │  Enable LINE Notifications   [ ON  / OFF ]              │ │
 │  │  Default notify before start [ 30  ] minutes               │ │
 │  │  Default notify before end   [ 60  ] minutes               │ │
 │  │  Default no-update alert     [ 24  ] hours                 │ │
@@ -430,7 +430,7 @@ Full page wireframe:
 │                                                                  │
 │  ┌── 🧪 Connection Test ──────────────────────────────────────┐ │
 │  │  [🔌 Test Messaging API]  [🔌 Test LIFF Login Channel]     │ │
-│  │  Last test: 19 Feb 2026 10:30 — ✅ OK                      │ │
+│  │  Last test: 19 Feb 2026 10:30 — OK                      │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │                                                                  │
 │                              [💾 Save Settings]                  │
@@ -495,7 +495,7 @@ All fields stored in `settings` table via existing `Settings_model`:
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  [🔑 Credentials] [⏳ Pending (3)] [✅ Approved] [❌ Rejected]   │
+│  [🔑 Credentials] [⏳ Pending (3)] [Approved] [❌ Rejected]   │
 │━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━│
 │  🔍 Search...                              [📤 Export CSV]        │
 │                                                                  │
@@ -504,7 +504,7 @@ All fields stored in `settings` table via existing `Settings_model`:
 │  │    LINE UID: Ud5fc1f611437c15ef91b8d70d8f411c8           │   │
 │  │    → Link to: อโรชา / User #4 [staff]                   │   │
 │  │    📅 Submitted: 19 Feb 2026 10:30                       │   │
-│  │    [✅ Approve]  [❌ Reject with Note...]                 │   │
+│  │    [Approve]  [❌ Reject with Note...]                 │   │
 │  └──────────────────────────────────────────────────────────┘   │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐   │
@@ -512,7 +512,7 @@ All fields stored in `settings` table via existing `Settings_model`:
 │  │    LINE UID: U441fe09ded061e38874f36a2217b320a           │   │
 │  │    → Link to: อภิญญา ญาณโภชน์ / User #39 [staff]       │   │
 │  │    📅 Submitted: 18 Feb 2026 15:22                       │   │
-│  │    [✅ Approve]  [❌ Reject with Note...]                 │   │
+│  │    [Approve]  [❌ Reject with Note...]                 │   │
 │  └──────────────────────────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────────┘
 ```
@@ -522,7 +522,7 @@ All fields stored in `settings` table via existing `Settings_model`:
 2. `INSERT INTO user_mappings_arr (line_user_id, rise_user_id, nick_name, line_display_name, is_active)` — or update if UID already exists
 3. Push LINE message to user via `line_channel_access_token`:
    ```
-   ✅ คำขอของคุณได้รับการอนุมัติแล้ว!
+   คำขอของคุณได้รับการอนุมัติแล้ว!
    กดที่นี่เพื่อเปิดแอป: {liff_entry_url}
    ```
 
@@ -717,7 +717,7 @@ Tabs: Todo | Tasks | Projects | Events | Profile
 
 #### LINE Notification Toggle (Task/Event Form)
 ```
-[🔔 LINE Notification]  ○──●  OFF   ← hidden by default, entire section optional
+[ LINE Notification]  ○──●  OFF   ← hidden by default, entire section optional
 
 When toggled ON → section expands with animation:
   ├─ "Notify before start"  [ 30 ] min  (pre-filled from system default; clear to skip)

@@ -1065,7 +1065,7 @@ body.board-tab-active .project-details-view > .container-fluid > .row > .col-md-
                                             🔍 Debug Info
                                         </button>
                                         <button onclick="window.resetBoard()" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-gray-800">
-                                            🔄 Reset Board
+                                             Reset Board
                                         </button>
                                         <button onclick="window.testAPIIntegration()" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded text-gray-800">
                                             🔗 Test API
@@ -1516,7 +1516,7 @@ window.csrf_token = csrfHash;
 
 // Project Selector Functions
 window.loadProjectDropdown = function() {
-    console.log('🔄 Loading project dropdown...');
+    console.log(' Loading project dropdown...');
     console.log('🔍 Checking if dropdown element exists...');
     
     const $loadingElement = $('#loading-projects');
@@ -1578,7 +1578,7 @@ window.loadProjectDropdown = function() {
             $loadingElement.html('<i data-feather="alert-circle" class="icon-16 me-2"></i>AJAX Error: ' + error);
             
             // Try fallback URL without index.php
-            console.log('🔄 Trying fallback URL...');
+            console.log(' Trying fallback URL...');
             setTimeout(() => {
                 tryFallbackProjectsAPI();
             }, 1000);
@@ -1693,7 +1693,7 @@ window.populateProjectDropdown = function(projects) {
         }
     });
     
-    console.log('📊 Added', addedCount, 'projects to dropdown');
+    console.log(' Added', addedCount, 'projects to dropdown');
     
     // Add recent projects from localStorage
     console.log('📚 Adding recent projects...');
@@ -1732,7 +1732,7 @@ window.addRecentProjectsToDropdown = function(dropdown, currentProjectId) {
 };
 
 window.switchProject = function(newProjectId) {
-    console.log('🔄 Switching to project:', newProjectId);
+    console.log(' Switching to project:', newProjectId);
     
     // Save to recent projects
     saveCurrentProjectToRecent();
@@ -1838,8 +1838,8 @@ window.testProjectsAPI = function() {
 
 // Global function for column reordering - MUST be defined before any Sortable instances
 window.reorderTableColumns = function(oldIndex, newIndex) {
-    console.log(`🔄 Reordering column from ${oldIndex} to ${newIndex}`);
-    console.log(`📊 Table has ${$('#task-table tbody tr').length} rows`);
+    console.log(` Reordering column from ${oldIndex} to ${newIndex}`);
+    console.log(` Table has ${$('#task-table tbody tr').length} rows`);
     
     if (oldIndex === newIndex) {
         console.log('⚠️ Same position, no reordering needed');
@@ -1852,7 +1852,7 @@ window.reorderTableColumns = function(oldIndex, newIndex) {
         const $row = $(this);
         const $cells = $row.children('td');
         
-        console.log(`🔄 Processing row ${rowsProcessed + 1}, cells: ${$cells.length}`);
+        console.log(` Processing row ${rowsProcessed + 1}, cells: ${$cells.length}`);
         
         // Skip empty rows or rows with insufficient cells
         if ($cells.length === 0) {
@@ -2711,7 +2711,7 @@ $(document).ready(function() {
                 dragClass: 'dragging',
                 filter: 'th:first-child', // Don't allow dragging the checkbox column
                 onStart: function(evt) {
-                    console.log('🔄 Started dragging column:', evt.item.dataset.column);
+                    console.log(' Started dragging column:', evt.item.dataset.column);
                 },
                 onEnd: function(evt) {
                     console.log(' Finished dragging column');
@@ -2738,7 +2738,7 @@ $(document).ready(function() {
     };
     
     window.sortColumn = function(columnName, direction) {
-        console.log(`🔄 Sorting column ${columnName} ${direction}`);
+        console.log(` Sorting column ${columnName} ${direction}`);
         
         const $table = $('#task-table');
         const $tbody = $table.find('tbody');
@@ -3082,7 +3082,7 @@ $(document).ready(function() {
                 dragClass: 'dragging',
                 filter: 'th:first-child', // Don't allow dragging the checkbox column
                 onStart: function(evt) {
-                    console.log('🔄 Started dragging column:', evt.item.dataset.column);
+                    console.log(' Started dragging column:', evt.item.dataset.column);
                 },
                 onEnd: function(evt) {
                     console.log(' Finished dragging column');
@@ -3192,7 +3192,7 @@ $(document).ready(function() {
     
     // Add function to reset table customization
     window.resetTableCustomization = function() {
-        console.log('🔄 Resetting table customization...');
+        console.log(' Resetting table customization...');
         
         // Show all columns first
         $('.draggable-column.table-column-hidden').each(function() {
@@ -3294,7 +3294,7 @@ $(document).ready(function() {
             $(this).addClass('resizing');
             $('body').addClass('col-resize');
             
-            console.log('🔄 Started resizing column:', currentColumn.data('column'));
+            console.log(' Started resizing column:', currentColumn.data('column'));
         });
         
         $(document).on('mousemove', function(e) {
@@ -3393,7 +3393,7 @@ $(document).ready(function() {
     
     // Apply column order function
     window.applyColumnOrder = function(columnOrder) {
-        console.log('🔄 Applying saved column order:', columnOrder);
+        console.log(' Applying saved column order:', columnOrder);
         
         try {
             const $table = $('#task-table');
@@ -3426,7 +3426,7 @@ $(document).ready(function() {
                 }
             });
             
-            console.log('🔄 New column order indices:', newOrder);
+            console.log(' New column order indices:', newOrder);
             
             // Reorder header columns
             const $originalHeaders = $headerRow.children('th').detach();
@@ -3564,7 +3564,7 @@ $(document).ready(function() {
     
     // Simple function to manually trigger the API call
     window.manualLoadProjects = function() {
-        console.log('🔄 Manual load projects...');
+        console.log(' Manual load projects...');
         const fallbackUrl = baseUrl + 'api/projects';
         
         $.get(fallbackUrl)
@@ -3723,7 +3723,7 @@ $(document).ready(function() {
     
     // Simple sort column function
     window.sortColumnSimple = function(columnName, direction) {
-        console.log('🔄 Sorting column:', columnName, direction);
+        console.log(' Sorting column:', columnName, direction);
         
         const $table = $('#task-table');
         const $tbody = $table.find('tbody');
@@ -3779,7 +3779,7 @@ $(document).ready(function() {
                 chosenClass: 'sortable-chosen',
                 filter: 'th:first-child, .column-resizer', // Don't drag checkbox or resizer
                 onStart: function(evt) {
-                    console.log('🔄 Started dragging column:', evt.oldIndex);
+                    console.log(' Started dragging column:', evt.oldIndex);
                 },
                 onEnd: function(evt) {
                     console.log(' Finished dragging column from', evt.oldIndex, 'to', evt.newIndex);
@@ -3852,7 +3852,7 @@ $(document).ready(function() {
         
         if (typeof window.sortColumn !== 'function') {
             window.sortColumn = function(columnName, direction) {
-                console.log('🔄 Sorting column:', columnName, direction);
+                console.log(' Sorting column:', columnName, direction);
                 
                 const table = document.getElementById('task-table');
                 const tbody = table.querySelector('tbody');
@@ -4135,12 +4135,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Refresh board when tab becomes active
     document.querySelector('a[href="#board"]').addEventListener('shown.bs.tab', function() {
-        console.log('🔄 Board tab shown - refreshing kanban data...');
+        console.log(' Board tab shown - refreshing kanban data...');
         
         let refreshed = false;
         
         if (window.nodeJSEnhancedKanbanBoard) {
-            console.log('🔄 Refreshing Node.js Enhanced Kanban...');
+            console.log(' Refreshing Node.js Enhanced Kanban...');
             try {
                 window.nodeJSEnhancedKanbanBoard.loadStatuses();
                 refreshed = true;
@@ -4149,7 +4149,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('❌ Error refreshing Node.js Enhanced Kanban:', error);
             }
         } else if (window.enhancedKanbanBoard) {
-            console.log('🔄 Refreshing Enhanced Kanban...');
+            console.log(' Refreshing Enhanced Kanban...');
             try {
                 window.enhancedKanbanBoard.loadStatuses();
                 refreshed = true;
@@ -4158,7 +4158,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('❌ Error refreshing Enhanced Kanban:', error);
             }
         } else if (kanbanBoard) {
-            console.log('🔄 Refreshing basic Kanban...');
+            console.log(' Refreshing basic Kanban...');
             try {
                 kanbanBoard.loadTasks();
                 refreshed = true;
@@ -4317,7 +4317,7 @@ window.autoInitializeBoard = function() {
 
 // Add reset function
 window.resetBoard = function() {
-    console.log("🔄 Resetting board...");
+    console.log(" Resetting board...");
     
     // Clear existing instances
     window.nodeJSEnhancedKanbanBoard = null;

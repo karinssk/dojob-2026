@@ -204,7 +204,7 @@ class NodeJSEnhancedKanban {
   async loadStatuses() {
     try {
       console.log(
-        "🔄 Loading statuses from Node.js API... api-dojob.rubyshop.co.th"
+        " Loading statuses from Node.js API... api-dojob.rubyshop.co.th"
       );
 
       // Add timeout to prevent infinite loading
@@ -248,7 +248,7 @@ class NodeJSEnhancedKanban {
         this.showError("API request timed out - using fallback data");
       } else {
         console.error("❌ Network error loading statuses:", error);
-        console.log("🔄 Using fallback statuses...");
+        console.log(" Using fallback statuses...");
       }
       this.useFallbackStatuses();
     }
@@ -289,7 +289,7 @@ class NodeJSEnhancedKanban {
 
   async loadTasks() {
     try {
-      console.log("🔄 Loading tasks from Node.js API...");
+      console.log(" Loading tasks from Node.js API...");
       console.log("🔗 API URL:", `${this.apiBase}/kanban/${this.projectId}`);
 
       // Add timeout to prevent infinite loading
@@ -329,7 +329,7 @@ class NodeJSEnhancedKanban {
       } else {
         console.error("❌ Network error:", error);
         console.log(
-          "🔄 Falling back to mock data due to API unavailability..."
+          " Falling back to mock data due to API unavailability..."
         );
       }
       this.loadFallbackData();
@@ -1059,7 +1059,7 @@ class NodeJSEnhancedKanban {
       // Calculate the new sort value based on neighboring tasks
       const newSortValue = this.calculateSortValue(dropPosition, statusId);
 
-      console.log(`📊 Calculated sort value: ${newSortValue}`);
+      console.log(` Calculated sort value: ${newSortValue}`);
 
       const response = await fetch(
         `${this.apiBase}/task/${cleanTaskId}/status`,
@@ -1814,7 +1814,7 @@ class NodeJSEnhancedKanban {
       const nextSortValue = await this.getNextSortValue(statusObj.id);
 
       console.log(
-        `🔄 Creating direct task in ${statusObj.title} with sort ${nextSortValue}, assigned to user ${currentUserId}`
+        ` Creating direct task in ${statusObj.title} with sort ${nextSortValue}, assigned to user ${currentUserId}`
       );
 
       const response = await fetch(`${this.apiBase}/tasks`, {
@@ -1975,7 +1975,7 @@ class NodeJSEnhancedKanban {
       const nextSortValue = await this.getNextSortValue(statusObj.id);
 
       console.log(
-        `🔄 Creating task in ${statusObj.title} with sort ${nextSortValue}, assigned to user ${currentUserId}`
+        ` Creating task in ${statusObj.title} with sort ${nextSortValue}, assigned to user ${currentUserId}`
       );
 
       const response = await fetch(`${this.apiBase}/tasks`, {
@@ -2160,7 +2160,7 @@ class NodeJSEnhancedKanban {
   }
 
   async reorderTask(taskId, direction) {
-    console.log(`🔄 Reordering Task ${taskId} ${direction}`);
+    console.log(` Reordering Task ${taskId} ${direction}`);
     try {
       const response = await fetch(`${this.apiBase}/task/${taskId}/reorder`, {
         method: "PUT",
@@ -2261,12 +2261,12 @@ class NodeJSEnhancedKanban {
       console.log("🔍 Existing task ID:", existingTaskId);
       if (existingTaskId === currentButtonId) {
         // Same button clicked - close the menu (toggle off)
-        console.log("🔄 Closing existing menu (same button)");
+        console.log(" Closing existing menu (same button)");
         existingMenu.remove();
         return;
       } else {
         // Different button clicked - remove old menu and create new one
-        console.log("🔄 Removing old menu (different button)");
+        console.log(" Removing old menu (different button)");
         existingMenu.remove();
       }
     }
@@ -2316,7 +2316,7 @@ class NodeJSEnhancedKanban {
       </div>
     `;
 
-    console.log("🔄 Creating menu HTML...");
+    console.log(" Creating menu HTML...");
     document.body.insertAdjacentHTML("beforeend", menuHtml);
 
     const menu = document.querySelector(".task-context-menu");

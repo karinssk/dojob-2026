@@ -43,7 +43,7 @@
         <li class="nav-item">
           <a class="nav-link <?= $current_tab === 'notifications' ? 'active' : '' ?>"
             href="<?= get_uri('settings/approve_line_liff_users?tab=notifications') ?>">
-            🔔 แจ้งเตือนงาน
+             แจ้งเตือนงาน
           </a>
         </li>
       </ul>

@@ -48,7 +48,7 @@
   <!-- Defaults summary pills -->
   <div class="qa-defaults-row">
     <span class="qa-default-chip">📅 <?= date('d/m', strtotime($d['start_date'])) ?></span>
-    <span class="qa-default-chip">⏰ <?= $d['start_time'] ?> – <?= $d['end_time'] ?></span>
+    <span class="qa-default-chip"> <?= $d['start_time'] ?> – <?= $d['end_time'] ?></span>
     <span class="qa-default-chip"> <?= esc(mb_substr($d['project_name'], 0, 18, 'UTF-8')) ?><?= mb_strlen($d['project_name'], 'UTF-8') > 18 ? '…' : '' ?></span>
     <span class="qa-default-chip">🏷 To Do</span>
   </div>
@@ -120,7 +120,7 @@
       var res = await LiffApp.api(_api, 'POST', payload);
 
       if (res && res.success) {
-        LiffApp.toast('✅ ส่งงานให้ ' + _name + ' แล้ว', 'success');
+        LiffApp.toast('ส่งงานให้ ' + _name + ' แล้ว', 'success');
         // Reset panel
         var ta = document.getElementById('qa-title');
         ta.value        = '';

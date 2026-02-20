@@ -1309,7 +1309,7 @@
             e.preventDefault();
             e.stopPropagation();
             
-            console.log('🔄 Manually triggering form submission...');
+            console.log(' Manually triggering form submission...');
             
             // Manually call our upload function
             uploadWithProgress();

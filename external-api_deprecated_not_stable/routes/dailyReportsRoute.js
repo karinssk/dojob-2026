@@ -373,7 +373,7 @@ function createDailyHeaderFlexMessage(dailyData, formatNumberWithCommas) {
         contents: [
           {
             type: "text",
-            text: "📊 สรุปค่าใช้จ่ายประจำวัน",
+            text: " สรุปค่าใช้จ่ายประจำวัน",
             weight: "bold",
             color: "#ffffff",
             size: "lg"
@@ -612,7 +612,7 @@ function createDailyProjectFlexMessage(project, index, totalProjects, formatNumb
 // Send daily summary report with flex messages
 async function sendDailySummaryFlexReport(dbPool, client_and_project, formatNumberWithCommas, LINE_ACCESS_TOKEN, REPORT_LINE_USER_ID, targetDate = null) {
   try {
-    console.log('📊 Generating daily flex messages...');
+    console.log(' Generating daily flex messages...');
     
     // Generate daily data
     const dailyData = await generateDailyExpenseData(dbPool, client_and_project, formatNumberWithCommas, targetDate);
@@ -774,7 +774,7 @@ async function generateDailyExpenseSummary(dbPool, client_and_project, formatNum
               ORDER BY id
             `, [project.id, today]);
             
-            console.log(`📊 Found ${expenseDetails.length} expenses for project "${project.title}"`);
+            console.log(` Found ${expenseDetails.length} expenses for project "${project.title}"`);
             
             if (expenseDetails.length > 0) {
               // Process each expense

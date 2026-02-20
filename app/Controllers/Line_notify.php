@@ -346,7 +346,7 @@ class Line_notify extends Security_Controller {
         $message .= "• 'help' - Show this help message\n";
         $message .= "• 'tasks' - Get summary of your tasks\n";
         $message .= "• 'test' - Test system connection\n\n";
-        $message .= "🔔 Automatic notifications:\n";
+        $message .= " Automatic notifications:\n";
         $message .= "• Deadline reminders (3 days before)\n";
         $message .= "• Due today alerts\n";
         $message .= "• Overdue task warnings\n";
@@ -362,10 +362,10 @@ class Line_notify extends Security_Controller {
         $today = date('Y-m-d');
         $upcoming_date = date('Y-m-d', strtotime('+7 days'));
         
-        $message = "📊 Tasks Summary\n\n";
+        $message = " Tasks Summary\n\n";
         $message .= "📅 Today: " . date('M j, Y') . "\n\n";
         $message .= "🔴 Due Today: 2 tasks\n";
-        $message .= "⏰ Due This Week: 5 tasks\n";
+        $message .= " Due This Week: 5 tasks\n";
         $message .= " Total Active: 12 tasks\n\n";
         $message .= "💡 Use the web interface for detailed task management.";
         
@@ -377,7 +377,7 @@ class Line_notify extends Security_Controller {
         $message = " Test Successful!\n\n";
         $message .= "🤖 Bot is working correctly\n";
         $message .= "📡 Connection established\n";
-        $message .= "⏰ Time: " . date('Y-m-d H:i:s') . "\n\n";
+        $message .= " Time: " . date('Y-m-d H:i:s') . "\n\n";
         $message .= "You're all set to receive task notifications!";
         
         $Line_webhook->send_push_message($user_id, $message, 'user');
@@ -982,7 +982,7 @@ class Line_notify extends Security_Controller {
                         
                         // Check how many messages we've sent today (MAX 3 per day)
                         $todays_count = $Line_logs_model->count_todays_notifications($event->id, $today);
-                        echo "📊 Messages sent today: $todays_count / 3 (maximum)\n";
+                        echo " Messages sent today: $todays_count / 3 (maximum)\n";
                         
                         if ($todays_count >= 3) {
                             echo "� Daily limit reached (3/3) - SKIPPING message\n";
@@ -999,7 +999,7 @@ class Line_notify extends Security_Controller {
                 // Special case: Check if event is overdue (past deadline)
                 $event_deadline = $event->end_date ?: $event->start_date;
                 if ($event_deadline && $event_deadline < $today) {
-                    echo "⏰ Event is OVERDUE (deadline: {$event_deadline})\n";
+                    echo " Event is OVERDUE (deadline: {$event_deadline})\n";
                     
                     // Even for overdue events, respect the daily limit unless it's critical
                     $todays_count = $Line_logs_model->count_todays_notifications($event->id, $today);
@@ -1051,7 +1051,7 @@ class Line_notify extends Security_Controller {
 
             // Summary
             echo "\n=== SUMMARY ===\n";
-            echo "📊 Total events processed: " . count($today_events) . "\n";
+            echo " Total events processed: " . count($today_events) . "\n";
             echo " Messages sent successfully: " . count($sent_messages) . "\n";
             echo "❌ Errors encountered: " . count($errors) . "\n";
 

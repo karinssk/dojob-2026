@@ -310,7 +310,7 @@ window.checkTaskHierarchy = function() {
 
 // Reinitialize task list
 window.reinitializeTaskList = function() {
-    console.log('=== 🔄 REINITIALIZING TASK LIST ===');
+    console.log('===  REINITIALIZING TASK LIST ===');
     
     taskListInitialized = false;
     

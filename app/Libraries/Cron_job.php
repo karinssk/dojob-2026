@@ -749,7 +749,7 @@ class Cron_job {
         }
 
         foreach ($tasks as $t) {
-            $msg  = "⏰ แจ้งเตือนก่อนเริ่มงาน\n";
+            $msg  = " แจ้งเตือนก่อนเริ่มงาน\n";
             $msg .= " {$t->title}\n";
             $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($t->start_date . ' ' . $t->start_time)) . "\n";
             $msg .= get_uri("liff/app/tasks/{$t->id}");
@@ -798,7 +798,7 @@ class Cron_job {
         }
 
         foreach ($events as $ev) {
-            $msg  = "⏰ แจ้งเตือนก่อนเริ่ม Event\n";
+            $msg  = " แจ้งเตือนก่อนเริ่ม Event\n";
             $msg .= "📅 {$ev->title}\n";
             $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($ev->start_date . ' ' . $ev->start_time)) . "\n";
             $msg .= get_uri("liff/app/events/{$ev->id}");
@@ -977,7 +977,7 @@ class Cron_job {
 
         foreach ($tasks as $t) {
             $hours = (int)$t->line_notify_no_update_hours;
-            $msg   = "🔔 ไม่มีการอัปเดตงาน {$hours} ชั่วโมงแล้ว\n";
+            $msg   = " ไม่มีการอัปเดตงาน {$hours} ชั่วโมงแล้ว\n";
             $msg  .= " {$t->title}\n";
             $msg  .= "อัปเดตล่าสุด: " . ($t->last_updated ? date('d/m H:i', strtotime($t->last_updated)) : '—') . "\n";
             $msg  .= get_uri("liff/app/tasks/{$t->id}");
@@ -1167,7 +1167,7 @@ class Cron_job {
         $total_users = count($rows);
 
         $flex     = $this->_build_summary_bubble($rows, $since, $total_tasks);
-        $alt_text = "📊 สรุปงานเสร็จ 7 วัน — {$total_tasks} งาน จาก {$total_users} คน";
+        $alt_text = " สรุปงานเสร็จ 7 วัน — {$total_tasks} งาน จาก {$total_users} คน";
 
         if ($mode === 'room' && !empty($rooms)) {
             foreach ($rooms as $rid) {
@@ -1242,7 +1242,7 @@ class Cron_job {
                 'contents'        => [
                     [
                         'type'   => 'text',
-                        'text'   => '🔔 งานที่ยังไม่เสร็จ',
+                        'text'   => ' งานที่ยังไม่เสร็จ',
                         'color'  => '#FFFFFF',
                         'weight' => 'bold',
                         'size'   => 'sm',
@@ -1364,7 +1364,7 @@ class Cron_job {
                 'contents'        => [
                     [
                         'type'   => 'text',
-                        'text'   => '📊 สรุปงานเสร็จประจำสัปดาห์',
+                        'text'   => ' สรุปงานเสร็จประจำสัปดาห์',
                         'color'  => '#FFFFFF',
                         'weight' => 'bold',
                         'size'   => 'sm',
