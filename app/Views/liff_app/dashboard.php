@@ -39,21 +39,21 @@ $avatar = get_avatar($login_user->image);
 
   <!-- Quick stat cards -->
   <div class="dash-stats-scroll">
-    <div class="dash-stat-card">
+    <div class="dash-stat-card" onclick="location.href='<?= get_uri('liff/app/tasks') ?>'">
       <div class="dash-stat-icon" style="background:var(--blue-lt);color:var(--blue)">
         <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M9 12l2 2 4-4M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="dash-stat-num" style="color:var(--blue)"><?= $tasks_due_today ?></div>
       <div class="dash-stat-label">Tasks วันนี้</div>
     </div>
-    <div class="dash-stat-card">
+    <div class="dash-stat-card" onclick="location.href='<?= get_uri('liff/app/events') ?>'">
       <div class="dash-stat-icon" style="background:var(--purple-lt);color:var(--purple)">
         <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M8 3v4M16 3v4M3 10h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="dash-stat-num" style="color:var(--purple)"><?= $events_today ?></div>
       <div class="dash-stat-label">Events วันนี้</div>
     </div>
-    <div class="dash-stat-card">
+    <div class="dash-stat-card" onclick="location.href='<?= get_uri('liff/app/todo') ?>'">
       <div class="dash-stat-icon" style="background:var(--green-lt);color:var(--green)">
         <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
@@ -61,7 +61,7 @@ $avatar = get_avatar($login_user->image);
       <div class="dash-stat-label">To-Do ค้างอยู่</div>
     </div>
     <?php if ($overdue_tasks > 0): ?>
-    <div class="dash-stat-card dash-stat-card-danger">
+    <div class="dash-stat-card dash-stat-card-danger" onclick="location.href='<?= get_uri('liff/app/tasks') ?>?overdue=1'">
       <div class="dash-stat-icon" style="background:var(--pink-lt);color:var(--pink)">
         <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>

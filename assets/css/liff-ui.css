@@ -487,6 +487,7 @@ html, body {
   border-radius: 18px;
   padding: 14px 16px;
   min-width: 108px;
+  cursor: pointer;
   box-shadow: var(--shadow-card);
   text-align: center;
   display: flex;
