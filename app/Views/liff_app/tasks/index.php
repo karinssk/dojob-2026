@@ -38,8 +38,8 @@
   <!-- Step 2: task title -->
   <div class="qa-section-label" id="qa-step2-label" style="opacity:.35">2 · ชื่องาน</div>
   <div class="qa-input-row" id="qa-input-row">
-    <input type="text" id="qa-title" class="qa-title-input"
-           placeholder="ระบุชื่องาน..." disabled oninput="qaCheckReady()">
+    <textarea id="qa-title" class="qa-title-input" rows="3"
+              placeholder="ระบุชื่องาน..." disabled oninput="qaCheckReady(); qaAutoResize(this)"></textarea>
     <button class="qa-send-btn" id="qa-send-btn" onclick="qaSubmit()" disabled>
       ส่งงาน ›
     </button>
@@ -64,6 +64,11 @@
   var _name = null;
   var _defs = <?= json_encode($d) ?>;
   var _api  = 'liff/api/tasks/quick_assign';
+
+  window.qaAutoResize = function (el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+  };
 
   window.qaSelectUser = function (el) {
     document.querySelectorAll('.qa-avatar-item').forEach(function(a){
@@ -112,9 +117,11 @@
       if (res && res.success) {
         LiffApp.toast('✅ ส่งงานให้ ' + _name + ' แล้ว', 'success');
         // Reset
-        document.getElementById('qa-title').value    = '';
-        document.getElementById('qa-title').disabled = true;
-        document.getElementById('qa-title').placeholder = 'ระบุชื่องาน...';
+        var ta = document.getElementById('qa-title');
+        ta.value       = '';
+        ta.disabled    = true;
+        ta.placeholder = 'ระบุชื่องาน...';
+        ta.style.height = 'auto';
         document.querySelectorAll('.qa-avatar-item').forEach(function(a){
           a.classList.remove('qa-selected');
         });

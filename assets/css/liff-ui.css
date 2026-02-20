@@ -1217,6 +1217,7 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 /* Input row */
 .qa-input-row {
   display: flex;
+  flex-direction: column;
   gap: 8px;
   margin-bottom: 10px;
   opacity: .45;
@@ -1224,7 +1225,8 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 }
 .qa-input-row.qa-active { opacity: 1; }
 .qa-title-input {
-  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
   border: 1.5px solid #E2E8F0;
   border-radius: 12px;
   padding: 10px 14px;
@@ -1233,6 +1235,11 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   color: var(--text);
   background: var(--surface);
   outline: none;
+  resize: none;
+  overflow: hidden;
+  min-height: 44px;
+  max-height: 200px;
+  line-height: 1.5;
   transition: border-color .15s;
 }
 .qa-title-input:focus { border-color: var(--blue); }
@@ -1242,12 +1249,12 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   color: #fff;
   border: none;
   border-radius: 12px;
-  padding: 10px 16px;
+  padding: 11px 16px;
   font-size: 14px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  white-space: nowrap;
+  width: 100%;
   transition: background .15s, opacity .15s, transform .1s;
 }
 .qa-send-btn:disabled {
@@ -1255,7 +1262,7 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   cursor: default;
   transform: none;
 }
-.qa-send-btn:not(:disabled):active { transform: scale(.95); }
+.qa-send-btn:not(:disabled):active { transform: scale(.97); }
 
 /* Defaults row */
 .qa-defaults-row {
