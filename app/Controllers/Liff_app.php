@@ -156,15 +156,41 @@ class Liff_app extends Security_Controller {
 
         $statuses = $this->Task_status_model->get_details()->getResult();
 
+        // For มอบหมาย tab: staff list + default project for Quick Assign panel
+        $staff_users     = [];
+        $quick_assign_defaults = [];
+        if ($filter === 'assigned_by_me') {
+            $staff_users = $this->_get_staff_list();
+            $def_project = $this->_get_default_monthly_project(0);
+
+            // Find "To Do" status id
+            $todo_status_id = 0;
+            foreach ($statuses as $s) {
+                if (($s->key_name ?? '') === 'to_do') { $todo_status_id = $s->id; break; }
+            }
+
+            $quick_assign_defaults = [
+                'project_id'  => $def_project->id,
+                'project_name'=> $def_project->title,
+                'start_date'  => date('Y-m-d'),
+                'start_time'  => '09:00',
+                'deadline'    => date('Y-m-d'),
+                'end_time'    => '17:30',
+                'status_id'   => $todo_status_id,
+            ];
+        }
+
         return $this->_liff_view('liff_app/tasks/index', [
-            'page_title' => 'Tasks',
-            'active_tab' => 'tasks',
-            'fab_url'    => get_uri('liff/app/tasks/create'),
-            'tasks'      => $tasks,
-            'statuses'   => $statuses,
-            'filter'     => $filter,
-            'status_id'  => $status_id,
-            'overdue'    => $overdue,
+            'page_title'            => 'Tasks',
+            'active_tab'            => 'tasks',
+            'fab_url'               => get_uri('liff/app/tasks/create'),
+            'tasks'                 => $tasks,
+            'statuses'              => $statuses,
+            'filter'                => $filter,
+            'status_id'             => $status_id,
+            'overdue'               => $overdue,
+            'staff_users'           => $staff_users,
+            'quick_assign_defaults' => $quick_assign_defaults,
         ]);
     }
 

@@ -25,6 +25,48 @@ class Liff_api extends Security_Controller {
         return $user_id;
     }
 
+    // ── Task: Quick Assign (from มอบหมาย panel) ───────────────────
+    // POST: title, assigned_to, project_id, start_date, start_time,
+    //       deadline, end_time, status_id
+    // All date/time/project/status values come from server-computed defaults.
+    public function quick_assign() {
+        $user_id     = $this->login_user->id;
+        $title       = trim($this->request->getPost('title') ?? '');
+        $assigned_to = (int)$this->request->getPost('assigned_to');
+
+        if (!$title) {
+            return $this->_json(['success' => false, 'message' => 'กรุณาระบุชื่องาน']);
+        }
+        if (!$assigned_to) {
+            return $this->_json(['success' => false, 'message' => 'กรุณาเลือกผู้รับงาน']);
+        }
+
+        $data = clean_data([
+            'title'       => $title,
+            'project_id'  => $this->request->getPost('project_id') ?: 0,
+            'assigned_to' => $assigned_to,
+            'start_date'  => $this->request->getPost('start_date') ?: null,
+            'start_time'  => $this->request->getPost('start_time') ?: null,
+            'deadline'    => $this->request->getPost('deadline')   ?: null,
+            'end_time'    => $this->request->getPost('end_time')   ?: null,
+            'status_id'   => $this->request->getPost('status_id')  ?: 0,
+            'context'     => 'general',
+            'created_by'  => $user_id,
+        ]);
+
+        $save_id = $this->Tasks_model->ci_save($data);
+        if (!$save_id) {
+            return $this->_json(['success' => false, 'message' => 'บันทึกไม่สำเร็จ']);
+        }
+
+        // Notify assigned user if different from creator
+        if ($assigned_to != $user_id) {
+            $this->_notify_assignment($save_id, $assigned_to, $title);
+        }
+
+        return $this->_json(['success' => true, 'id' => $save_id]);
+    }
+
     // ── Task: save (create / update) ───────────────────────────────
     public function task_save() {
         $user_id = $this->login_user->id;

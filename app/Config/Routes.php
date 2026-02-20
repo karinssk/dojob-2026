@@ -87,6 +87,7 @@ $routes->get('liff/app/profile', 'Liff_app::profile');
 
 // LIFF JSON API (protected)
 $routes->post('liff/api/tasks/save', 'Liff_api::task_save');
+$routes->post('liff/api/tasks/quick_assign', 'Liff_api::quick_assign');
 $routes->post('liff/api/tasks/update_status', 'Liff_api::task_update_status');
 $routes->post('liff/api/tasks/upload_image', 'Liff_api::task_upload_image');
 $routes->post('liff/api/tasks/quick_update', 'Liff_api::task_quick_update');
