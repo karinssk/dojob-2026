@@ -483,30 +483,130 @@ class Liff_api extends Security_Controller {
     }
 
     private function _notify_assignment($task_id, $assigned_to, $task_title) {
-        $map_t  = get_user_mappings_table();
+        $map_t   = get_user_mappings_table();
         $mapping = $this->db->query(
             "SELECT line_liff_user_id FROM $map_t WHERE rise_user_id=? AND is_active=1 LIMIT 1",
             [$assigned_to]
         )->getRow();
 
-        $mode = get_setting('liff_notify_mode') ?: 'user';
-        $rooms = $this->_get_liff_rooms();
+        // Get assignee's display name
+        $user_row  = $this->db->query(
+            "SELECT first_name, last_name FROM rise_users WHERE id=? LIMIT 1",
+            [$assigned_to]
+        )->getRow();
+        $user_name = $user_row ? trim($user_row->first_name . ' ' . $user_row->last_name) : 'คุณ';
 
-        $msg  = "📋 คุณได้รับมอบหมายงานใหม่\n";
-        $msg .= "งาน: $task_title\n";
-        $msg .= "ดูรายละเอียด: " . get_uri("liff/app/tasks/$task_id");
+        // Sender name (person who assigned the task)
+        $sender_row  = $this->db->query(
+            "SELECT first_name, last_name FROM rise_users WHERE id=? LIMIT 1",
+            [$this->login_user->id]
+        )->getRow();
+        $sender_name = $sender_row ? trim($sender_row->first_name . ' ' . $sender_row->last_name) : '';
+
+        // LIFF deep-link URL
+        $liff_base = rtrim(get_setting('line_liff_id') ?: '2009171467-kn2AHM0C', '/');
+        $liff_url  = 'https://liff.line.me/' . $liff_base . '?path=tasks/' . $task_id;
+
+        // Build Flex Message bubble
+        $flex = [
+            'type'   => 'bubble',
+            'size'   => 'kilo',
+            'header' => [
+                'type'            => 'box',
+                'layout'          => 'horizontal',
+                'backgroundColor' => '#4F7DF3',
+                'paddingAll'      => '14px',
+                'contents'        => [
+                    [
+                        'type'   => 'text',
+                        'text'   => '📋 งานใหม่',
+                        'color'  => '#FFFFFF',
+                        'weight' => 'bold',
+                        'size'   => 'md',
+                        'flex'   => 1,
+                    ],
+                ],
+            ],
+            'body' => [
+                'type'       => 'box',
+                'layout'     => 'vertical',
+                'paddingAll' => '16px',
+                'spacing'    => 'sm',
+                'contents'   => [
+                    [
+                        'type'   => 'text',
+                        'text'   => $user_name . ' ได้รับมอบหมายงานใหม่',
+                        'weight' => 'bold',
+                        'size'   => 'md',
+                        'color'  => '#1A1A2E',
+                        'wrap'   => true,
+                    ],
+                    [
+                        'type'    => 'separator',
+                        'margin'  => 'sm',
+                        'color'   => '#E8EAF6',
+                    ],
+                    [
+                        'type'    => 'box',
+                        'layout'  => 'vertical',
+                        'margin'  => 'sm',
+                        'spacing' => 'xs',
+                        'contents' => [
+                            [
+                                'type'   => 'text',
+                                'text'   => $task_title,
+                                'size'   => 'sm',
+                                'color'  => '#333333',
+                                'wrap'   => true,
+                                'maxLines' => 3,
+                            ],
+                            ($sender_name ? [
+                                'type'  => 'text',
+                                'text'  => 'มอบหมายโดย: ' . $sender_name,
+                                'size'  => 'xs',
+                                'color' => '#888888',
+                                'wrap'  => true,
+                            ] : ['type' => 'filler']),
+                        ],
+                    ],
+                ],
+            ],
+            'footer' => [
+                'type'       => 'box',
+                'layout'     => 'vertical',
+                'paddingAll' => '12px',
+                'contents'   => [
+                    [
+                        'type'   => 'button',
+                        'style'  => 'primary',
+                        'color'  => '#4F7DF3',
+                        'height' => 'sm',
+                        'action' => [
+                            'type'  => 'uri',
+                            'label' => 'ดูรายละเอียดงาน',
+                            'uri'   => $liff_url,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $alt_text = $user_name . ' ได้รับมอบหมายงานใหม่: ' . mb_substr($task_title, 0, 50);
+
+        $mode  = get_setting('liff_notify_mode') ?: 'user';
+        $rooms = $this->_get_liff_rooms();
 
         $Line = new \App\Libraries\Liff_line_webhook();
 
         if ($mode === 'room' && !empty($rooms)) {
             foreach ($rooms as $rid) {
-                $Line->send_push_message($rid, $msg, 'room');
+                $Line->send_flex_message($rid, $flex, $alt_text, 'room');
             }
             return;
         }
 
         if (!$mapping || empty($mapping->line_liff_user_id)) { return; }
-        $Line->send_push_message($mapping->line_liff_user_id, $msg, 'user');
+        $Line->send_flex_message($mapping->line_liff_user_id, $flex, $alt_text, 'user');
     }
 
     private function _get_liff_rooms() {
