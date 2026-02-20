@@ -63,7 +63,7 @@
   var _uid  = null;
   var _name = null;
   var _defs = <?= json_encode($d) ?>;
-  var _api  = '<?= get_uri('liff/api/tasks/quick_assign') ?>';
+  var _api  = 'liff/api/tasks/quick_assign';
 
   window.qaSelectUser = function (el) {
     document.querySelectorAll('.qa-avatar-item').forEach(function(a){
