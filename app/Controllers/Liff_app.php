@@ -83,7 +83,7 @@ class Liff_app extends Security_Controller {
 
         return $this->_liff_view('liff_app/dashboard', [
             'page_title'     => 'Dashboard',
-            'active_tab'     => '',
+            'active_tab'     => 'dashboard',
             'tasks_due_today'=> $tasks_due_today,
             'events_today'   => $events_today,
             'todos_pending'  => $todos_pending,

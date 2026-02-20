@@ -1,6 +1,18 @@
-<div class="page-header">
-  <h1>สวัสดี, <?= esc($login_user->first_name) ?></h1>
-  <p>ภาพรวมวันนี้</p>
+<div class="page-header page-header-row">
+  <div>
+    <h1>สวัสดี, <?= esc($login_user->first_name) ?></h1>
+    <p>ภาพรวมวันนี้</p>
+  </div>
+  <a href="<?= get_uri('liff/app/profile') ?>" class="dashboard-profile-btn">
+    <?php $avatar = get_avatar($login_user->image); ?>
+    <?php if ($login_user->image): ?>
+    <img src="<?= esc($avatar) ?>" alt="" class="dashboard-profile-avatar">
+    <?php else: ?>
+    <div class="dashboard-profile-avatar dashboard-profile-initials">
+      <?= mb_substr($login_user->first_name, 0, 1) ?>
+    </div>
+    <?php endif; ?>
+  </a>
 </div>
 
 <!-- Summary cards -->

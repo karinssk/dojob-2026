@@ -382,6 +382,28 @@ html, body {
 .avatar-sm  { width: 28px; height: 28px; font-size: 11px; }
 .avatar-lg  { width: 48px; height: 48px; font-size: 18px; }
 
+/* --- Dashboard profile button (top-right) ---------------- */
+.dashboard-profile-btn {
+  flex-shrink: 0;
+  display: block;
+  text-decoration: none;
+}
+.dashboard-profile-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #EEF2FF;
+  display: block;
+}
+.dashboard-profile-initials {
+  background: var(--blue);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* --- Profile --------------------------------------------- */
 .profile-card { text-align: center; padding: 26px 20px 22px; }
 .profile-avatar {
