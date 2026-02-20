@@ -613,7 +613,7 @@ $(document).ready(function () {
             }),
             beforeSend: function(xhr) {
                 console.log('📤 Sending Node.js API request...');
-                console.log('📋 Request data:', {
+                console.log(' Request data:', {
                     project_id: parseInt(projectId),
                     sub_project_id: subProjectId ? parseInt(subProjectId) : null
                 });

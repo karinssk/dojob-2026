@@ -1093,7 +1093,7 @@ $(document).ready(function() {
     
     // Handle Board tab click to load Kanban view
     $('a[href="#board"]').on('shown.bs.tab', function (e) {
-        console.log('📋 Loading Kanban Board...');
+        console.log(' Loading Kanban Board...');
         loadKanbanBoard();
     });
     
@@ -2102,7 +2102,7 @@ $(document).ready(function() {
     
     // Fallback to localStorage if database is not available
     window.loadLocalStorageFallback = function() {
-        console.log('📋 Loading from localStorage fallback...');
+        console.log(' Loading from localStorage fallback...');
         
         // Load hidden columns from localStorage
         const hiddenColumns = localStorage.getItem('taskTableHiddenColumns');
@@ -2381,7 +2381,7 @@ $(document).ready(function() {
                 }
             });
             
-            console.log('📋 Current column mapping:', columnMapping);
+            console.log(' Current column mapping:', columnMapping);
             
             // Build the new order array with original indices
             const newOrder = [0]; // Always keep checkbox column first
@@ -2429,7 +2429,7 @@ $(document).ready(function() {
     
     // Load saved customization function
     window.loadSavedCustomization = function() {
-        console.log('📋 Loading saved table customization from database...');
+        console.log(' Loading saved table customization from database...');
         
         $.ajax({
             url: baseUrl + 'table_preferences/get_preferences',

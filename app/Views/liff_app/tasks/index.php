@@ -49,7 +49,7 @@
   <div class="qa-defaults-row">
     <span class="qa-default-chip">📅 <?= date('d/m', strtotime($d['start_date'])) ?></span>
     <span class="qa-default-chip">⏰ <?= $d['start_time'] ?> – <?= $d['end_time'] ?></span>
-    <span class="qa-default-chip">📋 <?= esc(mb_substr($d['project_name'], 0, 18, 'UTF-8')) ?><?= mb_strlen($d['project_name'], 'UTF-8') > 18 ? '…' : '' ?></span>
+    <span class="qa-default-chip"> <?= esc(mb_substr($d['project_name'], 0, 18, 'UTF-8')) ?><?= mb_strlen($d['project_name'], 'UTF-8') > 18 ? '…' : '' ?></span>
     <span class="qa-default-chip">🏷 To Do</span>
   </div>
 
@@ -203,10 +203,10 @@ $noFilter  = !$status_id && !$overdue;
     </span>
     <?php endif; ?>
     <?php if ($t->assigned_name): ?>
-    <span class="task-meta-item">👤 <?= esc($t->assigned_name) ?></span>
+    <span class="task-meta-item"> <?= esc($t->assigned_name) ?></span>
     <?php endif; ?>
     <?php if ($t->project_title): ?>
-    <span class="task-meta-item">📋 <?= esc($t->project_title) ?></span>
+    <span class="task-meta-item"> <?= esc($t->project_title) ?></span>
     <?php endif; ?>
   </div>
   <?php if (!empty($t->all_comment_files_array)): ?>

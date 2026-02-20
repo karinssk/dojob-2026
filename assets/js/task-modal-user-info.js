@@ -13,7 +13,7 @@
     function displayUserInConsole(user) {
         if (!user || !user.id) return;
         
-        console.group('👤 Current User Information - Task Modal');
+        console.group(' Current User Information - Task Modal');
         console.log('%c🆔 User ID: ' + user.id, 'color: #2196F3; font-weight: bold;');
         console.log('%c👋 Name: ' + user.full_name, 'color: #4CAF50; font-weight: bold;');
         console.log('%c📧 Email: ' + user.email, 'color: #FF9800;');
@@ -72,7 +72,7 @@
 
     // Function to show user info when task modal opens
     function onTaskModalOpen() {
-        console.log('📋 Task modal opened - displaying current user info...');
+        console.log(' Task modal opened - displaying current user info...');
         if (currentUser) {
             displayUserInConsole(currentUser);
         } else {
@@ -101,7 +101,7 @@
                     color: #1976d2;
                 `;
                 userInfoDiv.innerHTML = `
-                    👤 Commenting as: <strong>${currentUser.full_name}</strong> (ID: ${currentUser.id})
+                     Commenting as: <strong>${currentUser.full_name}</strong> (ID: ${currentUser.id})
                 `;
                 form.insertBefore(userInfoDiv, form.firstChild);
             }
@@ -192,7 +192,7 @@
         init();
     }
 
-    console.log('%c📋 Task Modal User Info Loaded!', 'color: #4CAF50; font-weight: bold; font-size: 14px;');
+    console.log('%c Task Modal User Info Loaded!', 'color: #4CAF50; font-weight: bold; font-size: 14px;');
     console.log('Available commands: TaskModalUserInfo.showUserInfo(), TaskModalUserInfo.refreshUser()');
 
 })();

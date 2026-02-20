@@ -2724,7 +2724,7 @@ function setFallbackOptions(fieldType) {
     ],
     shot_size: [
       { value: "Full Shot", label: "Full Shot", color: "", icon: "🧍" },
-      { value: "Medium Shot", label: "Medium Shot", color: "", icon: "👤" },
+      { value: "Medium Shot", label: "Medium Shot", color: "", icon: "" },
       { value: "Close-up", label: "Close-up", color: "", icon: "😊" },
       {
         value: "Extreme Close-up",
@@ -2830,7 +2830,7 @@ async function fetchEmojis() {
         { emoji: "🎤", name: "microphone" },
         { emoji: "🎧", name: "headphone" },
         { emoji: "📝", name: "memo" },
-        { emoji: "📋", name: "clipboard" },
+        { emoji: "", name: "clipboard" },
         { emoji: "📌", name: "pushpin" },
         { emoji: "📍", name: "round pushpin" },
         { emoji: "📎", name: "paperclip" },

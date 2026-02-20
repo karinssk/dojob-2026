@@ -5,7 +5,7 @@
 class NodeJSEnhancedKanban {
   constructor(projectId) {
     console.log("🏗️ Creating NodeJS Enhanced Kanban instance...");
-    console.log("📋 Project ID:", projectId);
+    console.log(" Project ID:", projectId);
 
     this.projectId = projectId;
     this.boardData = {};
@@ -337,7 +337,7 @@ class NodeJSEnhancedKanban {
   }
 
   loadFallbackData() {
-    console.log("📋 Loading fallback/mock kanban data...");
+    console.log(" Loading fallback/mock kanban data...");
 
     // Create mock data structure that matches the expected format
     this.boardData = [
@@ -514,7 +514,7 @@ class NodeJSEnhancedKanban {
     });
 
     console.log(
-      `📋 Rendering ${sortedTasks.length} tasks for ${status}:`,
+      ` Rendering ${sortedTasks.length} tasks for ${status}:`,
       sortedTasks.map((t) => `${t.title} (sort: ${t.sort || t.id})`)
     );
 
@@ -1834,7 +1834,7 @@ class NodeJSEnhancedKanban {
       });
 
       const result = await response.json();
-      console.log("📋 Create direct task response:", result);
+      console.log(" Create direct task response:", result);
 
       if (result.success || result.id) {
         this.showSuccess(`Task created in ${statusObj.title}`);
@@ -1995,7 +1995,7 @@ class NodeJSEnhancedKanban {
       });
 
       const result = await response.json();
-      console.log("📋 Create task response:", result);
+      console.log(" Create task response:", result);
 
       if (result.success || result.id) {
         this.showSuccess(`Task created in ${statusObj.title}`);

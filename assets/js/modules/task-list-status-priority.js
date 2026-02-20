@@ -346,7 +346,7 @@ function convertPriorityIconsToDropdowns() {
     type: 'GET',
     cache: false,
     success: function(response) {
-      console.log("📋 Priorities API response:", response);
+      console.log(" Priorities API response:", response);
       if (response && response.success && response.priorities) {
         console.log(" Using real database priorities:", response.priorities);
         

@@ -1071,7 +1071,7 @@ body.board-tab-active .project-details-view > .container-fluid > .row > .col-md-
                                             🔗 Test API
                                         </button>
                                         <button onclick="window.testProjectsAPI()" class="bg-blue-200 hover:bg-blue-300 px-3 py-1 rounded text-gray-800">
-                                            📋 Test Projects API
+                                             Test Projects API
                                         </button>
                                         <button onclick="window.checkAuthStatus()" class="bg-green-200 hover:bg-green-300 px-3 py-1 rounded text-gray-800">
                                             🔐 Check Auth
@@ -1522,8 +1522,8 @@ window.loadProjectDropdown = function() {
     const $loadingElement = $('#loading-projects');
     const $dropdownMenu = $('#project-dropdown-menu');
     
-    console.log('📋 Loading element found:', $loadingElement.length);
-    console.log('📋 Dropdown menu found:', $dropdownMenu.length);
+    console.log(' Loading element found:', $loadingElement.length);
+    console.log(' Dropdown menu found:', $dropdownMenu.length);
     
     if ($loadingElement.length === 0) {
         console.error('❌ #loading-projects element not found!');
@@ -1557,8 +1557,8 @@ window.loadProjectDropdown = function() {
             }
             
             if (response.success && response.data) {
-                console.log('📋 Projects found:', response.data.length);
-                console.log('📋 First project:', response.data[0]);
+                console.log(' Projects found:', response.data.length);
+                console.log(' First project:', response.data[0]);
                 console.log('🚀 Calling populateProjectDropdown...');
                 populateProjectDropdown(response.data);
             } else {
@@ -1603,8 +1603,8 @@ window.tryFallbackProjectsAPI = function() {
             console.log(' Response.data length:', response.data ? response.data.length : 'no data');
             
             if (response.success && response.data) {
-                console.log('📋 Projects found via fallback:', response.data.length);
-                console.log('📋 First project sample:', response.data[0]);
+                console.log(' Projects found via fallback:', response.data.length);
+                console.log(' First project sample:', response.data[0]);
                 console.log('🚀 About to call populateProjectDropdown...');
                 console.log('🔍 populateProjectDropdown function exists:', typeof populateProjectDropdown);
                 
@@ -1662,8 +1662,8 @@ window.populateProjectDropdown = function(projects) {
     const dropdown = $('#project-dropdown-menu');
     const currentProjectId = projectId;
     
-    console.log('📋 Dropdown element found:', dropdown.length);
-    console.log('📋 Current project ID:', currentProjectId);
+    console.log(' Dropdown element found:', dropdown.length);
+    console.log(' Current project ID:', currentProjectId);
     
     // Clear loading item
     const $loadingItem = $('#loading-projects');
@@ -1925,7 +1925,7 @@ window.saveColumnOrder = function() {
         }
     });
     
-    console.log('📋 Column order to save:', columnOrder);
+    console.log(' Column order to save:', columnOrder);
     
     // Save to database
     $.ajax({
@@ -2030,7 +2030,7 @@ console.log(" Test function available: window.testTablePreferences()");
 // Initialize modular task list system
 $(document).ready(function() {
     console.log('🚀 Document ready - initializing modular task list...');
-    console.log('📋 Board tab is set as DEFAULT - List tab data loading DISABLED');
+    console.log(' Board tab is set as DEFAULT - List tab data loading DISABLED');
     
     // HIDE TOP NAVIGATION immediately since board is default active tab
     console.log('🔒 Hiding top navigation - Board is default active tab');
@@ -2258,13 +2258,13 @@ $(document).ready(function() {
     
     // Handle Board tab click to load Kanban view - DISABLED (using new system)
     // $('a[href="#board"]').on('shown.bs.tab', function (e) {
-    //     console.log('📋 Loading Kanban Board...');
+    //     console.log(' Loading Kanban Board...');
     //     loadKanbanBoard();
     // });
     
     // DISABLE LIST TAB DATA LOADING - Board is default
     $('a[href="#list"]').on('shown.bs.tab', function (e) {
-        console.log('📋 List tab clicked - data loading disabled, redirecting to board...');
+        console.log(' List tab clicked - data loading disabled, redirecting to board...');
         // Prevent list tab activation and redirect to board
         e.preventDefault();
         $('a[href="#board"]').tab('show');
@@ -2273,7 +2273,7 @@ $(document).ready(function() {
     
     // HIDE TOP NAVIGATION when board tab is active
     $('a[href="#board"]').on('shown.bs.tab', function (e) {
-        console.log('📋 Board tab activated - hiding top navigation...');
+        console.log(' Board tab activated - hiding top navigation...');
         $('body').addClass('board-tab-active');
         $('.page-content').addClass('board-tab-active');
         $('.project-details-view').addClass('board-tab-active');
@@ -2281,7 +2281,7 @@ $(document).ready(function() {
     
     // SHOW TOP NAVIGATION when other tabs are active
     $('a[href="#summary"], a[href="#list"], a[href="#calendar"]').on('shown.bs.tab', function (e) {
-        console.log('📋 Non-board tab activated - showing top navigation...');
+        console.log(' Non-board tab activated - showing top navigation...');
         $('body').removeClass('board-tab-active');
         $('.page-content').removeClass('board-tab-active');
         $('.project-details-view').removeClass('board-tab-active');
@@ -3130,7 +3130,7 @@ $(document).ready(function() {
     
     // Fallback to localStorage if database is not available
     window.loadLocalStorageFallback = function() {
-        console.log('📋 Loading from localStorage fallback...');
+        console.log(' Loading from localStorage fallback...');
         
         // Load hidden columns from localStorage
         const hiddenColumns = localStorage.getItem('taskTableHiddenColumns');
@@ -3409,7 +3409,7 @@ $(document).ready(function() {
                 }
             });
             
-            console.log('📋 Current column mapping:', columnMapping);
+            console.log(' Current column mapping:', columnMapping);
             
             // Build the new order array with original indices
             const newOrder = [0]; // Always keep checkbox column first
@@ -3457,7 +3457,7 @@ $(document).ready(function() {
     
     // Load saved customization function
     window.loadSavedCustomization = function() {
-        console.log('📋 Loading saved table customization from database...');
+        console.log(' Loading saved table customization from database...');
         
         $.ajax({
             url: baseUrl + 'table_preferences/get_preferences',
@@ -3954,7 +3954,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log("🔍 DOM Content Loaded - Starting task list initialization...");
     console.log("ℹ️ Note: Secondary navigation tabs are hidden - using main header navigation");
-    console.log("📋 Board tab is default active and will auto-initialize...");
+    console.log(" Board tab is default active and will auto-initialize...");
     
     // Initialize TaskModal immediately when DOM is ready
     console.log("🔍 DOM ready - checking TaskModal availability...");
@@ -4294,7 +4294,7 @@ window.autoInitializeBoard = function() {
                      boardTabPane.classList.contains('active');
     
     if (!isVisible) {
-        console.log("📋 Board tab not visible, skipping auto-initialization");
+        console.log(" Board tab not visible, skipping auto-initialization");
         return false;
     }
     

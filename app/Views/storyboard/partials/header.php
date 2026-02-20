@@ -11,7 +11,7 @@ function getFieldIcon($field, $value) {
         ),
         'shot_size' => array(
             array('value' => 'Full Shot', 'icon' => '🧍'),
-            array('value' => 'Medium Shot', 'icon' => '👤'),
+            array('value' => 'Medium Shot', 'icon' => ''),
             array('value' => 'Close-up', 'icon' => '😊'),
             array('value' => 'Extreme Close-up', 'icon' => '👁️'),
             array('value' => 'Wide Shot', 'icon' => '🏞️'),

@@ -30,7 +30,7 @@ function initLabelsDisplay() {
 
 // Load and display labels for a specific task
 function loadAndDisplayLabels($container, taskId, labelIds) {
-  console.log("📋 Loading labels for task:", taskId, "IDs:", labelIds);
+  console.log(" Loading labels for task:", taskId, "IDs:", labelIds);
 
   // Parse label IDs
   var labelIdArray = [];
@@ -113,7 +113,7 @@ function showLabelsDropdown($container, taskId, currentLabels) {
       "/update-new-feature/get_labels_direct.php",
     type: "GET",
     success: function (response) {
-      console.log("📋 Labels response:", response);
+      console.log(" Labels response:", response);
       if (response.success && response.labels) {
         renderLabelsDropdown(
           $container,
@@ -690,7 +690,7 @@ window.handleSaveLabels = function (taskId) {
     url: labelsUrl,
     type: "GET",
     success: function (response) {
-      console.log("📋 Labels fetch response:", response);
+      console.log(" Labels fetch response:", response);
       if (response.success && response.labels) {
         // Save labels
         console.log("🚀 Calling saveTaskLabels...");

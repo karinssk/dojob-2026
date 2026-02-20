@@ -809,7 +809,7 @@ class TaskModal {
       );
 
       const result = await response.json();
-      console.log("📋 Current user API response:", result);
+      console.log(" Current user API response:", result);
 
       if (result.success && result.authenticated) {
         this.currentUser = result.data;
@@ -876,7 +876,7 @@ class TaskModal {
 
       if (response.ok) {
         const result = await response.json();
-        console.log("📋 Local API response:", result);
+        console.log(" Local API response:", result);
 
         if (result.success && result.data) {
           this.currentTask = result.data;
@@ -931,7 +931,7 @@ class TaskModal {
         }
 
         const externalResult = await externalResponse.json();
-        console.log("📋 External API response:", externalResult);
+        console.log(" External API response:", externalResult);
 
         if (externalResult.success && externalResult.data) {
           this.currentTask = externalResult.data;
@@ -1409,7 +1409,7 @@ class TaskModal {
       }
 
       const result = await response.json();
-      console.log("📋 Delete image response:", result);
+      console.log(" Delete image response:", result);
 
       if (result.success) {
         await this.reloadTask();

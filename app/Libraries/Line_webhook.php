@@ -188,7 +188,7 @@ class Line_webhook {
         }
 
         $message = "🔄 **Recurring Task Created**\n\n";
-        $message .= "📋 **Task:** {$task->title}\n";
+        $message .= " **Task:** {$task->title}\n";
         
         if (!empty($task->project_title)) {
             $message .= "📁 **Project:** {$task->project_title}\n";
@@ -200,7 +200,7 @@ class Line_webhook {
         }
         
         if (!empty($task->assigned_to_user)) {
-            $message .= "👤 **Assigned to:** {$task->assigned_to_user}\n";
+            $message .= " **Assigned to:** {$task->assigned_to_user}\n";
         }
 
         $message .= "\n💡 This is an automatically created recurring task.";
@@ -233,11 +233,11 @@ class Line_webhook {
             'overdue' => 'Task Overdue'
         ];
 
-        $icon = $icons[$reminder_type] ?? '📋';
+        $icon = $icons[$reminder_type] ?? '';
         $title = $titles[$reminder_type] ?? 'Task Reminder';
 
         $message = "{$icon} **{$title}**\n\n";
-        $message .= "📋 **Task:** {$task->title}\n";
+        $message .= " **Task:** {$task->title}\n";
 
         if (!empty($task->project_title)) {
             $message .= "📁 **Project:** {$task->project_title}\n";
@@ -260,7 +260,7 @@ class Line_webhook {
         }
 
         if (!empty($task->assigned_to_user)) {
-            $message .= "👤 **Assigned to:** {$task->assigned_to_user}\n";
+            $message .= " **Assigned to:** {$task->assigned_to_user}\n";
         }
 
         if (!empty($task->priority_title)) {
@@ -700,7 +700,7 @@ class Line_webhook {
         }
 
         if (!empty($event->created_by_name)) {
-            $message .= "👤 **Created by:** {$event->created_by_name}\n";
+            $message .= " **Created by:** {$event->created_by_name}\n";
         }
 
         // Calculate time difference for before_event reminders
@@ -755,7 +755,7 @@ class Line_webhook {
         }
         
         if (!empty($event->created_by_name)) {
-            $message .= "👤 **Created by:** {$event->created_by_name}\n";
+            $message .= " **Created by:** {$event->created_by_name}\n";
         }
 
         $message .= "\n💡 This is an automatically created recurring event.";

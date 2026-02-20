@@ -33,7 +33,7 @@
             return; // Don't spam the console with the same user info
         }
 
-        console.group('👤 Current User Information');
+        console.group(' Current User Information');
         console.log('🆔 User ID:', user.id);
         console.log('👋 Name:', `${user.first_name} ${user.last_name}`);
         console.log('📧 Email:', user.email);
@@ -78,7 +78,7 @@
                     }
                 } else {
                     if (CONFIG.debug) {
-                        console.log('👤 No authenticated user found:', result);
+                        console.log(' No authenticated user found:', result);
                     }
                 }
             } else if (response.status === 401) {
@@ -168,6 +168,6 @@
 })();
 
 // Welcome message
-console.log('%c📋 DoJob Console User Info Loaded! 📋', 'color: #4CAF50; font-weight: bold; font-size: 14px;');
+console.log('%c DoJob Console User Info Loaded! ', 'color: #4CAF50; font-weight: bold; font-size: 14px;');
 console.log('Use ConsoleUserInfo.check() to manually check current user');
 console.log('Use ConsoleUserInfo.stop() to disable automatic checking');

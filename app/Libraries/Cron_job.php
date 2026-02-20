@@ -134,6 +134,18 @@ class Cron_job {
                 } catch (\Exception $e) {
                     log_message('error', 'LIFF notify no_update: ' . $e->getMessage());
                 }
+
+                try {
+                    $this->liff_task_reminder();
+                } catch (\Exception $e) {
+                    log_message('error', 'LIFF task reminder: ' . $e->getMessage());
+                }
+
+                try {
+                    $this->liff_task_summary();
+                } catch (\Exception $e) {
+                    log_message('error', 'LIFF task summary: ' . $e->getMessage());
+                }
             }
 
             $this->ci->Settings_model->save_setting("last_hourly_job_time", $this->current_time);
@@ -734,7 +746,7 @@ class Cron_job {
 
         foreach ($tasks as $t) {
             $msg  = "⏰ แจ้งเตือนก่อนเริ่มงาน\n";
-            $msg .= "📋 {$t->title}\n";
+            $msg .= " {$t->title}\n";
             $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($t->start_date . ' ' . $t->start_time)) . "\n";
             $msg .= get_uri("liff/app/tasks/{$t->id}");
             if ($mode === 'room') {
@@ -848,7 +860,7 @@ class Cron_job {
 
         foreach ($tasks as $t) {
             $msg  = "⚠️ แจ้งเตือนก่อนสิ้นสุดงาน\n";
-            $msg .= "📋 {$t->title}\n";
+            $msg .= " {$t->title}\n";
             $msg .= "🔚 สิ้นสุด: " . date('d/m H:i', strtotime($t->deadline . ' ' . $t->end_time)) . "\n";
             $msg .= get_uri("liff/app/tasks/{$t->id}");
             if ($mode === 'room') {
@@ -958,7 +970,7 @@ class Cron_job {
         foreach ($tasks as $t) {
             $hours = (int)$t->line_notify_no_update_hours;
             $msg   = "🔔 ไม่มีการอัปเดตงาน {$hours} ชั่วโมงแล้ว\n";
-            $msg  .= "📋 {$t->title}\n";
+            $msg  .= " {$t->title}\n";
             $msg  .= "อัปเดตล่าสุด: " . date('d/m H:i', strtotime($t->updated_at)) . "\n";
             $msg  .= get_uri("liff/app/tasks/{$t->id}");
             if ($mode === 'room') {
@@ -972,4 +984,446 @@ class Cron_job {
         }
     }
 
+    // ══════════════════════════════════════════════════════════════════
+    //  LIFF: แจ้งเตือนงานค้าง (scheduled reminder)
+    // ══════════════════════════════════════════════════════════════════
+    private function liff_task_reminder() {
+        if (get_setting('liff_reminder_enabled') !== '1') { return; }
+
+        // Check if current local time matches any configured reminder slot (within the hour)
+        $times   = json_decode(get_setting('liff_reminder_times') ?: '[]', true) ?: [];
+        $repeat  = get_setting('liff_reminder_repeat') === '1';
+        $days    = json_decode(get_setting('liff_reminder_days')  ?: '[]', true) ?: [1,2,3,4,5];
+
+        if (!$this->_is_notify_time_now($times, $days, $repeat, 'liff_reminder_last_sent')) { return; }
+
+        $this->_send_task_reminder_flex(false);
+        $this->ci->Settings_model->save_setting('liff_reminder_last_sent', date('Y-m-d H:i:s'));
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  LIFF: สรุปงานเสร็จ 7 วัน (scheduled summary)
+    // ══════════════════════════════════════════════════════════════════
+    private function liff_task_summary() {
+        if (get_setting('liff_summary_enabled') !== '1') { return; }
+
+        $times = [get_setting('liff_summary_time') ?: '08:00'];
+        $days  = json_decode(get_setting('liff_summary_days') ?: '[]', true) ?: [1,2,3,4,5];
+
+        if (!$this->_is_notify_time_now($times, $days, true, 'liff_summary_last_sent')) { return; }
+
+        $this->_send_task_summary_flex(false);
+        $this->ci->Settings_model->save_setting('liff_summary_last_sent', date('Y-m-d H:i:s'));
+    }
+
+    // ── Public test entry-points (called from Liff_settings controller) ──
+
+    public function run_task_reminder_test() {
+        $this->ci = new \App\Controllers\App_Controller();
+        return $this->_send_task_reminder_flex(true);
+    }
+
+    public function run_task_summary_test() {
+        $this->ci = new \App\Controllers\App_Controller();
+        return $this->_send_task_summary_flex(true);
+    }
+
+    // ── Core: build & send incomplete-task reminder ───────────────────
+
+    private function _send_task_reminder_flex($is_test = false) {
+        $db   = \Config\Database::connect();
+        $Line = new \App\Libraries\Liff_line_webhook();
+
+        $mode  = get_setting('liff_notify_mode') ?: 'user';
+        $rooms = $this->_get_liff_room_ids();
+
+        // Get all incomplete tasks grouped by assigned user
+        $mt    = get_user_mappings_table();
+        $liff_base = rtrim(get_setting('line_liff_id') ?: '2009171467-kn2AHM0C', '/');
+
+        $rows = $db->query("
+            SELECT
+                u.id AS user_id,
+                CONCAT(u.first_name,' ',u.last_name) AS user_name,
+                m.line_liff_user_id,
+                t.id AS task_id,
+                t.title AS task_title
+            FROM rise_users u
+            JOIN rise_tasks t ON t.assigned_to = u.id AND t.deleted = 0
+            LEFT JOIN rise_task_status ts ON ts.id = t.status_id
+            LEFT JOIN $mt m ON m.rise_user_id = u.id AND m.is_active = 1
+            WHERE (ts.key_name IS NULL OR ts.key_name != 'done')
+              AND u.deleted = 0
+            ORDER BY u.id, t.id
+        ")->getResult();
+
+        if (empty($rows)) { return 0; }
+
+        // Group by user
+        $users = [];
+        foreach ($rows as $r) {
+            $uid = $r->user_id;
+            if (!isset($users[$uid])) {
+                $users[$uid] = [
+                    'user_name'        => $r->user_name,
+                    'line_liff_user_id'=> $r->line_liff_user_id,
+                    'tasks'            => [],
+                ];
+            }
+            $users[$uid]['tasks'][] = ['id' => $r->task_id, 'title' => $r->task_title];
+        }
+
+        $total_users = count($users);
+        if ($total_users === 0) { return 0; }
+
+        // Build one combined Flex carousel or stacked bubble
+        // If room mode — send a single combined message to each room
+        // If user mode — send individual bubble per user to their own LINE
+        if ($mode === 'room' && !empty($rooms)) {
+            $flex = $this->_build_reminder_carousel($users, $liff_base);
+            $alt  = "📋 สรุปงานค้าง — {$total_users} คน";
+            foreach ($rooms as $rid) {
+                $Line->send_flex_message($rid, $flex, $alt, 'room');
+            }
+        } else {
+            foreach ($users as $uid => $u) {
+                if (empty($u['line_liff_user_id'])) { continue; }
+                $single = $this->_build_reminder_bubble_single($u['user_name'], $u['tasks'], $liff_base);
+                $alt    = $u['user_name'] . ' มีงานค้าง ' . count($u['tasks']) . ' รายการ';
+                $Line->send_flex_message($u['line_liff_user_id'], $single, $alt, 'user');
+            }
+        }
+
+        return array_sum(array_map(fn($u) => count($u['tasks']), $users));
+    }
+
+    // ── Core: build & send 7-day completion summary ───────────────────
+
+    private function _send_task_summary_flex($is_test = false) {
+        $db        = \Config\Database::connect();
+        $Line      = new \App\Libraries\Liff_line_webhook();
+        $mode      = get_setting('liff_notify_mode') ?: 'user';
+        $rooms     = $this->_get_liff_room_ids();
+        $liff_base = rtrim(get_setting('line_liff_id') ?: '2009171467-kn2AHM0C', '/');
+        $since     = date('Y-m-d', strtotime('-7 days'));
+
+        // Tasks completed in last 7 days (status done, updated within window)
+        $mt = get_user_mappings_table();
+        $rows = $db->query("
+            SELECT
+                u.id AS user_id,
+                CONCAT(u.first_name,' ',u.last_name) AS user_name,
+                m.line_liff_user_id,
+                COUNT(t.id) AS done_count
+            FROM rise_users u
+            JOIN rise_tasks t ON t.assigned_to = u.id AND t.deleted = 0
+            JOIN rise_task_status ts ON ts.id = t.status_id AND ts.key_name = 'done'
+            LEFT JOIN $mt m ON m.rise_user_id = u.id AND m.is_active = 1
+            WHERE t.status_changed_at >= ?
+              AND u.deleted = 0
+            GROUP BY u.id
+            HAVING done_count > 0
+            ORDER BY done_count DESC
+        ", [$since . ' 00:00:00'])->getResult();
+
+        if (empty($rows)) { return 0; }
+
+        $total_tasks = array_sum(array_column($rows, 'done_count'));
+        $total_users = count($rows);
+
+        $flex     = $this->_build_summary_bubble($rows, $since, $total_tasks);
+        $alt_text = "📊 สรุปงานเสร็จ 7 วัน — {$total_tasks} งาน จาก {$total_users} คน";
+
+        if ($mode === 'room' && !empty($rooms)) {
+            foreach ($rooms as $rid) {
+                $Line->send_flex_message($rid, $flex, $alt_text, 'room');
+            }
+        } else {
+            // For user mode, send the combined summary to users who have LINE linked
+            foreach ($rows as $r) {
+                if (empty($r->line_liff_user_id)) { continue; }
+                $Line->send_flex_message($r->line_liff_user_id, $flex, $alt_text, 'user');
+            }
+        }
+
+        return (int)$total_tasks;
+    }
+
+    // ── Flex builders ─────────────────────────────────────────────────
+
+    /**
+     * Single-user reminder bubble
+     */
+    private function _build_reminder_bubble_single($user_name, $tasks, $liff_base) {
+        $task_count = count($tasks);
+        $body_rows  = [];
+
+        foreach (array_slice($tasks, 0, 8) as $i => $t) {
+            $body_rows[] = [
+                'type'   => 'box',
+                'layout' => 'horizontal',
+                'contents' => [
+                    [
+                        'type'  => 'text',
+                        'text'  => ($i + 1) . '.',
+                        'size'  => 'xs',
+                        'color' => '#94A3B8',
+                        'flex'  => 0,
+                        'align' => 'start',
+                    ],
+                    [
+                        'type'      => 'text',
+                        'text'      => $t['title'],
+                        'size'      => 'xs',
+                        'color'     => '#334155',
+                        'wrap'      => true,
+                        'maxLines'  => 2,
+                        'flex'      => 1,
+                    ],
+                ],
+                'spacing' => 'xs',
+            ];
+        }
+
+        if ($task_count > 8) {
+            $body_rows[] = [
+                'type'  => 'text',
+                'text'  => '... และอีก ' . ($task_count - 8) . ' งาน',
+                'size'  => 'xs',
+                'color' => '#94A3B8',
+            ];
+        }
+
+        $liff_url = 'https://liff.line.me/' . $liff_base;
+
+        return [
+            'type'   => 'bubble',
+            'size'   => 'kilo',
+            'header' => [
+                'type'            => 'box',
+                'layout'          => 'horizontal',
+                'backgroundColor' => '#F97316',
+                'paddingAll'      => '12px',
+                'contents'        => [
+                    [
+                        'type'   => 'text',
+                        'text'   => '🔔 งานที่ยังไม่เสร็จ',
+                        'color'  => '#FFFFFF',
+                        'weight' => 'bold',
+                        'size'   => 'sm',
+                    ],
+                ],
+            ],
+            'body' => [
+                'type'       => 'box',
+                'layout'     => 'vertical',
+                'paddingAll' => '14px',
+                'spacing'    => 'sm',
+                'contents'   => array_merge(
+                    [[
+                        'type'   => 'text',
+                        'text'   => $user_name . ' มีงานค้าง ' . $task_count . ' รายการ',
+                        'weight' => 'bold',
+                        'size'   => 'sm',
+                        'color'  => '#1E293B',
+                        'wrap'   => true,
+                    ],
+                    [
+                        'type'   => 'separator',
+                        'margin' => 'sm',
+                        'color'  => '#FED7AA',
+                    ]],
+                    $body_rows
+                ),
+            ],
+            'footer' => [
+                'type'       => 'box',
+                'layout'     => 'vertical',
+                'paddingAll' => '10px',
+                'contents'   => [
+                    [
+                        'type'   => 'button',
+                        'style'  => 'primary',
+                        'color'  => '#F97316',
+                        'height' => 'sm',
+                        'action' => [
+                            'type'  => 'uri',
+                            'label' => 'อัปเดตงาน',
+                            'uri'   => $liff_url,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Room mode — carousel of per-user bubbles (max 12 bubbles per carousel)
+     */
+    private function _build_reminder_carousel($users, $liff_base) {
+        $bubbles = [];
+        foreach (array_slice($users, 0, 12) as $u) {
+            $bubbles[] = $this->_build_reminder_bubble_single(
+                $u['user_name'], $u['tasks'], $liff_base
+            );
+        }
+
+        return [
+            'type'     => 'carousel',
+            'contents' => $bubbles,
+        ];
+    }
+
+    /**
+     * Summary bubble: tasks completed in 7 days per user
+     */
+    private function _build_summary_bubble($rows, $since, $total_tasks) {
+        $since_fmt = date('d/m/Y', strtotime($since));
+        $today_fmt = date('d/m/Y');
+
+        $body_rows = [];
+        foreach (array_slice($rows, 0, 10) as $r) {
+            $body_rows[] = [
+                'type'    => 'box',
+                'layout'  => 'horizontal',
+                'spacing' => 'sm',
+                'contents' => [
+                    [
+                        'type'  => 'text',
+                        'text'  => $r->user_name,
+                        'size'  => 'xs',
+                        'color' => '#334155',
+                        'flex'  => 1,
+                        'wrap'  => true,
+                    ],
+                    [
+                        'type'   => 'text',
+                        'text'   => $r->done_count . ' งาน',
+                        'size'   => 'xs',
+                        'color'  => '#00B393',
+                        'weight' => 'bold',
+                        'flex'   => 0,
+                        'align'  => 'end',
+                    ],
+                ],
+            ];
+        }
+
+        if (count($rows) > 10) {
+            $body_rows[] = [
+                'type'  => 'text',
+                'text'  => '... และอีก ' . (count($rows) - 10) . ' คน',
+                'size'  => 'xs',
+                'color' => '#94A3B8',
+            ];
+        }
+
+        return [
+            'type'   => 'bubble',
+            'size'   => 'kilo',
+            'header' => [
+                'type'            => 'box',
+                'layout'          => 'vertical',
+                'backgroundColor' => '#00B393',
+                'paddingAll'      => '12px',
+                'contents'        => [
+                    [
+                        'type'   => 'text',
+                        'text'   => '📊 สรุปงานเสร็จประจำสัปดาห์',
+                        'color'  => '#FFFFFF',
+                        'weight' => 'bold',
+                        'size'   => 'sm',
+                    ],
+                    [
+                        'type'  => 'text',
+                        'text'  => $since_fmt . ' – ' . $today_fmt,
+                        'color' => '#CCFBF1',
+                        'size'  => 'xxs',
+                    ],
+                ],
+            ],
+            'body' => [
+                'type'       => 'box',
+                'layout'     => 'vertical',
+                'paddingAll' => '14px',
+                'spacing'    => 'sm',
+                'contents'   => array_merge(
+                    [[
+                        'type'   => 'text',
+                        'text'   => 'ทีมเสร็จงานรวม ' . $total_tasks . ' รายการ',
+                        'weight' => 'bold',
+                        'size'   => 'sm',
+                        'color'  => '#1E293B',
+                    ],
+                    [
+                        'type'   => 'separator',
+                        'margin' => 'sm',
+                        'color'  => '#99F6E4',
+                    ]],
+                    $body_rows
+                ),
+            ],
+            'footer' => [
+                'type'       => 'box',
+                'layout'     => 'vertical',
+                'paddingAll' => '10px',
+                'contents'   => [
+                    [
+                        'type'   => 'text',
+                        'text'   => 'ขอบคุณทุกคนที่ช่วยกัน! 💪',
+                        'size'   => 'xs',
+                        'color'  => '#64748B',
+                        'align'  => 'center',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────
+
+    /**
+     * Check whether "now" falls within any of the given time slots (±30 min window)
+     * and that today's day-of-week is in the allowed days list,
+     * and that we haven't already sent within the last 45 minutes.
+     *
+     * @param array  $times      e.g. ['09:00','15:00']
+     * @param array  $days       day-of-week 1=Mon … 7=Sun (ISO)
+     * @param bool   $repeat     if false, only fire once per slot ever (not needed here but kept)
+     * @param string $last_key   settings key that stores last-sent datetime
+     */
+    private function _is_notify_time_now($times, $days, $repeat, $last_key) {
+        if (empty($times)) { return false; }
+
+        $now_ts  = time(); // local server time
+        $dow     = (int)date('N'); // 1=Mon, 7=Sun
+
+        if (!in_array($dow, $days)) { return false; }
+
+        // Check last sent — skip if already sent within 45 min
+        $last_sent = get_setting($last_key);
+        if ($last_sent && (time() - strtotime($last_sent)) < 2700) { return false; }
+
+        $now_hm  = date('H:i');
+        $now_min = (int)date('H') * 60 + (int)date('i');
+
+        foreach ($times as $t) {
+            $parts = explode(':', $t);
+            if (count($parts) < 2) { continue; }
+            $slot_min = (int)$parts[0] * 60 + (int)$parts[1];
+            // Match if within ±30 minutes of slot
+            if (abs($now_min - $slot_min) <= 30) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function _get_liff_room_ids() {
+        $raw = get_setting('liff_notify_rooms');
+        $arr = $raw ? json_decode($raw, true) : [];
+        return is_array($arr) ? array_values(array_filter($arr)) : [];
+    }
+
 }
+

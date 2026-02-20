@@ -1175,7 +1175,7 @@ async function processExpenseData(userId, expenseData, files = []) {
 
     const responseMessage = ` บันทึกค่าใช้จ่ายของ ${userProfile.displayName || 'คุณ'} เรียบร้อยแล้ว
 
-📋 รายละเอียด:
+ รายละเอียด:
 - ชื่อรายการ: ${title}
 - หมวดหมู่: ${categoryName}
 - รายละเอียด: ${ex}${expenseData.description}
@@ -1871,7 +1871,7 @@ app.listen(port, async () => {
   console.log(`📲 Send Daily Flex: http://localhost:${port}/api/daily/send-flex-summary`);
   console.log(` Test Daily Flex: http://localhost:${port}/api/daily/test-flex-summary`);
   console.log(`🎨 Daily Flex Preview: http://localhost:${port}/api/daily/test-flex-preview`);
-  console.log(`📋 Monthly Summary: http://localhost:${port}/api/monthly-summary`);
+  console.log(` Monthly Summary: http://localhost:${port}/api/monthly-summary`);
   console.log(`📤 Send Monthly Summary: http://localhost:${port}/api/send-monthly-summary`);
   console.log(` Test Monthly Summary: http://localhost:${port}/api/test-monthly-summary`);
   console.log(`📲 Test Send to LINE: http://localhost:${port}/api/test-send-monthly-summary`);

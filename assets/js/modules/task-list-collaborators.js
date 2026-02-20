@@ -88,7 +88,7 @@ function getUsersList(callback) {
 
 // Show assignee dropdown
 function showAssigneeDropdown($container, taskId, currentAssignee) {
-  console.log("👤 Showing assignee dropdown for task:", taskId);
+  console.log(" Showing assignee dropdown for task:", taskId);
 
   // Get users list
   getUsersList(function (users) {
@@ -206,7 +206,7 @@ function showAssigneeDropdown($container, taskId, currentAssignee) {
       e.stopPropagation();
       var assigneeId = $(this).data("user-id");
 
-      console.log("👤 Selected assignee:", assigneeId);
+      console.log(" Selected assignee:", assigneeId);
 
       // Save assignee
       saveTaskAssignee(taskId, assigneeId, function (success) {
@@ -900,7 +900,7 @@ function initCollaboratorsDisplay() {
 
 // Initialize assignees display on page load
 function initAssigneesDisplay() {
-  console.log("👤 Initializing assignees display...");
+  console.log(" Initializing assignees display...");
 
   // Find all assignee containers that need initialization
   $(".task-assignee-container").each(function () {
@@ -916,7 +916,7 @@ function initAssigneesDisplay() {
 
 // Load and display collaborators with profile images
 function loadAndDisplayCollaborators($container, collaboratorIds) {
-  console.log("📋 Loading collaborators with images:", collaboratorIds);
+  console.log(" Loading collaborators with images:", collaboratorIds);
 
   // Parse collaborator IDs
   var collaboratorIdArray = [];
@@ -954,7 +954,7 @@ function loadAndDisplayCollaborators($container, collaboratorIds) {
 
 // Load and display assignee with profile image
 function loadAndDisplayAssignee($container, assigneeId) {
-  console.log("👤 Loading assignee with image:", assigneeId);
+  console.log(" Loading assignee with image:", assigneeId);
 
   // Fetch users with profile images
   getUsersList(function (users) {

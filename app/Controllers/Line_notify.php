@@ -341,7 +341,7 @@ class Line_notify extends Security_Controller {
 
     private function send_help_message($user_id) {
         $Line_webhook = new \App\Libraries\Line_webhook();
-        $message = "📋 Task Management System Help\n\n";
+        $message = " Task Management System Help\n\n";
         $message .= "Available commands:\n";
         $message .= "• 'help' - Show this help message\n";
         $message .= "• 'tasks' - Get summary of your tasks\n";
@@ -366,7 +366,7 @@ class Line_notify extends Security_Controller {
         $message .= "📅 Today: " . date('M j, Y') . "\n\n";
         $message .= "🔴 Due Today: 2 tasks\n";
         $message .= "⏰ Due This Week: 5 tasks\n";
-        $message .= "📋 Total Active: 12 tasks\n\n";
+        $message .= " Total Active: 12 tasks\n\n";
         $message .= "💡 Use the web interface for detailed task management.";
         
         $Line_webhook->send_push_message($user_id, $message, 'user');
@@ -966,7 +966,7 @@ class Line_notify extends Security_Controller {
                     $has_paid_record = false;
                     
                     foreach ($all_records as $record) {
-                        echo "📋 Record ID {$record['id']}: paid_status = {$record['paid_status']}\n";
+                        echo " Record ID {$record['id']}: paid_status = {$record['paid_status']}\n";
                         if ($record['paid_status'] == 1) {
                             $has_paid_record = true;
                             break;

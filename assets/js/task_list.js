@@ -1169,7 +1169,7 @@ function showAssigneeDropdown($container, taskId, currentAssignee) {
       e.stopPropagation();
       var newAssigneeId = parseInt($(this).data("assignee-id"));
 
-      console.log("👤 Selected assignee:", newAssigneeId);
+      console.log(" Selected assignee:", newAssigneeId);
 
       // Update assignee
       saveTaskAssignee(taskId, newAssigneeId, function (success, assigneeData) {
@@ -1593,7 +1593,7 @@ function showLabelsDropdown($container, taskId, currentLabels) {
     url: baseUrl + "/update-new-feature/get_labels_direct.php",
     type: "GET",
     success: function (response) {
-      console.log("📋 Labels response:", response);
+      console.log(" Labels response:", response);
       if (response.success && response.labels) {
         renderLabelsDropdown(
           $container,
@@ -1962,7 +1962,7 @@ window.handleSaveLabels = function (taskId) {
     url: baseUrl + "/update-new-feature/get_labels_direct.php",
     type: "GET",
     success: function (response) {
-      console.log("📋 Labels fetch response:", response);
+      console.log(" Labels fetch response:", response);
       if (response.success && response.labels) {
         // Save labels
         console.log("🚀 Calling saveTaskLabels...");
@@ -4809,7 +4809,7 @@ function testAllFunctionality() {
 
   // Test 4: Check for any existing inline forms
   var existingForms = $(".inline-task-form");
-  console.log("\n📋 Existing inline forms:", existingForms.length);
+  console.log("\n Existing inline forms:", existingForms.length);
 
   // Test 5: Check jQuery event delegation setup
   console.log("\n🔗 jQuery Event Setup:");

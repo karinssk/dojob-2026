@@ -101,7 +101,7 @@ After submitting link request, user sees a **full-screen pending page**:
 │  ⏳  Waiting for Approval        │
 │                                  │
 │  You've linked your LINE to:     │
-│  👤  [Selected User Name]        │
+│    [Selected User Name]        │
 │  📅  Submitted: 19 Feb 2026      │
 │                                  │
 │  An admin will review your       │
@@ -141,7 +141,7 @@ After submitting link request, user sees a **full-screen pending page**:
   │ [Priority chip] [Status chip]       │
   │ Task Title                          │
   │ 📅 19 Feb — ⏰ 09:00 → 17:00       │
-  │ 👤 Assigned to: พี่ mike            │
+  │  Assigned to: พี่ mike            │
   │ 🖼 [thumbnail] [thumbnail]          │
   │ [📝 Update] [✅ Done]               │
   └─────────────────────────────────────┘
@@ -228,7 +228,7 @@ Fields:
   │ [Status chip]  PROJECT NAME         │
   │ 📅 Due: 28 Feb 2026                 │
   │ ████████░░ 78% complete             │
-  │ 👥 5 members  |  📋 12 tasks        │
+  │ 👥 5 members  |   12 tasks        │
   │ 🔔 LINE notify: ON                  │
   └─────────────────────────────────────┘
   ```
@@ -315,7 +315,7 @@ Per-project toggles (stored in `project_settings` or new column):
 │ รายงานยอดขายประจำเดือน          │
 │ 📅 Start: 19 Feb 09:00          │
 │ ⏰ End:   19 Feb 17:00          │
-│ 👤 Assigned: พี่ mike           │
+│  Assigned: พี่ mike           │
 │ 📊 Status: In Progress          │
 │─────────────────────────────────│
 │ [📝 Open Task] [✅ Mark Done]   │
@@ -448,7 +448,7 @@ All fields stored in `settings` table via existing `Settings_model`:
 | `line_webhook_url` | read-only display | Auto-built: `{base_url}line_webhook` |
 
 - **Masked fields**: displayed as `••••••••` with a [👁 Show/Hide] toggle button (JS only, no server round-trip)
-- **Webhook URL**: read-only text + [📋 Copy] button; reminds admin to paste into LINE Developer Console
+- **Webhook URL**: read-only text + [ Copy] button; reminds admin to paste into LINE Developer Console
 
 #### 8.3.2 LINE Login / LIFF Section
 
@@ -461,7 +461,7 @@ All fields stored in `settings` table via existing `Settings_model`:
 
 > **Note**: LINE Login channel and Messaging API channel are typically **different channels** in LINE Developer Console. The Login channel handles LIFF user authentication; the Messaging API channel handles bot messages. Both are needed.
 
-- **LIFF Entry URL**: read-only + [📋 Copy]; admin pastes this as the LIFF Endpoint URL in LINE console
+- **LIFF Entry URL**: read-only + [ Copy]; admin pastes this as the LIFF Endpoint URL in LINE console
 - **LIFF ID**: auto-populated hint — after adding the LIFF app in the console, paste the generated ID here
 
 #### 8.3.3 Notification Defaults Section
@@ -500,7 +500,7 @@ All fields stored in `settings` table via existing `Settings_model`:
 │  🔍 Search...                              [📤 Export CSV]        │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │ 👤 LINE display: พี่เล็ก (Rubyshop lek)                 │   │
+│  │  LINE display: พี่เล็ก (Rubyshop lek)                 │   │
 │  │    LINE UID: Ud5fc1f611437c15ef91b8d70d8f411c8           │   │
 │  │    → Link to: อโรชา / User #4 [staff]                   │   │
 │  │    📅 Submitted: 19 Feb 2026 10:30                       │   │
@@ -508,7 +508,7 @@ All fields stored in `settings` table via existing `Settings_model`:
 │  └──────────────────────────────────────────────────────────┘   │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │ 👤 LINE display: อุ้ม                                    │   │
+│  │  LINE display: อุ้ม                                    │   │
 │  │    LINE UID: U441fe09ded061e38874f36a2217b320a           │   │
 │  │    → Link to: อภิญญา ญาณโภชน์ / User #39 [staff]       │   │
 │  │    📅 Submitted: 18 Feb 2026 15:22                       │   │
@@ -546,7 +546,7 @@ All fields stored in `settings` table via existing `Settings_model`:
 │  🔍 Search by name or LINE UID...                                │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │ 👤 พี่ตี้  ↔  User: [staff #1]                          │   │
+│  │  พี่ตี้  ↔  User: [staff #1]                          │   │
 │  │    LINE UID: U0e70424426101ba374a3e27a45c6cfce           │   │
 │  │    Approved: 04 Oct 2025 by Admin                        │   │
 │  │    [🔗 View User]  [🚫 Revoke Access]                    │   │

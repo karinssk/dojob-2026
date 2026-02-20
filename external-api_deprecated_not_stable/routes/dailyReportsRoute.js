@@ -240,7 +240,7 @@ function createDailyHeaderFlexMessage(dailyData, formatNumberWithCommas) {
         },
         {
           type: "text",
-          text: project.hasExpenses ? `📋 ${project.expenses.length} รายการ` : `📋 ไม่มีรายการ`,
+          text: project.hasExpenses ? ` ${project.expenses.length} รายการ` : ` ไม่มีรายการ`,
           color: "#999999",
           size: "xxs",
           flex: 7,
@@ -269,7 +269,7 @@ function createDailyHeaderFlexMessage(dailyData, formatNumberWithCommas) {
     
     headerContents.push({
       type: "text",
-      text: `📋 โครงการอื่นๆ (${remainingProjects} โครงการ)`,
+      text: ` โครงการอื่นๆ (${remainingProjects} โครงการ)`,
       color: "#FF9500",
       size: "xs",
       weight: "bold",

@@ -183,7 +183,7 @@ function initContainerClickHandlers() {
     var taskId = $container.data("task-id");
     var currentAssignee = $container.data("assigned-to");
     
-    console.log("👤 Assignee container clicked:", taskId);
+    console.log(" Assignee container clicked:", taskId);
     
     // Close any existing dropdowns first
     $(".deadline-picker, .assignee-dropdown, .collaborators-dropdown").remove();

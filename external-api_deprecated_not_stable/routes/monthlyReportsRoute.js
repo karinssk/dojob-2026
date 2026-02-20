@@ -177,7 +177,7 @@ router.get('/send-other-projects-to-line', async (req, res) => {
             contents: [
               {
                 type: "text",
-                text: "📋 รายการค่าใช้จ่าย:",
+                text: " รายการค่าใช้จ่าย:",
                 color: "#8C8C8C",
                 size: "sm",
                 flex: 2
@@ -269,7 +269,7 @@ router.get('/send-other-projects-to-line', async (req, res) => {
             },
             {
               type: "text",
-              text: `📋 ${project.expenseCount} รายการ`,
+              text: ` ${project.expenseCount} รายการ`,
               color: "#999999",
               size: "xxs",
               flex: 5,
@@ -296,7 +296,7 @@ router.get('/send-other-projects-to-line', async (req, res) => {
           contents: [
             {
               type: "text",
-              text: `📋 รายการโครงการ ${chunkIndex + 1}`,
+              text: ` รายการโครงการ ${chunkIndex + 1}`,
               weight: "bold",
               color: "#ffffff",
               size: "sm"
@@ -502,13 +502,13 @@ async function generateMonthlyExpenseSummary(dbPool, client_and_project, formatN
         // Add expense details or no expense message
         if (projectHasExpenses && projectExpenseDetails.length > 0) {
           summaryReport += `💰 ยอดรวม: ${formatNumberWithCommas(projectTotal)} บาท\n`;
-          summaryReport += `📋 รายละเอียดค่าใช้จ่าย (${expenseCount} รายการ):\n`;
+          summaryReport += ` รายละเอียดค่าใช้จ่าย (${expenseCount} รายการ):\n`;
           summaryReport += `${projectExpenseDetails.join('\n\n')}\n\n`;
           totalMonthExpense += projectTotal;
           hasExpenses = true;
         } else {
           summaryReport += `💰 ยอดรวม: 0 บาท\n`;
-          summaryReport += `📋 รายละเอียด: ไม่มีรายการค่าใช้จ่ายในเดือนนี้\n\n`;
+          summaryReport += ` รายละเอียด: ไม่มีรายการค่าใช้จ่ายในเดือนนี้\n\n`;
         }
         
         summaryReport += `${'━'.repeat(40)}\n\n`;
@@ -764,7 +764,7 @@ async function createMonthlyHeaderFlexMessage(monthData, dbPool, client_and_proj
         },
         {
           type: "text",
-          text: `📋 ${project.expenseCount} รายการ`,
+          text: ` ${project.expenseCount} รายการ`,
           color: "#999999",
           size: "xxs",
           flex: 7,
@@ -797,7 +797,7 @@ async function createMonthlyHeaderFlexMessage(monthData, dbPool, client_and_proj
       // Add other projects header
       headerContents.push({
         type: "text",
-        text: `📋 โครงการอื่นๆ (${otherProjectsResult.summary.totalProjects} โครงการ)`,
+        text: ` โครงการอื่นๆ (${otherProjectsResult.summary.totalProjects} โครงการ)`,
         color: "#FF9500",
         size: "xs",
         weight: "bold",
@@ -855,7 +855,7 @@ async function createMonthlyHeaderFlexMessage(monthData, dbPool, client_and_proj
             },
             {
               type: "text",
-              text: `📋 ${project.expenseCount} รายการ`,
+              text: ` ${project.expenseCount} รายการ`,
               color: "#999999",
               size: "xxs",
               flex: 7,
@@ -1135,7 +1135,7 @@ function createProjectFlexMessage(project, projectNumber, totalProjects) {
             contents: [
               {
                 type: "text",
-                text: "📋 รายการ:",
+                text: " รายการ:",
                 color: "#8C8C8C",
                 size: "sm",
                 flex: 2
@@ -1383,7 +1383,7 @@ function createRemainingProjectsSummaryCard(remainingProjects, formatNumberWithC
           contents: [
             {
               type: "text",
-              text: "📋 จำนวน:",
+              text: " จำนวน:",
               color: "#8C8C8C",
               size: "sm",
               flex: 2
@@ -1402,7 +1402,7 @@ function createRemainingProjectsSummaryCard(remainingProjects, formatNumberWithC
         },
         {
           type: "text",
-          text: "📋 รายการโครงการ:",
+          text: " รายการโครงการ:",
           color: "#9B59B6",
           size: "xs",
           weight: "bold",

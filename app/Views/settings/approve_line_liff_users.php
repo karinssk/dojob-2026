@@ -40,6 +40,12 @@
              ปฏิเสธ
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link <?= $current_tab === 'notifications' ? 'active' : '' ?>"
+            href="<?= get_uri('settings/approve_line_liff_users?tab=notifications') ?>">
+            🔔 แจ้งเตือนงาน
+          </a>
+        </li>
       </ul>
 
       <!-- Tab content -->
@@ -51,6 +57,8 @@
         <?= view('settings/liff_approved_tab') ?>
       <?php elseif ($current_tab === 'rejected'): ?>
         <?= view('settings/liff_rejected_tab') ?>
+      <?php elseif ($current_tab === 'notifications'): ?>
+        <?= view('settings/liff_notifications_tab', get_defined_vars()) ?>
       <?php endif; ?>
 
     </div>

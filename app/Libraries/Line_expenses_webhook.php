@@ -895,7 +895,7 @@ class Line_expenses_webhook {
                 'type' => 'box', 'layout' => 'baseline', 'spacing' => 'none', 'margin' => 'none',
                 'contents' => array(
                     array('type' => 'text', 'text' => ' ', 'flex' => 0),
-                    array('type' => 'text', 'text' => $project['hasExpenses'] ? "📋 {$project['expenseCount']} รายการ" : "📋 ไม่มีรายการ", 'color' => '#999999', 'size' => 'xxs', 'flex' => 7, 'margin' => 'sm')
+                    array('type' => 'text', 'text' => $project['hasExpenses'] ? " {$project['expenseCount']} รายการ" : " ไม่มีรายการ", 'color' => '#999999', 'size' => 'xxs', 'flex' => 7, 'margin' => 'sm')
                 )
             );
         }
@@ -911,7 +911,7 @@ class Line_expenses_webhook {
             $remaining = count($other);
 
             $header_contents[] = array(
-                'type' => 'text', 'text' => "📋 โครงการอื่นๆ ({$remaining} โครงการ)",
+                'type' => 'text', 'text' => " โครงการอื่นๆ ({$remaining} โครงการ)",
                 'color' => '#FF9500', 'size' => 'xs', 'weight' => 'bold', 'align' => 'center', 'margin' => 'sm'
             );
             $header_contents[] = array(
@@ -1194,7 +1194,7 @@ class Line_expenses_webhook {
                 'type' => 'box', 'layout' => 'baseline', 'spacing' => 'none', 'margin' => 'none',
                 'contents' => array(
                     array('type' => 'text', 'text' => ' ', 'flex' => 0),
-                    array('type' => 'text', 'text' => "📋 {$project['expenseCount']} รายการ", 'color' => '#999999', 'size' => 'xxs', 'flex' => 7, 'margin' => 'sm')
+                    array('type' => 'text', 'text' => " {$project['expenseCount']} รายการ", 'color' => '#999999', 'size' => 'xxs', 'flex' => 7, 'margin' => 'sm')
                 )
             );
         }
@@ -1292,7 +1292,7 @@ class Line_expenses_webhook {
                     ),
                     array('type' => 'box', 'layout' => 'baseline', 'spacing' => 'sm', 'margin' => 'md',
                         'contents' => array(
-                            array('type' => 'text', 'text' => '📋 รายการ:', 'color' => '#8C8C8C', 'size' => 'sm', 'flex' => 2),
+                            array('type' => 'text', 'text' => ' รายการ:', 'color' => '#8C8C8C', 'size' => 'sm', 'flex' => 2),
                             array('type' => 'text', 'text' => "{$project['expenseCount']} รายการ", 'weight' => 'bold', 'color' => '#666666', 'size' => 'sm', 'flex' => 3)
                         )
                     ),

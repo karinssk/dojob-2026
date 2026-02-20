@@ -40,6 +40,14 @@ class Liff_settings extends Security_Controller {
             'liff_notify_mode'           => get_setting('liff_notify_mode') ?: 'user',
             'liff_notify_rooms'          => $this->_decode_json_setting('liff_notify_rooms'),
             'liff_line_rooms'            => $this->_decode_json_setting('liff_line_rooms'),
+            // task notification settings
+            'liff_reminder_enabled'  => get_setting('liff_reminder_enabled')  ?: '0',
+            'liff_reminder_repeat'   => get_setting('liff_reminder_repeat')   ?: '1',
+            'liff_reminder_times'    => get_setting('liff_reminder_times')    ?: '["09:00","15:00"]',
+            'liff_reminder_days'     => get_setting('liff_reminder_days')     ?: '[1,2,3,4,5]',
+            'liff_summary_enabled'   => get_setting('liff_summary_enabled')   ?: '0',
+            'liff_summary_time'      => get_setting('liff_summary_time')      ?: '08:00',
+            'liff_summary_days'      => get_setting('liff_summary_days')      ?: '[1,2,3,4,5]',
         ];
 
         return $this->template->rander('settings/approve_line_liff_users', $view_data);
@@ -219,6 +227,63 @@ class Liff_settings extends Security_Controller {
         );
 
         echo json_encode(['success' => true, 'message' => 'อัปเดตการแจ้งเตือนสำเร็จ']);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Save task notification settings (tab: notifications)
+    // ──────────────────────────────────────────────────────────────
+    public function save_liff_notification_settings() {
+        $plain = [
+            'liff_reminder_enabled',
+            'liff_reminder_repeat',
+            'liff_reminder_times',   // already JSON-encoded by JS
+            'liff_reminder_days',    // already JSON-encoded by JS
+            'liff_summary_enabled',
+            'liff_summary_time',
+            'liff_summary_days',     // already JSON-encoded by JS
+        ];
+
+        foreach ($plain as $key) {
+            $val = $this->request->getPost($key);
+            if ($val === null) { $val = '0'; }  // unchecked checkboxes
+            $this->Settings_model->save_setting($key, $val);
+        }
+
+        echo json_encode(['success' => true, 'message' => 'บันทึกการตั้งค่าแจ้งเตือนสำเร็จ']);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Test notification — trigger immediately (ignores schedule)
+    // ──────────────────────────────────────────────────────────────
+    public function test_liff_notification() {
+        $type = $this->request->getPost('type');   // 'reminder' or 'summary'
+
+        $has_token = get_setting('liff_line_channel_access_token') || get_setting('line_channel_access_token');
+        if (!$has_token) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'ยังไม่ได้ตั้งค่า Channel Access Token',
+            ]);
+        }
+
+        try {
+            $cron = new \App\Libraries\Cron_job();
+            if ($type === 'reminder') {
+                $count = $cron->run_task_reminder_test();
+                $msg   = $count > 0
+                    ? "ส่งแจ้งเตือนสำเร็จ ({$count} ราย)"
+                    : 'ไม่มีงานค้างในระบบ (ไม่ส่ง)';
+            } else {
+                $count = $cron->run_task_summary_test();
+                $msg   = $count > 0
+                    ? "ส่งรายงานสรุปสำเร็จ ({$count} รายการงาน)"
+                    : 'ไม่มีงานที่เสร็จใน 7 วันที่ผ่านมา (ไม่ส่ง)';
+            }
+
+            return $this->response->setJSON(['success' => true, 'message' => $msg]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 
     private function _decode_json_setting($key) {

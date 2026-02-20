@@ -860,7 +860,7 @@ function testAllFunctionality() {
 
   // Test 4: Check for any existing inline forms
   var existingForms = $(".inline-task-form");
-  console.log("\n📋 Existing inline forms:", existingForms.length);
+  console.log("\n Existing inline forms:", existingForms.length);
 
   // Test 5: Check jQuery event delegation setup
   console.log("\n🔗 jQuery Event Setup:");

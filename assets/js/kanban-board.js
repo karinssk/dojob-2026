@@ -40,7 +40,7 @@ class KanbanBoard {
 
         // Use the API data directly (it's already in the right format)
         this.boardData = result.data;
-        console.log("📋 Board data set:", this.boardData);
+        console.log(" Board data set:", this.boardData);
 
         this.renderBoard();
       } else {
@@ -189,7 +189,7 @@ class KanbanBoard {
                       const title = column.title || "Unknown Status";
 
                       console.log(
-                        `📋 Rendering column: ${title} with ${tasks.length} tasks`
+                        ` Rendering column: ${title} with ${tasks.length} tasks`
                       );
 
                       return `
@@ -701,7 +701,7 @@ class KanbanBoard {
 
   async reorderTask(taskId, direction) {
     console.log(`🔄 Reordering Task ${taskId} ${direction}`);
-    console.log(`📋 Project ID: ${this.projectId}`);
+    console.log(` Project ID: ${this.projectId}`);
 
     try {
       const requestData = {

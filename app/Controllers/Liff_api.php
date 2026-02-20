@@ -154,7 +154,7 @@ class Liff_api extends Security_Controller {
 
         $title = $title ?: 'งาน';
         $msg  = "🧪 ทดสอบแจ้งเตือนงาน\n";
-        $msg .= "📋 {$title}\n";
+        $msg .= " {$title}\n";
         if ($start_date && $start_time) {
             $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($start_date . ' ' . $start_time)) . "\n";
         }
@@ -519,7 +519,7 @@ class Liff_api extends Security_Controller {
                 'contents'        => [
                     [
                         'type'   => 'text',
-                        'text'   => '📋 งานใหม่',
+                        'text'   => ' งานใหม่',
                         'color'  => '#FFFFFF',
                         'weight' => 'bold',
                         'size'   => 'md',

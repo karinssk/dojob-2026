@@ -25,7 +25,7 @@
 </head>
 <body>
 <div class="card">
-  <div class="logo">📋</div>
+  <div class="logo"></div>
   <h1>DoJob</h1>
   <p>กำลังยืนยันตัวตน LINE ของคุณ<br>กรุณารอสักครู่...</p>
   <div class="spinner" id="spinner"></div>
