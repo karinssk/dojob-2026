@@ -288,7 +288,7 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
     <b>⚠️ Cron Job ยังไม่ทำงาน</b><br>
     การแจ้งเตือนตามเวลาต้องการ Cron Job ของระบบ กรุณาตั้งค่า Cron ให้เรียก URL นี้ทุก 30 นาที:<br>
     <code style="display:inline-block;margin-top:6px;background:#fff;padding:4px 8px;border-radius:4px;border:1px solid #FDE68A">
-      <?= get_uri('cron_job/index') ?>
+      <?= get_uri('cron/index') ?>
     </code>
     <br><span style="color:#B45309;margin-top:4px;display:block">หรือกด "ส่งเดี๋ยวนี้" ด้านบนเพื่อบังคับส่งทันที</span>
   </div>
