@@ -408,10 +408,8 @@ class Liff_app extends Security_Controller {
         return $this->db->query(
             "SELECT p.id, p.title FROM rise_projects p
              LEFT JOIN rise_project_members pm ON pm.project_id=p.id AND pm.user_id=$user_id
-             LEFT JOIN rise_project_status ps ON ps.id=p.status_id
              WHERE p.deleted=0
                AND (p.created_by=$user_id OR pm.id IS NOT NULL)
-               AND ps.key_name='open'
              ORDER BY p.title"
         )->getResult();
     }

@@ -30,7 +30,7 @@
           ?>
         </span>
         <span class="chev">▾</span>
-        <select name="project_id" class="dropdown-native-select" id="project-select">
+        <select name="project_id" class="dropdown-native-select" id="project-select" onchange="document.getElementById('project-label').textContent=this.options[this.selectedIndex].text">
           <option value="">— ไม่ระบุโปรเจกต์ —</option>
           <?php foreach ($projects as $p): ?>
           <option value="<?= $p->id ?>" <?= ($task->project_id ?? 0) == $p->id ? 'selected' : '' ?>><?= esc($p->title) ?></option>
@@ -52,7 +52,7 @@
           ?>
         </span>
         <span class="chev">▾</span>
-        <select name="assigned_to" class="dropdown-native-select" id="assignee-select">
+        <select name="assigned_to" class="dropdown-native-select" id="assignee-select" onchange="document.getElementById('assignee-label').textContent=this.options[this.selectedIndex].text">
           <?php foreach ($users as $u): ?>
           <option value="<?= $u->id ?>" <?= ($task->assigned_to ?? $login_user->id) == $u->id ? 'selected' : '' ?>><?= esc(trim($u->first_name . ' ' . $u->last_name)) ?></option>
           <?php endforeach; ?>
@@ -64,22 +64,22 @@
   <div class="d-flex gap-8">
     <div class="form-group flex-1">
       <label class="form-label">วันเริ่ม</label>
-      <input class="form-control" type="date" name="start_date" value="<?= esc(($task->start_date ?? '') ? date('Y-m-d', strtotime($task->start_date)) : '') ?>">
+      <input class="form-control" type="date" name="start_date" value="<?= esc(($task->start_date ?? '') ? date('Y-m-d', strtotime($task->start_date)) : '') ?>" oninput="updateNotifyPreview()">
     </div>
     <div class="form-group flex-1">
       <label class="form-label">เวลาเริ่ม</label>
-      <input class="form-control" type="time" name="start_time" value="<?= esc($task->start_time ?? '') ?>">
+      <input class="form-control" type="time" name="start_time" value="<?= esc($task->start_time ?? '') ?>" oninput="updateNotifyPreview()">
     </div>
   </div>
 
   <div class="d-flex gap-8">
     <div class="form-group flex-1">
       <label class="form-label">วันสิ้นสุด</label>
-      <input class="form-control" type="date" name="deadline" value="<?= esc(($task->deadline ?? '') ? date('Y-m-d', strtotime($task->deadline)) : '') ?>">
+      <input class="form-control" type="date" name="deadline" value="<?= esc(($task->deadline ?? '') ? date('Y-m-d', strtotime($task->deadline)) : '') ?>" oninput="updateNotifyPreview()">
     </div>
     <div class="form-group flex-1">
       <label class="form-label">เวลาสิ้นสุด</label>
-      <input class="form-control" type="time" name="end_time" value="<?= esc($task->end_time ?? '') ?>">
+      <input class="form-control" type="time" name="end_time" value="<?= esc($task->end_time ?? '') ?>" oninput="updateNotifyPreview()">
     </div>
   </div>
 
@@ -96,7 +96,7 @@
             ?>
           </span>
           <span class="chev">▾</span>
-          <select name="priority_id" class="dropdown-native-select" id="priority-select">
+          <select name="priority_id" class="dropdown-native-select" id="priority-select" onchange="document.getElementById('priority-label').textContent=this.options[this.selectedIndex].text">
             <option value="">— เลือก —</option>
             <?php foreach ($priorities as $p): ?>
             <option value="<?= $p->id ?>" <?= ($task->priority_id ?? 0) == $p->id ? 'selected' : '' ?>><?= esc($p->title) ?></option>
@@ -134,7 +134,8 @@
       </div>
       <label class="toggle">
         <input type="checkbox" id="notify-toggle" name="line_notify_enabled" value="1"
-          <?= !empty($task->line_notify_enabled) ? 'checked' : '' ?>>
+          <?= !empty($task->line_notify_enabled) ? 'checked' : '' ?>
+          onchange="onNotifyToggle(this)">
         <span class="toggle-slider"></span>
       </label>
     </div>
@@ -142,19 +143,19 @@
       <div class="notify-row">
         <label>แจ้งเตือนก่อนเวลาเริ่ม</label>
         <input type="number" name="line_notify_before_start" min="0" max="1440"
-          value="<?= esc($task->line_notify_before_start ?? '') ?>" placeholder="—">
+          value="<?= esc($task->line_notify_before_start ?? '') ?>" placeholder="—" oninput="updateNotifyPreview()">
         <span>นาที</span>
       </div>
       <div class="notify-row">
         <label>แจ้งเตือนก่อนเวลาสิ้นสุด</label>
         <input type="number" name="line_notify_before_end" min="0" max="1440"
-          value="<?= esc($task->line_notify_before_end ?? '') ?>" placeholder="—">
+          value="<?= esc($task->line_notify_before_end ?? '') ?>" placeholder="—" oninput="updateNotifyPreview()">
         <span>นาที</span>
       </div>
       <div class="notify-row">
         <label>แจ้งหากไม่มีการอัปเดต</label>
         <input type="number" name="line_notify_no_update_hours" min="1" max="720"
-          value="<?= esc($task->line_notify_no_update_hours ?? '') ?>" placeholder="—">
+          value="<?= esc($task->line_notify_no_update_hours ?? '') ?>" placeholder="—" oninput="updateNotifyPreview()">
         <span>ชั่วโมง</span>
       </div>
       <p class="text-xs text-muted mt-8">ปล่อยว่างไว้ = ปิดการแจ้งเตือนนั้น</p>
@@ -183,13 +184,28 @@
 </form>
 
 <script>
-function syncLabel(selectId, labelId) {
-  const sel = document.getElementById(selectId);
-  const lbl = document.getElementById(labelId);
-  if (!sel || !lbl) return;
-  sel.addEventListener('change', () => {
-    lbl.textContent = sel.options[sel.selectedIndex].text;
-  });
+/* Toggle LINE notify section open/closed */
+function onNotifyToggle(cb) {
+  const section = document.getElementById('notify-section');
+  if (cb.checked) {
+    section.classList.add('open');
+    // Pre-fill system defaults if fields are empty
+    const html  = document.documentElement;
+    const defs  = {
+      before_start: parseInt(html.dataset.defaultStart  || '30'),
+      before_end:   parseInt(html.dataset.defaultEnd    || '60'),
+      no_update:    parseInt(html.dataset.defaultUpdate || '24'),
+    };
+    const f1 = document.querySelector('[name="line_notify_before_start"]');
+    const f2 = document.querySelector('[name="line_notify_before_end"]');
+    const f3 = document.querySelector('[name="line_notify_no_update_hours"]');
+    if (f1 && !f1.value) f1.value = defs.before_start;
+    if (f2 && !f2.value) f2.value = defs.before_end;
+    if (f3 && !f3.value) f3.value = defs.no_update;
+    updateNotifyPreview();
+  } else {
+    section.classList.remove('open');
+  }
 }
 
 function initTaskForm() {
@@ -197,22 +213,7 @@ function initTaskForm() {
     setTimeout(initTaskForm, 50);
     return;
   }
-
   LiffApp.initImageUpload('img-input', 'img-previews');
-  LiffApp.initNotifyToggle('notify-toggle','notify-section');
-
-  syncLabel('project-select',  'project-label');
-  syncLabel('assignee-select', 'assignee-label');
-  syncLabel('priority-select', 'priority-label');
-
-  const notifyInputs = [
-    'start_date','start_time','deadline','end_time',
-    'line_notify_before_start','line_notify_before_end','line_notify_no_update_hours'
-  ];
-  notifyInputs.forEach(name => {
-    const el = document.querySelector(`[name="${name}"]`);
-    if (el) el.addEventListener('input', updateNotifyPreview);
-  });
   updateNotifyPreview();
 }
 
