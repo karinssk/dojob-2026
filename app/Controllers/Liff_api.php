@@ -12,6 +12,7 @@ class Liff_api extends Security_Controller {
 
     public function __construct() {
         parent::__construct();
+        $this->db = \Config\Database::connect();
         $this->Liff_pending_model = model('App\Models\Liff_pending_model');
         $this->Event_comments_model = model('App\Models\Event_comments_model');
     }
