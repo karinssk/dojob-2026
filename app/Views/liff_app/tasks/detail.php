@@ -11,19 +11,19 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
   <a href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>" class="btn btn-primary btn-sm edit-btn">แก้ไข</a>
 </div>
 
-<!-- Status quick-update -->
+<!-- Status: current chip + horizontal scroll options -->
 <div class="card">
   <div class="card-body">
-    <div class="d-flex align-center justify-between mb-8">
+    <div class="d-flex align-center justify-between" style="margin-bottom:10px">
       <span class="text-sm fw-600 text-muted">สถานะ</span>
       <span class="chip" style="background:<?= $bg ?>;color:<?= $color ?>" id="status-chip">
         <?= esc($task->status_title) ?>
       </span>
     </div>
-    <div class="d-flex gap-8" style="flex-wrap:wrap">
+    <div class="status-scroll">
       <?php foreach ($statuses as $s):
         $sc = $s->color ?: '#6C8EF5'; ?>
-      <button class="chip" style="background:<?= $sc ?>22;color:<?= $sc ?>;cursor:pointer;border:none"
+      <button class="chip" style="background:<?= $sc ?>22;color:<?= $sc ?>"
         onclick="LiffApp.updateTaskStatus(<?= $task->id ?>, <?= $s->id ?>, document.getElementById('status-chip'))">
         <?= esc($s->title) ?>
       </button>
@@ -32,11 +32,26 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
   </div>
 </div>
 
-<!-- Task info -->
+<!-- Task detail + Images — single merged card -->
 <div class="card">
   <div class="card-body">
+
     <?php if ($task->description): ?>
-    <p class="text-sm" style="color:var(--label);line-height:1.6;margin-bottom:12px"><?= nl2br(esc($task->description)) ?></p>
+    <p class="text-sm" style="color:var(--label);line-height:1.6"><?= nl2br(esc($task->description)) ?></p>
+    <div class="divider"></div>
+    <?php endif; ?>
+
+    <?php if (!empty($comment_files)): ?>
+    <div class="detail-images">
+      <?php foreach ($comment_files as $file):
+        $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
+        $url   = get_source_url_of_file($file, get_setting("timeline_file_path"));
+      ?>
+      <a href="<?= esc($url) ?>" target="_blank">
+        <img src="<?= esc($thumb) ?>" alt="">
+      </a>
+      <?php endforeach; ?>
+    </div>
     <div class="divider"></div>
     <?php endif; ?>
 
@@ -66,9 +81,9 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
           <?php if ($task->start_time): ?> <?= date('H:i', strtotime($task->start_time)) ?><?php endif; ?>
           <?php endif; ?>
           <?php if ($task->deadline): ?>
-          - <?= date('j M', strtotime($task->deadline)) ?>
+          – <?= date('j M', strtotime($task->deadline)) ?>
           <?php if ($task->end_time): ?> <?= date('H:i', strtotime($task->end_time)) ?><?php endif; ?>
-          <?php if ($is_overdue): ?> <span class="chip chip-pink">เกินกำหนด</span><?php endif; ?>
+          <?php if ($is_overdue): ?> <span class="chip chip-pink" style="font-size:10px">เกินกำหนด</span><?php endif; ?>
           <?php endif; ?>
         </div>
       </div>
@@ -92,45 +107,27 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
       </span>
     </div>
     <?php endif; ?>
+
   </div>
 </div>
 
-<!-- Images -->
-<?php if (!empty($comment_files)): ?>
-<div class="section-title">รูปภาพ</div>
+<!-- Comments + form — single card -->
 <div class="card">
-  <div class="card-body">
-    <div style="display:flex;flex-wrap:wrap;gap:8px">
-      <?php foreach ($comment_files as $file): ?>
-        <?php
-          $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
-          $url   = get_source_url_of_file($file, get_setting("timeline_file_path"));
-        ?>
-      <a href="<?= esc($url) ?>" target="_blank">
-        <img src="<?= esc($thumb) ?>" style="width:72px;height:72px;border-radius:10px;object-fit:cover" alt="">
-      </a>
-      <?php endforeach; ?>
-    </div>
+  <div class="card-header">
+    <h3>ความคิดเห็น</h3>
+    <?php if (!empty($comments)): ?>
+    <span class="chip chip-gray"><?= count($comments) ?></span>
+    <?php endif; ?>
   </div>
-</div>
-<?php endif; ?>
 
-<!-- Comments -->
-<div class="section-title">ความคิดเห็น</div>
-<?php if (empty($comments)): ?>
-<div class="card">
-  <div class="card-body text-sm text-muted">ยังไม่มีความคิดเห็น</div>
-</div>
-<?php else: ?>
-<div class="card">
-  <div class="card-body">
+  <?php if (!empty($comments)): ?>
+  <div class="card-body" style="padding-bottom:0">
     <div class="comment-list">
-      <?php foreach ($comments as $c): ?>
-        <?php
-          $avatar = get_avatar($c->created_by_avatar ?? '');
-          $files = $c->files ? @unserialize($c->files) : [];
-          if (!is_array($files)) { $files = []; }
-        ?>
+      <?php foreach ($comments as $c):
+        $avatar = get_avatar($c->created_by_avatar ?? '');
+        $files  = $c->files ? @unserialize($c->files) : [];
+        if (!is_array($files)) { $files = []; }
+      ?>
       <div class="comment-item">
         <img src="<?= esc($avatar) ?>" class="comment-avatar" alt="">
         <div class="comment-body">
@@ -143,13 +140,12 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
           <?php endif; ?>
           <?php if (!empty($files)): ?>
           <div class="comment-attachments">
-            <?php foreach ($files as $file): ?>
-              <?php
-                if (!is_array($file)) { continue; }
-                $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
-                $url   = get_source_url_of_file($file, get_setting("timeline_file_path"));
-              ?>
-              <a href="<?= esc($url) ?>" target="_blank"><img src="<?= esc($thumb) ?>" alt=""></a>
+            <?php foreach ($files as $file):
+              if (!is_array($file)) { continue; }
+              $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
+              $url   = get_source_url_of_file($file, get_setting("timeline_file_path"));
+            ?>
+            <a href="<?= esc($url) ?>" target="_blank"><img src="<?= esc($thumb) ?>" alt=""></a>
             <?php endforeach; ?>
           </div>
           <?php endif; ?>
@@ -158,13 +154,15 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
       <?php endforeach; ?>
     </div>
   </div>
-</div>
-<?php endif; ?>
+  <div class="divider" style="margin:0 16px"></div>
+  <?php endif; ?>
 
-<div class="card comment-form-card">
-  <div class="card-body">
+  <div class="card-body" style="padding-top:12px">
+    <?php if (empty($comments)): ?>
+    <p class="text-sm text-muted" style="margin-bottom:12px">ยังไม่มีความคิดเห็น เป็นคนแรกที่แสดงความเห็น</p>
+    <?php endif; ?>
     <form id="task-comment-form" onsubmit="submitTaskComment(event)">
-      <textarea class="form-control" name="description" rows="3" placeholder="เขียนความคิดเห็น..."></textarea>
+      <textarea class="form-control" name="description" rows="2" placeholder="เขียนความคิดเห็น..." style="margin-bottom:8px"></textarea>
       <input type="hidden" name="task_id" value="<?= (int)$task->id ?>">
       <input type="hidden" name="project_id" value="<?= (int)($task->project_id ?? 0) ?>">
       <div class="comment-actions">

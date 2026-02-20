@@ -306,11 +306,12 @@ function eventsForRange(start, end) {
 }
 
 function initCalendar() {
-  if (!window.LiffApp) {
-    setTimeout(initCalendar, 50);
-    return;
-  }
-  renderCalendar();
+  renderCalendar(); // render skeleton immediately — no LiffApp needed
+  waitAndFetch();
+}
+
+function waitAndFetch() {
+  if (!window.LiffApp) { setTimeout(waitAndFetch, 50); return; }
   fetchEvents();
 }
 

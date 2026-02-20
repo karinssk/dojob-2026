@@ -624,6 +624,36 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 /* --- Divider ----------------------------------------------- */
 .divider { height: 1px; background: var(--border); margin: 12px 0; }
 
+/* --- Status chips (horizontal scroll row) ------------------ */
+.status-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 4px 2px;
+}
+.status-scroll::-webkit-scrollbar { display: none; }
+.status-scroll .chip { flex-shrink: 0; cursor: pointer; border: none; font-family: inherit; }
+
+/* --- Task detail image strip ------------------------------- */
+.detail-images {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 0;
+}
+.detail-images::-webkit-scrollbar { display: none; }
+.detail-images a { flex-shrink: 0; }
+.detail-images img {
+  width: 80px; height: 80px;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+}
+
 /* --- Alert ------------------------------------------------- */
 .alert { padding: 12px 16px; border-radius: 12px; font-size: 14px; margin-bottom: 12px; }
 .alert-danger  { background: var(--pink-lt);   color: #C0295A; border: 1px solid #F9A8C9; }
