@@ -52,10 +52,17 @@ html, body {
   font-family: 'Sarabun', 'Noto Sans Thai', -apple-system, sans-serif;
   font-size: 15px;
   color: var(--text);
-  background: radial-gradient(1200px 600px at 10% -10%, #EEF2FF 0%, rgba(238,242,255,0) 60%), var(--bg);
-  min-height: 100vh;
+  background-color: var(--bg);
+  background-image: radial-gradient(1200px 600px at 10% -10%, #EEF2FF 0%, rgba(238,242,255,0) 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  min-height: 100%;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+}
+html {
+  min-height: 100%;
+  background-color: var(--bg);
 }
 
 /* --- Scroll area above tab bar ----------------------------- */
