@@ -241,8 +241,8 @@ class Liff_settings extends Security_Controller {
             'liff_summary_enabled',
             'liff_summary_time',
             'liff_summary_days',     // already JSON-encoded by JS
-            'liff_fallback_token',
-            'liff_fallback_room_id',
+            'line_channel_access_token_fall_back',
+            'line_default_room_id_fall_back',
         ];
 
         foreach ($plain as $key) {
@@ -258,8 +258,8 @@ class Liff_settings extends Security_Controller {
     // Test fallback bot — send a real text message to fallback room
     // ──────────────────────────────────────────────────────────────
     public function test_liff_fallback() {
-        $token   = get_setting('liff_fallback_token')   ?: get_setting('line_channel_access_token');
-        $room_id = get_setting('liff_fallback_room_id') ?: get_setting('line_default_room_id');
+        $token   = get_setting('line_channel_access_token_fall_back')   ?: get_setting('line_channel_access_token');
+        $room_id = get_setting('line_default_room_id_fall_back') ?: get_setting('line_default_room_id');
 
         if (!$token) {
             return $this->response->setJSON([

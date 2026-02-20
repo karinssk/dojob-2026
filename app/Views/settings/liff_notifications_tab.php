@@ -189,9 +189,9 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
           <label style="font-size:13px;font-weight:600;color:#374151">
             Fallback Channel Access Token
           </label>
-          <input type="text" name="liff_fallback_token"
+          <input type="text" name="line_channel_access_token_fall_back"
             class="form-control" autocomplete="off"
-            value="<?= esc(get_setting('liff_fallback_token') ?: get_setting('line_channel_access_token') ?: '') ?>"
+            value="<?= esc(get_setting('line_channel_access_token_fall_back') ?: get_setting('line_channel_access_token') ?: '') ?>"
             placeholder="Token ของ LINE Bot สำรอง (ถ้าว่างจะใช้ line_channel_access_token)">
           <p class="help-block" style="font-size:11px">ถ้าว่าง จะใช้ <code>line_channel_access_token</code> อัตโนมัติ</p>
         </div>
@@ -201,9 +201,9 @@ $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=
           <label style="font-size:13px;font-weight:600;color:#374151">
             Fallback Room / Group ID
           </label>
-          <input type="text" name="liff_fallback_room_id"
+          <input type="text" name="line_default_room_id_fall_back"
             class="form-control" autocomplete="off"
-            value="<?= esc(get_setting('liff_fallback_room_id') ?: get_setting('line_default_room_id') ?: '') ?>"
+            value="<?= esc(get_setting('line_default_room_id_fall_back') ?: get_setting('line_default_room_id') ?: '') ?>"
             placeholder="Room ID หรือ Group ID เช่น C7a110af...">
           <p class="help-block" style="font-size:11px">ถ้าว่าง จะใช้ <code>line_default_room_id</code> อัตโนมัติ</p>
         </div>

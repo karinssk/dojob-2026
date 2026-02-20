@@ -10,8 +10,8 @@ namespace App\Libraries;
  * If the primary token fails for ANY reason (quota exceeded = HTTP 429,
  * invalid token = 401, network error, etc.) the library automatically
  * retries using the fallback credentials:
- *   - token : setting  `liff_fallback_token`  (falls back to `line_channel_access_token`)
- *   - target: setting  `liff_fallback_room_id` (falls back to `line_default_room_id`)
+ *   - token : setting  `line_channel_access_token_fall_back`  (falls back to `line_channel_access_token`)
+ *   - target: setting  `line_default_room_id_fall_back` (falls back to `line_default_room_id`)
  *
  * Flex messages are degraded to a plain-text summary when sent via the
  * fallback channel (many bots share a general room that may not support
@@ -30,10 +30,10 @@ class Liff_line_webhook {
         $this->primary_token  = get_setting('liff_line_channel_access_token')
                              ?: get_setting('line_channel_access_token');
 
-        $this->fallback_token = get_setting('liff_fallback_token')
+        $this->fallback_token = get_setting('line_channel_access_token_fall_back')
                              ?: get_setting('line_channel_access_token');
 
-        $this->fallback_room  = get_setting('liff_fallback_room_id')
+        $this->fallback_room  = get_setting('line_default_room_id_fall_back')
                              ?: get_setting('line_default_room_id');
     }
 
