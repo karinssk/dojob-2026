@@ -200,8 +200,61 @@ $is_overdue = $task->deadline && strtotime($task->deadline) < time();
 
 <a class="btn btn-primary btn-block" href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>">แก้ไขงาน</a>
 
+<!-- Image modal -->
+<div id="img-modal" class="img-modal" onclick="closeImgModal()">
+  <button class="img-modal-close" onclick="closeImgModal()">✕</button>
+  <button class="img-modal-prev" id="img-modal-prev" onclick="event.stopPropagation();imgModalNav(-1)">‹</button>
+  <img id="img-modal-img" class="img-modal-img" src="" alt="" onclick="event.stopPropagation()">
+  <button class="img-modal-next" id="img-modal-next" onclick="event.stopPropagation();imgModalNav(1)">›</button>
+  <div class="img-modal-counter" id="img-modal-counter"></div>
+</div>
+
 <script>
 LiffApp.initImageUpload('task-comment-images', 'task-comment-previews');
+
+/* ── Image modal ── */
+let _imgs = [], _imgIdx = 0;
+
+function openImgModal(idx) {
+  _imgIdx = idx;
+  _updateModal();
+  document.getElementById('img-modal').classList.add('open');
+}
+function closeImgModal() {
+  document.getElementById('img-modal').classList.remove('open');
+}
+function imgModalNav(dir) {
+  _imgIdx = (_imgIdx + dir + _imgs.length) % _imgs.length;
+  _updateModal();
+}
+function _updateModal() {
+  document.getElementById('img-modal-img').src = _imgs[_imgIdx];
+  document.getElementById('img-modal-counter').textContent = _imgs.length > 1 ? `${_imgIdx + 1} / ${_imgs.length}` : '';
+  document.getElementById('img-modal-prev').hidden = _imgs.length < 2;
+  document.getElementById('img-modal-next').hidden = _imgs.length < 2;
+}
+
+// Collect all image links from detail strip + comment attachments
+document.addEventListener('DOMContentLoaded', () => {
+  const links = [...document.querySelectorAll('.detail-images a, .comment-attachments a')];
+  _imgs = links.map(a => a.href);
+  links.forEach((a, idx) => {
+    a.addEventListener('click', e => { e.preventDefault(); openImgModal(idx); });
+  });
+});
+
+// Swipe left/right to navigate
+(function() {
+  let tx = 0;
+  const el = document.getElementById('img-modal');
+  el.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) imgModalNav(dx < 0 ? 1 : -1);
+  });
+})();
+
+/* ── Comment submit ── */
 async function submitTaskComment(e) {
   e.preventDefault();
   const form = new FormData(e.target);
