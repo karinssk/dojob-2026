@@ -286,6 +286,61 @@ class Liff_settings extends Security_Controller {
         }
     }
 
+    // ──────────────────────────────────────────────────────────────
+    // GET LINE Push Message quota + consumption this month
+    // LINE API:
+    //   GET /v2/bot/message/quota          → { type, value }
+    //   GET /v2/bot/message/quota/consumption → { totalUsage }
+    // ──────────────────────────────────────────────────────────────
+    public function get_push_quota() {
+        $token = get_setting('liff_line_channel_access_token') ?: get_setting('line_channel_access_token');
+        if (!$token) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'ยังไม่ได้ตั้งค่า Channel Access Token',
+            ]);
+        }
+
+        $headers = [
+            'Authorization: Bearer ' . $token,
+            'User-Agent: DoJob-LIFF/1.0',
+        ];
+
+        // Helper: call LINE API and return decoded JSON
+        $call = function($url) use ($headers) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER     => $headers,
+                CURLOPT_TIMEOUT        => 10,
+                CURLOPT_SSL_VERIFYPEER => true,
+            ]);
+            $body = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $err  = curl_error($ch);
+            curl_close($ch);
+            return [$code, $body ? json_decode($body, true) : null, $err];
+        };
+
+        [$code1, $quota,  $err1] = $call('https://api.line.me/v2/bot/message/quota');
+        [$code2, $usage,  $err2] = $call('https://api.line.me/v2/bot/message/quota/consumption');
+
+        if ($err1 || $code1 !== 200) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'ดึง quota ไม่สำเร็จ: HTTP ' . $code1 . ($err1 ? ' / ' . $err1 : ''),
+            ]);
+        }
+
+        $data = [
+            'type'       => $quota['type']       ?? 'unknown',   // 'limited' | 'unlimited'
+            'value'      => (int)($quota['value'] ?? 0),          // monthly limit (0 = unlimited)
+            'totalUsage' => (int)($usage['totalUsage'] ?? 0),     // used this month
+        ];
+
+        return $this->response->setJSON(['success' => true, 'data' => $data]);
+    }
+
     private function _decode_json_setting($key) {
         $raw = get_setting($key);
         if (!$raw) { return []; }

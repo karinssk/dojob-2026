@@ -12,6 +12,29 @@ $s_days     = json_decode(get_setting('liff_summary_days')    ?: '[1,2,3,4,5]', 
 $day_labels = [1=>'จ.',2=>'อ.',3=>'พ.',4=>'พฤ.',5=>'ศ.',6=>'ส.',7=>'อา.'];
 ?>
 
+<!-- ═══════════════════════════════════════════════════════════
+     LINE QUOTA BADGE (top-right)
+═══════════════════════════════════════════════════════════ -->
+<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+  <div id="lnf-quota-box"
+    style="display:inline-flex;align-items:center;gap:10px;
+           background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;
+           padding:10px 16px;font-size:13px;color:#334155;min-width:260px">
+    <span style="font-size:18px">📨</span>
+    <div id="lnf-quota-inner" style="flex:1">
+      <div style="font-weight:600;color:#64748B;font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">
+        LINE Push Message Quota
+      </div>
+      <div id="lnf-quota-text" style="color:#94A3B8;font-size:12px">กำลังโหลด...</div>
+    </div>
+    <button type="button" onclick="loadQuota()"
+      title="รีเฟรช"
+      style="background:none;border:none;cursor:pointer;color:#94A3B8;font-size:16px;padding:0;line-height:1">
+      ↻
+    </button>
+  </div>
+</div>
+
 <form id="liff-notify-form">
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -269,10 +292,66 @@ function testNotify(type) {
     success: function(r){
       resultEl.innerHTML = (r.success ? '✅ ' : '❌ ') + r.message;
       setTimeout(function(){ resultEl.innerHTML = ''; }, 6000);
+      // Refresh quota after sending test
+      setTimeout(loadQuota, 1500);
     },
     error: function(xhr){
       resultEl.innerHTML = '❌ AJAX error (' + xhr.status + ')';
     }
   });
 }
+
+// ── LINE Push Quota ──────────────────────────────────────────────
+function loadQuota() {
+  var el = document.getElementById('lnf-quota-text');
+  var box = document.getElementById('lnf-quota-box');
+  el.style.color = '#94A3B8';
+  el.innerHTML = 'กำลังโหลด...';
+
+  $.ajax({
+    url: '<?= get_uri('liff_settings/get_push_quota') ?>',
+    method: 'GET',
+    dataType: 'json',
+    success: function(r) {
+      if (!r.success) {
+        el.innerHTML = '<span style="color:#EF4444">❌ ' + r.message + '</span>';
+        box.style.borderColor = '#FECACA';
+        return;
+      }
+      var d = r.data;
+      // d.type: 'limited' | 'unlimited'
+      if (d.type === 'unlimited') {
+        el.innerHTML = '♾️ ไม่จำกัด (Verified account)';
+        el.style.color = '#00B393';
+        box.style.borderColor = '#99F6E4';
+      } else {
+        var used     = d.totalUsage;
+        var limit    = d.value;
+        var remain   = limit - used;
+        var pct      = limit > 0 ? Math.round(used / limit * 100) : 0;
+        var barColor = pct >= 90 ? '#EF4444' : pct >= 70 ? '#F97316' : '#4F7DF3';
+        var textColor= pct >= 90 ? '#EF4444' : pct >= 70 ? '#F97316' : '#334155';
+
+        // Border color by usage
+        box.style.borderColor = pct >= 90 ? '#FECACA' : pct >= 70 ? '#FED7AA' : '#BFDBFE';
+
+        el.style.color = textColor;
+        el.innerHTML =
+          '<span style="font-size:14px;font-weight:700">' + used.toLocaleString() + '</span>' +
+          '<span style="color:#94A3B8"> / ' + limit.toLocaleString() + ' messages</span>' +
+          '<span style="color:' + barColor + ';font-weight:600;margin-left:6px">(' + pct + '%)</span>' +
+          '<div style="margin-top:5px;height:5px;background:#E2E8F0;border-radius:3px;overflow:hidden">' +
+            '<div style="width:' + Math.min(pct,100) + '%;height:100%;background:' + barColor + ';border-radius:3px;transition:width .4s"></div>' +
+          '</div>' +
+          '<div style="font-size:11px;color:#64748B;margin-top:3px">เหลือ ' + remain.toLocaleString() + ' messages · รีเซ็ตทุกต้นเดือน</div>';
+      }
+    },
+    error: function(xhr) {
+      el.innerHTML = '<span style="color:#EF4444">❌ ดึงข้อมูลไม่สำเร็จ (' + xhr.status + ')</span>';
+    }
+  });
+}
+
+// Auto-load on tab open
+$(document).ready(function(){ loadQuota(); });
 </script>
