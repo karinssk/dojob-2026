@@ -19,7 +19,7 @@ const PORT = process.env.DOJOB_PORT || 3259;
 // BASE_URL can be set via env:
 //   BASE_URL=https://dojob.rubyshop.co.th node server.js       ← production
 //   BASE_URL=http://localhost:8888/dojob-2026 node server.js   ← dev (default)
-const BASE_URL = (process.env.BASE_URL || 'http://localhost:8888/dojob-2026').replace(/\/$/, '');
+const BASE_URL = (process.env.BASE_URL || 'https://dojob.rubyshop.co.th').replace(/\/$/, '');
 const CRON_URL = `${BASE_URL}/index.php/cron`;
 const requester = CRON_URL.startsWith('https') ? https : http;
 
