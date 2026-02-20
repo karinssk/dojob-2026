@@ -733,9 +733,9 @@ class Cron_job {
         } else {
             $tasks = $db->query(
                 "SELECT t.id, t.title, t.start_date, t.start_time, t.line_notify_before_start,
-                        m.line_user_id AS line_user_id
+                        COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id
                  FROM rise_tasks t
-                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1
+                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1 AND m.liff_notify_user = 1
                  WHERE t.deleted = 0
                    AND t.line_notify_enabled = 1
                    AND t.line_notify_before_start IS NOT NULL
@@ -782,9 +782,9 @@ class Cron_job {
         } else {
             $events = $db->query(
                 "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start,
-                        m.line_user_id AS line_user_id
+                        COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id
                  FROM rise_events e
-                 JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1
+                 JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1 AND m.liff_notify_user = 1
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
                    AND e.line_notify_before_start IS NOT NULL
@@ -845,9 +845,9 @@ class Cron_job {
         } else {
             $tasks = $db->query(
                 "SELECT t.id, t.title, t.deadline, t.end_time, t.line_notify_before_end,
-                        m.line_user_id AS line_user_id
+                        COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id
                  FROM rise_tasks t
-                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1
+                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1 AND m.liff_notify_user = 1
                  JOIN rise_task_status ts ON ts.id = t.status_id
                  WHERE t.deleted = 0
                    AND t.line_notify_enabled = 1
@@ -896,9 +896,9 @@ class Cron_job {
         } else {
             $events = $db->query(
                 "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end,
-                        m.line_user_id AS line_user_id
+                        COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id
                  FROM rise_events e
-                 JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1
+                 JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1 AND m.liff_notify_user = 1
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
                    AND e.line_notify_before_end IS NOT NULL
@@ -960,9 +960,9 @@ class Cron_job {
                 "SELECT t.id, t.title,
                         COALESCE(t.status_changed_at, t.created_date) AS last_updated,
                         t.line_notify_no_update_hours,
-                        m.line_user_id AS line_user_id
+                        COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id
                  FROM rise_tasks t
-                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1
+                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1 AND m.liff_notify_user = 1
                  JOIN rise_task_status ts ON ts.id = t.status_id
                  WHERE t.deleted = 0
                    AND t.line_notify_enabled = 1
@@ -1080,7 +1080,7 @@ class Cron_job {
             SELECT
                 u.id AS user_id,
                 CONCAT(u.first_name,' ',u.last_name) AS user_name,
-                m.line_user_id,
+                COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id,
                 t.id AS task_id,
                 t.title AS task_title
             FROM rise_users u
@@ -1148,7 +1148,7 @@ class Cron_job {
             SELECT
                 u.id AS user_id,
                 CONCAT(u.first_name,' ',u.last_name) AS user_name,
-                m.line_user_id,
+                COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id,
                 COUNT(t.id) AS done_count
             FROM rise_users u
             JOIN rise_tasks t ON t.assigned_to = u.id AND t.deleted = 0
