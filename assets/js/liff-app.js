@@ -186,7 +186,7 @@ const LiffApp = (() => {
 
   /* ── Celebration confetti (triggered on task done) ── */
   function celebrate() {
-    const EMOJIS = ['🍤', '🥑', '🧀', '🍓', '🫐', '🥚', '⭐', '✨', '🎉', '🌟'];
+    const EMOJIS = ['🔧', '🔨', '⚙️', '🔩', '🪛', '📐', '🏆', '⭐', '✅', '💡'];
     const COUNT  = 50;
 
     const overlay = document.createElement('div');
@@ -219,9 +219,9 @@ const LiffApp = (() => {
     var card = document.createElement('div');
     card.className = 'celebrate-card';
     card.innerHTML =
-      '<div class="celebrate-mascot">👨‍🍳</div>' +
-      '<div class="celebrate-title">เสร็จแล้ว!</div>' +
-      '<div class="celebrate-sub">ทำได้ดีมากเลย 🎉</div>';
+      '<div class="celebrate-mascot">👷</div>' +
+      '<div class="celebrate-title">งานสำเร็จ!</div>' +
+      '<div class="celebrate-sub">ทีมงานเยี่ยมมาก 💪</div>';
     overlay.appendChild(card);
 
     // Dismiss helpers

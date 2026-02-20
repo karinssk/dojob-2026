@@ -53,6 +53,8 @@ $modalIdx = 0;
 <div class="card">
   <div class="card-body">
 
+    <div class="fw-700" style="font-size:16px;line-height:1.4;margin-bottom:<?= $task->description ? '10px' : '0' ?>"><?= esc($task->title) ?></div>
+
     <?php if ($task->description): ?>
     <p class="text-sm" style="color:var(--label);line-height:1.6"><?= nl2br(esc($task->description)) ?></p>
     <div class="divider"></div>
