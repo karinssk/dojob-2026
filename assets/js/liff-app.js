@@ -166,15 +166,20 @@ const LiffApp = (() => {
 
   /* ── Quick status update ── */
   async function updateTaskStatus(taskId, statusId, chipEl) {
+    console.log('[updateTaskStatus] called', { taskId, statusId });
     const res = await api('liff/api/tasks/update_status', 'POST', { task_id: taskId, status_id: statusId });
+    console.log('[updateTaskStatus] API response', res);
     if (res.success) {
+      console.log('[updateTaskStatus] status_key =', res.status_key, '| is done?', res.status_key === 'done');
       if (chipEl) { chipEl.textContent = res.status_title; }
       if (res.status_key === 'done') {
+        console.log('[updateTaskStatus] triggering celebrate()');
         celebrate();
       } else {
         toast('อัปเดตสถานะแล้ว', 'success');
       }
     } else {
+      console.log('[updateTaskStatus] FAILED', res.message);
       toast(res.message || 'เกิดข้อผิดพลาด', 'error');
     }
   }
