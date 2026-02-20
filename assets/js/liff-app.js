@@ -168,11 +168,64 @@ const LiffApp = (() => {
   async function updateTaskStatus(taskId, statusId, chipEl) {
     const res = await api('liff/api/tasks/update_status', 'POST', { task_id: taskId, status_id: statusId });
     if (res.success) {
-      toast('อัปเดตสถานะแล้ว', 'success');
       if (chipEl) { chipEl.textContent = res.status_title; }
+      if (res.status_key === 'done') {
+        celebrate();
+      } else {
+        toast('อัปเดตสถานะแล้ว', 'success');
+      }
     } else {
       toast(res.message || 'เกิดข้อผิดพลาด', 'error');
     }
+  }
+
+  /* ── Celebration confetti (triggered on task done) ── */
+  function celebrate() {
+    const EMOJIS = ['🍤', '🥑', '🧀', '🍓', '🫐', '🥚', '⭐', '✨', '🎉', '🌟'];
+    const COUNT  = 50;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'celebrate-overlay';
+    document.body.appendChild(overlay);
+
+    // Confetti pieces
+    for (var i = 0; i < COUNT; i++) {
+      var piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      var dx       = (Math.random() - 0.5) * 350;
+      var dy       = (Math.random() - 1)   * 500 - 150;
+      var rot      = Math.random() * 720 - 360;
+      var scale    = 0.6 + Math.random() * 0.8;
+      var delay    = Math.random() * 0.15;
+      var duration = i % 6 === 4 ? 5 : i % 6 === 1 || i % 6 === 3 ? 3 : 4;
+      piece.textContent = EMOJIS[i % EMOJIS.length];
+      piece.style.cssText = [
+        '--dx:' + dx + 'px',
+        '--dy:' + dy + 'px',
+        '--rot:' + rot + 'deg',
+        '--sc:'  + scale,
+        'animation-delay:'    + delay + 's',
+        'animation-duration:' + duration + 's',
+      ].join(';');
+      overlay.appendChild(piece);
+    }
+
+    // Central card
+    var card = document.createElement('div');
+    card.className = 'celebrate-card';
+    card.innerHTML =
+      '<div class="celebrate-mascot">👨‍🍳</div>' +
+      '<div class="celebrate-title">เสร็จแล้ว!</div>' +
+      '<div class="celebrate-sub">ทำได้ดีมากเลย 🎉</div>';
+    overlay.appendChild(card);
+
+    // Dismiss helpers
+    function dismiss() {
+      overlay.classList.add('celebrate-out');
+      setTimeout(function () { overlay.remove(); }, 400);
+    }
+    overlay.onclick = dismiss;
+    setTimeout(dismiss, 3000);
   }
 
   /* ── Todo toggle ── */
@@ -220,7 +273,7 @@ const LiffApp = (() => {
     }
   }
 
-  return { api, toast, initTabs, initNotifyToggle, initImageUpload, updateTaskStatus, toggleTodo, confirm, formatDate };
+  return { api, toast, initTabs, initNotifyToggle, initImageUpload, updateTaskStatus, toggleTodo, confirm, formatDate, celebrate };
 })();
 
 // Auto-init tabs on page load

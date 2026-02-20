@@ -240,31 +240,38 @@ class Liff_app extends Security_Controller {
 
     // ── Events ─────────────────────────────────────────────────────
     public function events() {
-        $user_id = $this->login_user->id;
-        $view    = $this->request->getGet('view') ?: 'today';
+        $user_id    = $this->login_user->id;
+        $month_start = date('Y-m-01');
+        $month_end   = date('Y-m-t');
 
-        $date_where = match ($view) {
-            'week'  => "e.start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)",
-            'all'   => "e.start_date >= CURDATE()",
-            default => "e.start_date = CURDATE()",
-        };
-
-        $events = $this->db->query(
-            "SELECT e.*, CONCAT(u.first_name,' ',u.last_name) AS creator_name
+        // Pre-fetch current month events so the calendar renders immediately without an AJAX call
+        $rows = $this->db->query(
+            "SELECT e.id, e.title, e.start_date, e.end_date, e.start_time, e.end_time, e.color
              FROM rise_events e
-             LEFT JOIN rise_users u ON u.id = e.created_by
-             WHERE e.deleted=0 AND $date_where
-             AND (e.created_by=$user_id OR e.share_with LIKE '%all_team%' OR e.share_with LIKE '%$user_id%')
-             ORDER BY e.start_date ASC, e.start_time ASC
-             LIMIT 30"
+             WHERE e.deleted=0
+               AND e.start_date <= ? AND (e.end_date >= ? OR (e.end_date IS NULL AND e.start_date >= ?))
+               AND (e.created_by=? OR e.share_with LIKE '%all_team%' OR FIND_IN_SET(?,e.share_with))
+             ORDER BY e.start_date ASC, e.start_time ASC",
+            [$month_end, $month_start, $month_start, $user_id, $user_id]
         )->getResult();
 
+        $initial_events = array_map(function($e) {
+            return [
+                'id'         => (int)$e->id,
+                'title'      => $e->title,
+                'start_date' => $e->start_date,
+                'end_date'   => $e->end_date ?: $e->start_date,
+                'start_time' => $e->start_time,
+                'end_time'   => $e->end_time,
+                'color'      => $e->color ?: '#4F7DF3',
+            ];
+        }, $rows);
+
         return $this->_liff_view('liff_app/events/index', [
-            'page_title' => 'Events',
-            'active_tab' => 'events',
-            'fab_url'    => get_uri('liff/app/events/create'),
-            'events'     => $events,
-            'view'       => $view,
+            'page_title'     => 'Events',
+            'active_tab'     => 'events',
+            'fab_url'        => get_uri('liff/app/events/create'),
+            'initial_events' => json_encode($initial_events),
         ]);
     }
 

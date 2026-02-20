@@ -21,7 +21,7 @@
 const CAL = {
   view: 'month',
   date: new Date(),
-  events: [],
+  events: <?= $initial_events ?? '[]' ?>,
 };
 
 function parseDateStr(s) {
@@ -306,18 +306,14 @@ function eventsForRange(start, end) {
 }
 
 function initCalendar() {
-  renderCalendar(); // render skeleton immediately — no LiffApp needed
-  waitAndFetch();
+  renderCalendar(); // events already in CAL.events from server — renders immediately
 }
 
+// Only used when navigating to a different range (prev/next, view switch)
 function waitAndFetch() {
   if (!window.LiffApp) { setTimeout(waitAndFetch, 50); return; }
   fetchEvents();
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initCalendar);
-} else {
-  initCalendar();
-}
+initCalendar();
 </script>

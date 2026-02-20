@@ -1027,3 +1027,96 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   border: 1px solid rgba(148, 163, 184, 0.2);
   z-index: 9999;
 }
+
+/* --- Celebration overlay ----------------------------------- */
+.celebrate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: cel-in 0.25s ease both;
+}
+.celebrate-overlay.celebrate-out {
+  animation: cel-out 0.4s ease forwards;
+}
+@keyframes cel-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cel-out { to   { opacity: 0; } }
+
+/* Confetti pieces */
+.confetti-piece {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 26px;
+  line-height: 1;
+  pointer-events: none;
+  transform-origin: center center;
+  animation: confetti-burst linear forwards;
+  will-change: transform, opacity;
+}
+@keyframes confetti-burst {
+  0% {
+    transform: translate(-50%, -50%) translate(0px, 0px) rotate(0deg) scale(0);
+    opacity: 1;
+  }
+  15% {
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) rotate(calc(var(--rot) * 0.3)) scale(var(--sc));
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(var(--dx), 900px) rotate(var(--rot)) scale(var(--sc));
+    opacity: 0;
+  }
+}
+
+/* Central card */
+.celebrate-card {
+  position: relative;
+  z-index: 10;
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 36px 48px 28px;
+  text-align: center;
+  box-shadow: 0 32px 64px rgba(0,0,0,0.25);
+  pointer-events: none;
+  animation: card-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s both;
+}
+@keyframes card-pop {
+  from { transform: scale(0) rotate(-10deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg);  opacity: 1; }
+}
+
+.celebrate-mascot {
+  font-size: 68px;
+  margin-bottom: 10px;
+  display: block;
+  animation: mascot-wiggle 0.55s ease 0.3s both;
+}
+@keyframes mascot-wiggle {
+  0%   { transform: rotate(-15deg) scale(0.8); }
+  50%  { transform: rotate(10deg)  scale(1.1); }
+  100% { transform: rotate(0deg)   scale(1);   }
+}
+
+.celebrate-title {
+  font-size: 30px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+.celebrate-sub {
+  font-size: 14px;
+  color: #64748B;
+}

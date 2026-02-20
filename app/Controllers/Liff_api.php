@@ -92,7 +92,7 @@ class Liff_api extends Security_Controller {
             'status_changed_at' => date('Y-m-d H:i:s'),
         ], $task_id);
 
-        return $this->_json(['success' => true, 'status_title' => $status->title ?? '']);
+        return $this->_json(['success' => true, 'status_title' => $status->title ?? '', 'status_key' => $status->key_name ?? '']);
     }
 
     // ── Task: test notify to LIFF rooms (immediate) ─────────────────
