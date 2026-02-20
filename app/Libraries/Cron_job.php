@@ -22,6 +22,21 @@ class Cron_job {
         $this->call_hourly_jobs();
         $this->call_daily_jobs();
 
+        // LIFF scheduled notifications — checked every cron run (own cooldown prevents duplicates)
+        if (get_setting('liff_line_channel_access_token') || get_setting('line_channel_access_token')) {
+            try {
+                $this->liff_task_reminder();
+            } catch (\Throwable $e) {
+                log_message('error', 'LIFF task reminder: ' . $e->getMessage());
+            }
+
+            try {
+                $this->liff_task_summary();
+            } catch (\Throwable $e) {
+                log_message('error', 'LIFF task summary: ' . $e->getMessage());
+            }
+        }
+
         try {
             $this->run_imap();
         } catch (\Exception $e) {
@@ -119,33 +134,22 @@ class Cron_job {
             if (get_setting('liff_line_channel_access_token') || get_setting('line_channel_access_token')) {
                 try {
                     $this->liff_notify_before_start();
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     log_message('error', 'LIFF notify before_start: ' . $e->getMessage());
                 }
 
                 try {
                     $this->liff_notify_before_end();
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     log_message('error', 'LIFF notify before_end: ' . $e->getMessage());
                 }
 
                 try {
                     $this->liff_notify_no_update();
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     log_message('error', 'LIFF notify no_update: ' . $e->getMessage());
                 }
 
-                try {
-                    $this->liff_task_reminder();
-                } catch (\Exception $e) {
-                    log_message('error', 'LIFF task reminder: ' . $e->getMessage());
-                }
-
-                try {
-                    $this->liff_task_summary();
-                } catch (\Exception $e) {
-                    log_message('error', 'LIFF task summary: ' . $e->getMessage());
-                }
             }
 
             $this->ci->Settings_model->save_setting("last_hourly_job_time", $this->current_time);
@@ -729,9 +733,9 @@ class Cron_job {
         } else {
             $tasks = $db->query(
                 "SELECT t.id, t.title, t.start_date, t.start_time, t.line_notify_before_start,
-                        m.line_liff_user_id AS line_user_id
+                        m.line_user_id AS line_user_id
                  FROM rise_tasks t
-                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1 AND m.liff_notify_user = 1
+                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1
                  WHERE t.deleted = 0
                    AND t.line_notify_enabled = 1
                    AND t.line_notify_before_start IS NOT NULL
@@ -778,9 +782,9 @@ class Cron_job {
         } else {
             $events = $db->query(
                 "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start,
-                        m.line_liff_user_id AS line_user_id
+                        m.line_user_id AS line_user_id
                  FROM rise_events e
-                 JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1 AND m.liff_notify_user = 1
+                 JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
                    AND e.line_notify_before_start IS NOT NULL
@@ -841,9 +845,9 @@ class Cron_job {
         } else {
             $tasks = $db->query(
                 "SELECT t.id, t.title, t.deadline, t.end_time, t.line_notify_before_end,
-                        m.line_liff_user_id AS line_user_id
+                        m.line_user_id AS line_user_id
                  FROM rise_tasks t
-                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1 AND m.liff_notify_user = 1
+                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1
                  JOIN rise_task_status ts ON ts.id = t.status_id
                  WHERE t.deleted = 0
                    AND t.line_notify_enabled = 1
@@ -892,9 +896,9 @@ class Cron_job {
         } else {
             $events = $db->query(
                 "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end,
-                        m.line_liff_user_id AS line_user_id
+                        m.line_user_id AS line_user_id
                  FROM rise_events e
-                 JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1 AND m.liff_notify_user = 1
+                 JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
                    AND e.line_notify_before_end IS NOT NULL
@@ -956,9 +960,9 @@ class Cron_job {
                 "SELECT t.id, t.title,
                         COALESCE(t.status_changed_at, t.created_date) AS last_updated,
                         t.line_notify_no_update_hours,
-                        m.line_liff_user_id AS line_user_id
+                        m.line_user_id AS line_user_id
                  FROM rise_tasks t
-                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1 AND m.liff_notify_user = 1
+                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1
                  JOIN rise_task_status ts ON ts.id = t.status_id
                  WHERE t.deleted = 0
                    AND t.line_notify_enabled = 1
@@ -1076,7 +1080,7 @@ class Cron_job {
             SELECT
                 u.id AS user_id,
                 CONCAT(u.first_name,' ',u.last_name) AS user_name,
-                m.line_liff_user_id,
+                m.line_user_id,
                 t.id AS task_id,
                 t.title AS task_title
             FROM rise_users u
@@ -1096,9 +1100,9 @@ class Cron_job {
             $uid = $r->user_id;
             if (!isset($users[$uid])) {
                 $users[$uid] = [
-                    'user_name'        => $r->user_name,
-                    'line_liff_user_id'=> $r->line_liff_user_id,
-                    'tasks'            => [],
+                    'user_name'   => $r->user_name,
+                    'line_user_id'=> $r->line_user_id,
+                    'tasks'       => [],
                 ];
             }
             $users[$uid]['tasks'][] = ['id' => $r->task_id, 'title' => $r->task_title];
@@ -1118,10 +1122,10 @@ class Cron_job {
             }
         } else {
             foreach ($users as $uid => $u) {
-                if (empty($u['line_liff_user_id'])) { continue; }
+                if (empty($u['line_user_id'])) { continue; }
                 $single = $this->_build_reminder_bubble_single($u['user_name'], $u['tasks'], $liff_base);
                 $alt    = $u['user_name'] . ' มีงานค้าง ' . count($u['tasks']) . ' รายการ';
-                $Line->send_flex_message($u['line_liff_user_id'], $single, $alt, 'user');
+                $Line->send_flex_message($u['line_user_id'], $single, $alt, 'user');
             }
         }
 
@@ -1144,7 +1148,7 @@ class Cron_job {
             SELECT
                 u.id AS user_id,
                 CONCAT(u.first_name,' ',u.last_name) AS user_name,
-                m.line_liff_user_id,
+                m.line_user_id,
                 COUNT(t.id) AS done_count
             FROM rise_users u
             JOIN rise_tasks t ON t.assigned_to = u.id AND t.deleted = 0
@@ -1172,8 +1176,8 @@ class Cron_job {
         } else {
             // For user mode, send the combined summary to users who have LINE linked
             foreach ($rows as $r) {
-                if (empty($r->line_liff_user_id)) { continue; }
-                $Line->send_flex_message($r->line_liff_user_id, $flex, $alt_text, 'user');
+                if (empty($r->line_user_id)) { continue; }
+                $Line->send_flex_message($r->line_user_id, $flex, $alt_text, 'user');
             }
         }
 
@@ -1463,7 +1467,8 @@ class Cron_job {
 
     /** Prepend a line to the LIFF notification debug log (keeps last 80 lines) */
     private function _liff_log($msg) {
-        $raw   = get_setting('liff_notify_debug_log') ?: '';
+        // Read directly from DB (not CI cache) so sequential log entries accumulate correctly
+        $raw   = $this->ci->Settings_model->get_setting('liff_notify_debug_log') ?: '';
         $lines = $raw ? explode("\n", $raw) : [];
         array_unshift($lines, '[' . date('d/m H:i:s') . '] ' . $msg);
         $this->ci->Settings_model->save_setting(
