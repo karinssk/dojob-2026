@@ -712,44 +712,65 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 /* --- Bottom Tab Bar ---------------------------------------- */
 .bottom-tabs {
   position: fixed; bottom: 0; left: 0; right: 0;
-  height: 68px;
-  background: rgba(255,255,255,0.95);
-  border-top: 1px solid #E8EEF7;
-  display: flex; justify-content: space-around; align-items: center;
-  padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
-  backdrop-filter: blur(8px);
-  box-shadow: var(--shadow-tab);
+  height: 64px;
+  background: #fff;
+  border-top: 1px solid #EAEEF6;
+  display: flex; align-items: stretch;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -2px 12px rgba(15,23,42,0.07);
   z-index: 100;
 }
 .bottom-tab {
-  flex: 1 1 20%;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 4px 0;
-  text-decoration: none; color: var(--muted);
-  font-size: 10px; font-weight: 600; cursor: pointer;
-  transition: color 0.15s, transform 0.15s; position: relative;
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  color: #9AA5BE;
+  font-size: 10px; font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.18s;
+  -webkit-tap-highlight-color: transparent;
+  padding: 8px 0 6px;
 }
-.bottom-tab.active { color: var(--blue); }
-.bottom-tab:active { transform: scale(0.96); }
+/* Active top indicator bar */
+.bottom-tab::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 24px; height: 3px;
+  background: var(--blue);
+  border-radius: 0 0 3px 3px;
+  transition: transform 0.2s cubic-bezier(.34,1.56,.64,1);
+}
+.bottom-tab.active::before {
+  transform: translateX(-50%) scaleX(1);
+}
+.bottom-tab.active {
+  color: var(--blue);
+}
+.bottom-tab:active {
+  opacity: 0.7;
+}
 .bottom-tab-icon {
-  width: 30px; height: 30px;
-  display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 12px;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.18s cubic-bezier(.34,1.56,.64,1);
 }
 .bottom-tab.active .bottom-tab-icon {
-  background: var(--blue-lt);
-  color: var(--blue);
-  box-shadow: 0 6px 16px rgba(79,125,243,0.25);
+  transform: translateY(-1px) scale(1.12);
 }
-.bottom-tab-icon svg { width: 20px; height: 20px; display: block; }
-.bottom-tab-label { font-size: 10px; letter-spacing: 0.02em; }
+.bottom-tab-icon svg { width: 22px; height: 22px; display: block; }
+.bottom-tab-label { font-size: 10px; letter-spacing: 0.01em; line-height: 1; }
 .bottom-tab-badge {
-  position: absolute; top: 0; right: 6px;
+  position: absolute; top: 6px; right: calc(50% - 18px);
   background: var(--pink); color: #fff;
-  width: 16px; height: 16px; border-radius: 50%;
-  font-size: 10px; font-weight: 700;
+  min-width: 15px; height: 15px; border-radius: 8px;
+  padding: 0 3px;
+  font-size: 9px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid #fff;
 }
 
 /* --- FAB --------------------------------------------------- */

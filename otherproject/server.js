@@ -972,6 +972,13 @@ class LineHandler {
 
       const taskId = await this.db.createTask(taskData);
 
+      // Force status to done in case createTask applies defaults
+      try {
+        await this.db.updateTask(taskId, { status: 'done', status_id: 3 });
+      } catch (updateError) {
+        logger.error('createDailyTask', 'Error enforcing done status', updateError, userId);
+      }
+
       // Log activity
       await this.db.logActivity({
         created_by: userInfo.rise_user_id,
