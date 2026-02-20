@@ -60,8 +60,9 @@
 
 <script>
 (function () {
-  var _uid  = null;
-  var _name = null;
+  var _uid        = null;
+  var _name       = null;
+  var _submitting = false;   // guard against double-tap
   var _defs = <?= json_encode($d) ?>;
   var _api  = 'liff/api/tasks/quick_assign';
 
@@ -94,10 +95,14 @@
   };
 
   window.qaSubmit = async function () {
+    if (_submitting) return;                          // block double-tap
     var title = document.getElementById('qa-title').value.trim();
     if (!title || !_uid) return;
 
-    document.getElementById('qa-send-btn').disabled  = true;
+    _submitting = true;
+    var btn = document.getElementById('qa-send-btn');
+    btn.disabled  = true;
+    btn.textContent = 'กำลังส่ง...';
     document.getElementById('qa-submitting').style.display = 'block';
 
     try {
@@ -116,11 +121,11 @@
 
       if (res && res.success) {
         LiffApp.toast('✅ ส่งงานให้ ' + _name + ' แล้ว', 'success');
-        // Reset
+        // Reset panel
         var ta = document.getElementById('qa-title');
-        ta.value       = '';
-        ta.disabled    = true;
-        ta.placeholder = 'ระบุชื่องาน...';
+        ta.value        = '';
+        ta.disabled     = true;
+        ta.placeholder  = 'ระบุชื่องาน...';
         ta.style.height = 'auto';
         document.querySelectorAll('.qa-avatar-item').forEach(function(a){
           a.classList.remove('qa-selected');
@@ -128,15 +133,20 @@
         _uid = null; _name = null;
         document.getElementById('qa-step2-label').style.opacity = '.35';
         document.getElementById('qa-input-row').classList.remove('qa-active');
-        document.getElementById('qa-send-btn').disabled = true;
+        btn.disabled    = true;
+        btn.textContent = 'ส่งงาน ›';
         setTimeout(function(){ location.reload(); }, 900);
       } else {
         LiffApp.toast((res && res.message) ? res.message : 'เกิดข้อผิดพลาด', 'error');
-        document.getElementById('qa-send-btn').disabled = false;
+        btn.disabled    = false;
+        btn.textContent = 'ส่งงาน ›';
+        _submitting     = false;
       }
     } catch(e) {
       LiffApp.toast('เกิดข้อผิดพลาด', 'error');
-      document.getElementById('qa-send-btn').disabled = false;
+      btn.disabled    = false;
+      btn.textContent = 'ส่งงาน ›';
+      _submitting     = false;
     }
     document.getElementById('qa-submitting').style.display = 'none';
   };
