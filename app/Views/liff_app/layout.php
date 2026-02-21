@@ -33,11 +33,11 @@
     </span>
     <span class="bottom-tab-label">หน้าหลัก</span>
   </a>
-  <a class="bottom-tab <?= ($active_tab ?? '') === 'todo'     ? 'active' : '' ?>" href="<?= get_uri('liff/app/todo') ?>">
+  <a class="bottom-tab <?= ($active_tab ?? '') === 'assign' ? 'active' : '' ?>" href="<?= get_uri('liff/app/tasks?filter=assigned_by_me') ?>">
     <span class="bottom-tab-icon">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="7" r="3" stroke="currentColor" stroke-width="2"/><path d="M3 20c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 11l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </span>
-    <span class="bottom-tab-label">To-Do</span>
+    <span class="bottom-tab-label">Assign</span>
   </a>
   <a class="bottom-tab <?= ($active_tab ?? '') === 'tasks'    ? 'active' : '' ?>" href="<?= get_uri('liff/app/tasks') ?>">
     <span class="bottom-tab-icon">
