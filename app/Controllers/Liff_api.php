@@ -191,9 +191,9 @@ class Liff_api extends Security_Controller {
         )->getRow();
         $latest_comment = trim($comment_row->description ?? '');
 
-        // LIFF deep-link
+        // LIFF deep-link — format: https://liff.line.me/{liff-id}/tasks/{task_id}
         $liff_base = rtrim(get_setting('line_liff_id') ?: '2009171467-kn2AHM0C', '/');
-        $liff_url  = 'https://liff.line.me/' . $liff_base . '?path=tasks/' . $task_id;
+        $liff_url  = 'https://liff.line.me/' . $liff_base . '/tasks/' . $task_id;
 
         // Build body contents
         $body_contents = [
@@ -745,9 +745,9 @@ class Liff_api extends Security_Controller {
         )->getRow();
         $sender_name = $sender_row ? trim($sender_row->first_name . ' ' . $sender_row->last_name) : '';
 
-        // LIFF deep-link URL
+        // LIFF deep-link URL — format: https://liff.line.me/{liff-id}/tasks/{task_id}
         $liff_base = rtrim(get_setting('line_liff_id') ?: '2009171467-kn2AHM0C', '/');
-        $liff_url  = 'https://liff.line.me/' . $liff_base . '?path=tasks/' . $task_id;
+        $liff_url  = 'https://liff.line.me/' . $liff_base . '/tasks/' . $task_id;
 
         // Build Flex Message bubble
         $flex = [
