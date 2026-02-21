@@ -157,7 +157,155 @@ class Liff_api extends Security_Controller {
             'status_changed_at' => date('Y-m-d H:i:s'),
         ], $task_id);
 
+        // Send LINE notification only when status is marked as done
+        if (!empty($status->key_name) && strtolower($status->key_name) === 'done') {
+            $this->_notify_task_done($task_id);
+        }
+
         return $this->_json(['success' => true, 'status_title' => $status->title ?? '', 'status_key' => $status->key_name ?? '']);
+    }
+
+    // ── Notify LINE rooms when a task is marked Done ───────────────
+    private function _notify_task_done($task_id) {
+        // Get full task info
+        $task = $this->Tasks_model->get_one($task_id);
+        if (!$task) { return; }
+
+        $task_title = $task->title ?? 'งาน';
+        $task_desc  = trim($task->description ?? '');
+
+        // Who marked it done
+        $doer_row  = $this->db->query(
+            "SELECT first_name, last_name FROM rise_users WHERE id=? LIMIT 1",
+            [$this->login_user->id]
+        )->getRow();
+        $doer_name = $doer_row ? trim($doer_row->first_name . ' ' . $doer_row->last_name) : 'ผู้ใช้';
+
+        // Latest comment on this task (if any)
+        $comment_row = $this->db->query(
+            "SELECT description FROM rise_task_comments
+             WHERE task_id=? AND deleted=0
+             ORDER BY id DESC LIMIT 1",
+            [$task_id]
+        )->getRow();
+        $latest_comment = trim($comment_row->description ?? '');
+
+        // LIFF deep-link
+        $liff_base = rtrim(get_setting('line_liff_id') ?: '2009171467-kn2AHM0C', '/');
+        $liff_url  = 'https://liff.line.me/' . $liff_base . '?path=tasks/' . $task_id;
+
+        // Build body contents
+        $body_contents = [
+            [
+                'type'   => 'text',
+                'text'   => '✅ ' . $task_title,
+                'weight' => 'bold',
+                'size'   => 'md',
+                'color'  => '#1A1A2E',
+                'wrap'   => true,
+            ],
+            [
+                'type'   => 'separator',
+                'margin' => 'sm',
+                'color'  => '#E8EAF6',
+            ],
+        ];
+
+        if ($task_desc) {
+            $body_contents[] = [
+                'type'     => 'text',
+                'text'     => $task_desc,
+                'size'     => 'sm',
+                'color'    => '#555555',
+                'wrap'     => true,
+                'maxLines' => 3,
+                'margin'   => 'sm',
+            ];
+        }
+
+        if ($latest_comment) {
+            $body_contents[] = [
+                'type'            => 'box',
+                'layout'          => 'vertical',
+                'margin'          => 'sm',
+                'paddingAll'      => '10px',
+                'backgroundColor' => '#F8FAFF',
+                'cornerRadius'    => '8px',
+                'contents'        => [
+                    [
+                        'type'  => 'text',
+                        'text'  => '💬 ' . $latest_comment,
+                        'size'  => 'sm',
+                        'color' => '#444466',
+                        'wrap'  => true,
+                        'maxLines' => 3,
+                    ],
+                ],
+            ];
+        }
+
+        $body_contents[] = [
+            'type'  => 'text',
+            'text'  => 'โดย: ' . $doer_name,
+            'size'  => 'xs',
+            'color' => '#888888',
+            'margin'=> 'sm',
+            'wrap'  => true,
+        ];
+
+        $flex = [
+            'type'   => 'bubble',
+            'size'   => 'kilo',
+            'header' => [
+                'type'            => 'box',
+                'layout'          => 'horizontal',
+                'backgroundColor' => '#22C55E',
+                'paddingAll'      => '14px',
+                'contents'        => [[
+                    'type'   => 'text',
+                    'text'   => '🎉 อัพเดตงาน เสร็จแล้ว',
+                    'color'  => '#FFFFFF',
+                    'weight' => 'bold',
+                    'size'   => 'md',
+                    'flex'   => 1,
+                ]],
+            ],
+            'body' => [
+                'type'       => 'box',
+                'layout'     => 'vertical',
+                'paddingAll' => '16px',
+                'spacing'    => 'sm',
+                'contents'   => $body_contents,
+            ],
+            'footer' => [
+                'type'       => 'box',
+                'layout'     => 'vertical',
+                'paddingAll' => '12px',
+                'contents'   => [[
+                    'type'   => 'button',
+                    'style'  => 'primary',
+                    'color'  => '#22C55E',
+                    'height' => 'sm',
+                    'action' => [
+                        'type'  => 'uri',
+                        'label' => 'ดูรายละเอียดงาน',
+                        'uri'   => $liff_url,
+                    ],
+                ]],
+            ],
+        ];
+
+        $alt_text = '🎉 อัพเดตงาน เสร็จแล้ว: ' . mb_substr($task_title, 0, 50);
+
+        $Line  = new \App\Libraries\Liff_line_webhook();
+        $rooms = $this->_get_liff_rooms();
+
+        foreach ($rooms as $rid) {
+            $Line->send_flex_message($rid, $flex, $alt_text, 'room', [
+                'task_id' => $task_id,
+                'type'    => 'liff_task_done',
+            ]);
+        }
     }
 
     // ── Task: test notify to LIFF rooms (immediate) ─────────────────

@@ -122,9 +122,8 @@ async function setTaskStatus(btn, taskId, statusId) {
   const res = await LiffApp.api('liff/api/tasks/update_status', 'POST', { task_id: taskId, status_id: statusId });
   if (!res || !res.success) {
     LiffApp.toast(res?.message || 'อัปเดตสถานะไม่สำเร็จ', 'danger');
-  } else {
-    LiffApp.toast('อัปเดตสถานะแล้ว', 'success');
   }
+  // No toast on success — visual chip change is feedback enough
 }
 </script>
 
@@ -390,7 +389,6 @@ async function submitTaskComment(e) {
     if (input) input.value = '';
     const previews = document.getElementById('task-comment-previews');
     if (previews) previews.innerHTML = '';
-    LiffApp.toast('บันทึกแล้ว ✓', 'success');
   } else {
     LiffApp.toast(res.message || 'เกิดข้อผิดพลาด', 'error');
   }
