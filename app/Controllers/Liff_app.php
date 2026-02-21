@@ -233,8 +233,6 @@ class Liff_app extends Security_Controller {
             'task_id'    => (int)$task_id,
             'comment_id' => 0
         ])->getResult());
-        $comment_files = $this->_get_task_comment_files($task_id);
-
         return $this->_liff_view('liff_app/tasks/detail', [
             'page_title' => $task->title,
             'active_tab' => 'tasks',
@@ -242,7 +240,6 @@ class Liff_app extends Security_Controller {
             'activity'   => $activity,
             'statuses'   => $statuses,
             'comments'   => $comments,
-            'comment_files' => $comment_files,
         ]);
     }
 

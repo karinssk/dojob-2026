@@ -3,13 +3,8 @@ $color = $task->status_color ?: '#6C8EF5';
 $bg    = $color . '22';
 $is_overdue = $task->deadline && strtotime($task->deadline) < time();
 
-// Pre-build full-size URLs for the image modal (detail images first, then comment attachments)
+// Pre-build full-size URLs for the image modal (comment attachments only)
 $modalImgs = [];
-if (!empty($comment_files)) {
-    foreach ($comment_files as $f) {
-        $modalImgs[] = get_source_url_of_file($f, get_setting('timeline_file_path'));
-    }
-}
 foreach ($comments as $c) {
     $cfiles = $c->files ? @unserialize($c->files) : [];
     if (is_array($cfiles)) {
@@ -25,7 +20,7 @@ $modalIdx = 0;
     <h1 style="font-size:16px;line-height:1.4"><?= esc($task->title) ?></h1>
     <p><?= esc($task->project_title ?? 'ไม่ระบุโปรเจกต์') ?></p>
   </div>
-  <a href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>" class="btn btn-primary btn-sm edit-btn">แก้ไข</a>
+  <a href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>" class="btn btn-primary btn-sm edit-btn">อัพเดตงาน</a>
 </div>
 
 <!-- Status: current chip + horizontal scroll options -->
@@ -57,17 +52,6 @@ $modalIdx = 0;
 
     <?php if ($task->description): ?>
     <p class="text-sm" style="color:var(--label);line-height:1.6"><?= nl2br(esc($task->description)) ?></p>
-    <div class="divider"></div>
-    <?php endif; ?>
-
-    <?php if (!empty($comment_files)): ?>
-    <div class="detail-images">
-      <?php foreach ($comment_files as $file):
-        $thumb = get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail");
-      ?>
-      <img src="<?= esc($thumb) ?>" alt="" onclick="openImgModal(<?= $modalIdx++ ?>)">
-      <?php endforeach; ?>
-    </div>
     <div class="divider"></div>
     <?php endif; ?>
 
@@ -213,7 +197,7 @@ $modalIdx = 0;
 </div>
 <?php endif; ?>
 
-<a class="btn btn-primary btn-block" href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>">แก้ไขงาน</a>
+<a class="btn btn-primary btn-block" href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>">อัพเดตงาน</a>
 
 <!-- Image modal -->
 <div id="img-modal" class="img-modal" onclick="closeImgModal()">

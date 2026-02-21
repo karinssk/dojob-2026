@@ -117,6 +117,28 @@ class Liff_api extends Security_Controller {
             $this->_notify_assignment($save_id, $data['assigned_to'], $data['title']);
         }
 
+        // Notify LINE rooms (Group IDs) about task save
+        $group_ids_raw = get_setting('line_group_ids');
+        if ($group_ids_raw) {
+            $ids = preg_split('/[\n,]+/', $group_ids_raw);
+            $ids = array_values(array_filter(array_map('trim', $ids)));
+            if (!empty($ids)) {
+                $Line = new \App\Libraries\Liff_line_webhook();
+                $user_name = trim($this->login_user->first_name . ' ' . $this->login_user->last_name);
+                $action = $id ? 'อัปเดตงาน' : 'สร้างงาน';
+                $msg = "📝 {$action}\n{$data['title']}\nโดย: {$user_name}\n" . get_uri("liff/app/tasks/{$save_id}");
+                $meta = [
+                    'task_id' => $save_id,
+                    'type' => $id ? 'liff_task_updated' : 'liff_task_created',
+                    'force_token' => get_setting('line_channel_access_token'),
+                    'force_token_label' => 'line_channel_access_token',
+                ];
+                foreach ($ids as $rid) {
+                    $Line->send_push_message($rid, $msg, 'room', $meta);
+                }
+            }
+        }
+
         return $this->_json(['success' => true, 'id' => $save_id, 'redirect' => get_uri('liff/app/tasks/' . $save_id)]);
     }
 
@@ -362,7 +384,7 @@ class Liff_api extends Security_Controller {
                 $Line = new \App\Libraries\Liff_line_webhook();
                 $user_name = trim($this->login_user->first_name . ' ' . $this->login_user->last_name);
                 $date_label = $end_date ? date('d/m/y', strtotime($end_date)) : '-';
-                $msg = "✅ ยืนยันกิจกรรมเสร็จแล้ว\n{$event->title}\nวันที่: {$date_label}\nโดย: {$user_name}";
+                $msg = " ยืนยันกิจกรรมเสร็จแล้ว\n{$event->title}\nวันที่: {$date_label}\nโดย: {$user_name}";
                 $meta = [
                     'event_id' => $event_id,
                     'type' => 'liff_event_confirmed',
