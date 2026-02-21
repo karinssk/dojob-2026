@@ -44,10 +44,15 @@ class Liff_line_webhook {
         $this->last_error    = '';
         $this->used_fallback = false;
 
-        if (!$this->primary_token || !$to) {
+        $token = $this->primary_token;
+        if (!empty($meta['force_token'])) {
+            $token = $meta['force_token'];
+        }
+
+        if (!$token || !$to) {
             $this->last_error = 'Missing LIFF channel token or target';
             $res = ['success' => false, 'error' => $this->last_error];
-            $this->_log_notification($message, $meta, false, $res);
+            $this->_log_notification($message, $meta, false, $res, $to, $type);
             return $res;
         }
 
@@ -55,15 +60,15 @@ class Liff_line_webhook {
         $messages = [['type' => 'text', 'text' => $message]];
 
         // Try primary
-        $result = $this->_push($this->primary_token, $to, $messages);
+        $result = $this->_push($token, $to, $messages);
         if ($result['success']) {
-            $this->_log_notification($message, $meta, true, $result);
+            $this->_log_notification($message, $meta, true, $result, $to, $type);
             return $result;
         }
 
         // Primary failed — try fallback
         $fallback = $this->_send_fallback_text($message, $result['error']);
-        $this->_log_notification($message, $meta, (bool)($fallback['success'] ?? false), $fallback);
+        $this->_log_notification($message, $meta, (bool)($fallback['success'] ?? false), $fallback, $to, $type);
         return $fallback;
     }
 
@@ -74,10 +79,15 @@ class Liff_line_webhook {
         $this->last_error    = '';
         $this->used_fallback = false;
 
-        if (!$this->primary_token || !$to) {
+        $token = $this->primary_token;
+        if (!empty($meta['force_token'])) {
+            $token = $meta['force_token'];
+        }
+
+        if (!$token || !$to) {
             $this->last_error = 'Missing LIFF channel token or target';
             $res = ['success' => false, 'error' => $this->last_error];
-            $this->_log_notification($alt_text, $meta, false, $res);
+            $this->_log_notification($alt_text, $meta, false, $res, $to, $type);
             return $res;
         }
 
@@ -88,15 +98,15 @@ class Liff_line_webhook {
         ]];
 
         // Try primary
-        $result = $this->_push($this->primary_token, $to, $messages, true);
+        $result = $this->_push($token, $to, $messages, true);
         if ($result['success']) {
-            $this->_log_notification($alt_text, $meta, true, $result);
+            $this->_log_notification($alt_text, $meta, true, $result, $to, $type);
             return $result;
         }
 
         // Primary failed — degrade to plain text sent to fallback room
         $fallback = $this->_send_fallback_text($alt_text, $result['error']);
-        $this->_log_notification($alt_text, $meta, (bool)($fallback['success'] ?? false), $fallback);
+        $this->_log_notification($alt_text, $meta, (bool)($fallback['success'] ?? false), $fallback, $to, $type);
         return $fallback;
     }
 
@@ -170,7 +180,7 @@ class Liff_line_webhook {
     // ──────────────────────────────────────────────────────────────
     // Internal: log to line_notification_logs (same UI as Line Notify)
     // ──────────────────────────────────────────────────────────────
-    private function _log_notification($message, $meta, $success, $result) {
+    private function _log_notification($message, $meta, $success, $result, $to = '', $type = '') {
         try {
             $Line_logs_model = model('App\Models\Line_notification_logs_model');
             $notification_type = '';
@@ -194,6 +204,15 @@ class Liff_line_webhook {
                 if (isset($result['http_code']) && $result['http_code']) {
                     $response .= " | HTTP {$result['http_code']}";
                 }
+            }
+
+            if (!empty($meta['force_token_label'])) {
+                $response = '[token=' . $meta['force_token_label'] . '] ' . $response;
+            }
+
+            if ($to) {
+                $label = $type ?: 'user';
+                $response = "{$label} {$to}: " . $response;
             }
 
             $Line_logs_model->log_notification([

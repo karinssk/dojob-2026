@@ -713,6 +713,31 @@ class Cron_job {
         return [];
     }
 
+    private function _liff_rooms_from_line_groups() {
+        $raw = get_setting('liff_notify_rooms');
+        $arr = $raw ? json_decode($raw, true) : [];
+        if (is_array($arr) && !empty($arr)) {
+            return false;
+        }
+
+        $fallback = get_setting('line_group_ids');
+        if (!$fallback) {
+            return false;
+        }
+
+        $ids = preg_split('/[\n,]+/', $fallback);
+        $ids = array_values(array_filter(array_map('trim', $ids)));
+        return !empty($ids);
+    }
+
+    private function _liff_room_meta($meta = []) {
+        if ($this->_liff_rooms_from_line_groups()) {
+            $meta['force_token'] = get_setting('line_channel_access_token');
+            $meta['force_token_label'] = 'line_channel_access_token';
+        }
+        return $meta;
+    }
+
     /**
      * Notify users X minutes before task/event start_time.
      */
@@ -769,6 +794,7 @@ class Cron_job {
             $msg .= get_uri("liff/app/tasks/{$t->id}");
             $meta = ['task_id' => $t->id, 'type' => 'liff_task_before_start'];
             if ($mode === 'room') {
+                $meta = $this->_liff_room_meta($meta);
                 foreach ($rooms as $rid) {
                     $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
@@ -823,6 +849,7 @@ class Cron_job {
             $msg .= get_uri("liff/app/events/{$ev->id}");
             $meta = ['event_id' => $ev->id, 'type' => 'liff_event_before_start'];
             if ($mode === 'room') {
+                $meta = $this->_liff_room_meta($meta);
                 foreach ($rooms as $rid) {
                     $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
@@ -893,6 +920,7 @@ class Cron_job {
             $msg .= get_uri("liff/app/tasks/{$t->id}");
             $meta = ['task_id' => $t->id, 'type' => 'liff_task_before_end'];
             if ($mode === 'room') {
+                $meta = $this->_liff_room_meta($meta);
                 foreach ($rooms as $rid) {
                     $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
@@ -947,6 +975,7 @@ class Cron_job {
             $msg .= get_uri("liff/app/events/{$ev->id}");
             $meta = ['event_id' => $ev->id, 'type' => 'liff_event_before_end'];
             if ($mode === 'room') {
+                $meta = $this->_liff_room_meta($meta);
                 foreach ($rooms as $rid) {
                     $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
@@ -1017,6 +1046,7 @@ class Cron_job {
             $msg  .= get_uri("liff/app/tasks/{$t->id}");
             $meta = ['task_id' => $t->id, 'type' => 'liff_task_no_update'];
             if ($mode === 'room') {
+                $meta = $this->_liff_room_meta($meta);
                 foreach ($rooms as $rid) {
                     $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
@@ -1155,7 +1185,7 @@ class Cron_job {
         if ($mode === 'room' && !empty($rooms)) {
             $flex = $this->_build_reminder_carousel($users, $liff_base);
             $alt  = "📋 สรุปงานค้าง — {$total_users} คน";
-            $meta = ['type' => 'liff_task_reminder'];
+            $meta = $this->_liff_room_meta(['type' => 'liff_task_reminder']);
             foreach ($rooms as $rid) {
                 $Line->send_flex_message($rid, $flex, $alt, 'room', $meta);
             }
@@ -1212,8 +1242,9 @@ class Cron_job {
         $alt_text = " สรุปงานเสร็จ 7 วัน — {$total_tasks} งาน จาก {$total_users} คน";
 
         if ($mode === 'room' && !empty($rooms)) {
+            $meta = $this->_liff_room_meta(['type' => 'liff_task_summary']);
             foreach ($rooms as $rid) {
-                $Line->send_flex_message($rid, $flex, $alt_text, 'room', ['type' => 'liff_task_summary']);
+                $Line->send_flex_message($rid, $flex, $alt_text, 'room', $meta);
             }
         } else {
             // For user mode, send the combined summary to users who have LINE linked
