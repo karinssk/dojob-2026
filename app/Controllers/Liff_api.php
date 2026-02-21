@@ -649,7 +649,71 @@ class Liff_api extends Security_Controller {
                 $Line = new \App\Libraries\Liff_line_webhook();
                 $user_name = trim($this->login_user->first_name . ' ' . $this->login_user->last_name);
                 $date_label = $end_date ? date('d/m/y', strtotime($end_date)) : '-';
-                $msg = " ยืนยันกิจกรรมเสร็จแล้ว\n{$event->title}\nวันที่: {$date_label}\nโดย: {$user_name}";
+                $liff_base = rtrim(get_setting('line_liff_id') ?: '2009171467-kn2AHM0C', '/');
+                $liff_url = 'https://liff.line.me/' . $liff_base . '/events/' . $event_id;
+
+                $flex = [
+                    'type' => 'bubble',
+                    'size' => 'kilo',
+                    'header' => [
+                        'type' => 'box',
+                        'layout' => 'horizontal',
+                        'backgroundColor' => '#16A34A',
+                        'paddingAll' => '12px',
+                        'contents' => [[
+                            'type' => 'text',
+                            'text' => 'ยืนยันกิจกรรมเสร็จแล้ว',
+                            'color' => '#FFFFFF',
+                            'weight' => 'bold',
+                            'size' => 'md',
+                            'flex' => 1,
+                        ]],
+                    ],
+                    'body' => [
+                        'type' => 'box',
+                        'layout' => 'vertical',
+                        'spacing' => 'sm',
+                        'paddingAll' => '14px',
+                        'contents' => [
+                            [
+                                'type' => 'text',
+                                'text' => $event->title ?: 'กิจกรรม',
+                                'weight' => 'bold',
+                                'size' => 'md',
+                                'wrap' => true,
+                            ],
+                            [
+                                'type' => 'text',
+                                'text' => 'วันที่: ' . $date_label,
+                                'size' => 'sm',
+                                'color' => '#555555',
+                            ],
+                            [
+                                'type' => 'text',
+                                'text' => 'โดย: ' . ($user_name ?: '-'),
+                                'size' => 'xs',
+                                'color' => '#888888',
+                            ],
+                        ],
+                    ],
+                    'footer' => [
+                        'type' => 'box',
+                        'layout' => 'vertical',
+                        'paddingAll' => '12px',
+                        'contents' => [[
+                            'type' => 'button',
+                            'style' => 'primary',
+                            'color' => '#16A34A',
+                            'height' => 'sm',
+                            'action' => [
+                                'type' => 'uri',
+                                'label' => 'เปิดกิจกรรม',
+                                'uri' => $liff_url,
+                            ],
+                        ]],
+                    ],
+                ];
+                $alt_text = 'ยืนยันกิจกรรมเสร็จแล้ว: ' . mb_substr($event->title ?: 'กิจกรรม', 0, 50);
                 $meta = [
                     'event_id' => $event_id,
                     'type' => 'liff_event_confirmed',
@@ -657,7 +721,7 @@ class Liff_api extends Security_Controller {
                     'force_token_label' => 'line_channel_access_token',
                 ];
                 foreach ($ids as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room', $meta);
+                    $Line->send_flex_message($rid, $flex, $alt_text, 'room', $meta);
                 }
             }
         }
