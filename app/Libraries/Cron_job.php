@@ -1136,6 +1136,8 @@ class Cron_job {
 
         $mode  = get_setting('liff_notify_mode') ?: 'user';
         $rooms = $this->_get_liff_room_ids();
+        $failed = 0;
+        $errors = [];
 
         // Get all incomplete tasks grouped by assigned user
         $mt    = get_user_mappings_table();
@@ -1160,7 +1162,9 @@ class Cron_job {
             ORDER BY u.id, t.id
         ")->getResult();
 
-        if (empty($rows)) { return 0; }
+        if (empty($rows)) {
+            return $is_test ? ['count' => 0, 'failed' => 0, 'errors' => []] : 0;
+        }
 
         // Group by user
         $users = [];
@@ -1182,23 +1186,39 @@ class Cron_job {
         // Build one combined Flex carousel or stacked bubble
         // If room mode — send a single combined message to each room
         // If user mode — send individual bubble per user to their own LINE
-        if ($mode === 'room' && !empty($rooms)) {
+        if ($mode === 'room') {
+            if (empty($rooms)) {
+                return $is_test ? ['count' => 0, 'failed' => 1, 'errors' => ['missing_room_ids']] : 0;
+            }
             $flex = $this->_build_reminder_carousel($users, $liff_base);
             $alt  = "📋 สรุปงานค้าง — {$total_users} คน";
             $meta = $this->_liff_room_meta(['type' => 'liff_task_reminder']);
             foreach ($rooms as $rid) {
-                $Line->send_flex_message($rid, $flex, $alt, 'room', $meta);
+                $res = $Line->send_flex_message($rid, $flex, $alt, 'room', $meta);
+                if (empty($res['success'])) {
+                    $failed++;
+                    if (!empty($res['error'])) {
+                        $errors[] = $rid . ': ' . $res['error'];
+                    }
+                }
             }
         } else {
             foreach ($users as $uid => $u) {
                 if (empty($u['line_user_id'])) { continue; }
                 $single = $this->_build_reminder_bubble_single($u['user_name'], $u['tasks'], $liff_base);
                 $alt    = $u['user_name'] . ' มีงานค้าง ' . count($u['tasks']) . ' รายการ';
-                $Line->send_flex_message($u['line_user_id'], $single, $alt, 'user', ['type' => 'liff_task_reminder']);
+                $res = $Line->send_flex_message($u['line_user_id'], $single, $alt, 'user', ['type' => 'liff_task_reminder']);
+                if (empty($res['success'])) {
+                    $failed++;
+                    if (!empty($res['error'])) {
+                        $errors[] = $u['line_user_id'] . ': ' . $res['error'];
+                    }
+                }
             }
         }
 
-        return array_sum(array_map(fn($u) => count($u['tasks']), $users));
+        $count = array_sum(array_map(fn($u) => count($u['tasks']), $users));
+        return $is_test ? ['count' => $count, 'failed' => $failed, 'errors' => $errors] : $count;
     }
 
     // ── Core: build & send 7-day completion summary ───────────────────

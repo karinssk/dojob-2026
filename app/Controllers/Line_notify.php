@@ -699,13 +699,48 @@ class Line_notify extends Security_Controller {
         }
 
         try {
+            $raw_rooms = get_setting('liff_notify_rooms');
+            $rooms = $raw_rooms ? json_decode($raw_rooms, true) : [];
+            $line_group_ids = get_setting('line_group_ids');
+            $has_rooms = (is_array($rooms) && !empty($rooms)) || !empty(trim((string)$line_group_ids));
+            if (!$has_rooms) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'ยังไม่ได้ตั้งค่า Group IDs หรือห้องแจ้งเตือน (LINE Settings → Group IDs)'
+                ]);
+            }
+
             $this->Settings_model->save_setting('liff_notify_mode', 'room');
             $cron = new \App\Libraries\Cron_job();
-            $count = $cron->run_task_reminder_test();
-            // record last test/send time (UTC) so UI can show latest action
-            $this->Settings_model->save_setting('liff_reminder_last_sent', get_current_utc_time());
-            $msg = $count > 0 ? "ส่งทดสอบสำเร็จ ({$count} งาน)" : 'ไม่มีงานค้างในระบบ (ไม่ส่ง)';
-            return $this->response->setJSON(['success' => true, 'message' => $msg]);
+            $result = $cron->run_task_reminder_test();
+            $count = is_array($result) ? (int)($result['count'] ?? 0) : (int)$result;
+            $failed = is_array($result) ? (int)($result['failed'] ?? 0) : 0;
+            $errors = is_array($result) ? ($result['errors'] ?? []) : [];
+
+            if ($failed > 0) {
+                $message = 'ส่งไม่สำเร็จ';
+                if (!empty($errors)) {
+                    $message .= ': ' . implode(' | ', array_slice($errors, 0, 2));
+                }
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => $message
+                ]);
+            }
+
+            if ($count > 0) {
+                // record last test/send time (UTC) so UI can show latest action
+                $this->Settings_model->save_setting('liff_reminder_last_sent', get_current_utc_time());
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => "ส่งทดสอบสำเร็จ ({$count} งาน)"
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'ไม่มีงานค้างในระบบ (ไม่ส่ง)'
+            ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([
                 'success' => false,
