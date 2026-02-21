@@ -702,6 +702,8 @@ class Line_notify extends Security_Controller {
             $this->Settings_model->save_setting('liff_notify_mode', 'room');
             $cron = new \App\Libraries\Cron_job();
             $count = $cron->run_task_reminder_test();
+            // record last test/send time (UTC) so UI can show latest action
+            $this->Settings_model->save_setting('liff_reminder_last_sent', get_current_utc_time());
             $msg = $count > 0 ? "ส่งทดสอบสำเร็จ ({$count} งาน)" : 'ไม่มีงานค้างในระบบ (ไม่ส่ง)';
             return $this->response->setJSON(['success' => true, 'message' => $msg]);
         } catch (\Exception $e) {

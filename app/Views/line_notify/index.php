@@ -145,7 +145,11 @@
                                 </label>
                             </div>
                             <div class="text-muted mb-3" style="font-size:12px">
-                                ส่งทุกวันตามเวลาที่กำหนด | ส่งล่าสุด: <?php echo $task_reminder_last_sent ? format_to_datetime($task_reminder_last_sent) : '-'; ?>
+                                ส่งทุกวันตามเวลาที่กำหนด |
+                                ส่งล่าสุด/ทดสอบล่าสุด:
+                                <span id="last-sent-local" data-utc="<?php echo esc($task_reminder_last_sent); ?>">
+                                    <?php echo $task_reminder_last_sent ? format_to_datetime($task_reminder_last_sent) : '-'; ?>
+                                </span>
                                 <br>
                                 เวลาระบบ (เครื่องคุณ): <span id="system-time">-</span>
                                 | เวลาเซิร์ฟเวอร์ (<?php echo esc($server_timezone); ?>): <?php echo esc($server_time); ?>
@@ -764,6 +768,7 @@
         setLogFilter(currentLogFilter);
         updateSystemTime();
         setInterval(updateSystemTime, 1000);
+        updateLastSentLocal();
     });
 </script>
 
@@ -805,5 +810,17 @@ function updateSystemTime() {
     if (!el) return;
     const now = new Date();
     el.textContent = now.toLocaleString();
+}
+
+function updateLastSentLocal() {
+    const el = document.getElementById('last-sent-local');
+    if (!el) return;
+    const utc = (el.dataset.utc || '').trim();
+    if (!utc) return;
+    // convert "YYYY-MM-DD HH:MM:SS" UTC to local time
+    const iso = utc.replace(' ', 'T') + 'Z';
+    const dt = new Date(iso);
+    if (isNaN(dt.getTime())) return;
+    el.textContent = dt.toLocaleString();
 }
 </script>
