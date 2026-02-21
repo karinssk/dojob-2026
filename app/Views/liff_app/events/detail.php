@@ -76,10 +76,8 @@ $is_past = $end_ts ? ($end_ts < time()) : false;
 
     <?php if ($is_confirmed): ?>
       <button class="btn btn-success btn-block" disabled>ยืนยันแล้ว</button>
-    <?php elseif ($is_past): ?>
-      <button class="btn btn-success btn-block" onclick="confirmEventDone(<?= (int)$event->id ?>)">ยืนยันกิจกรรมเสร็จแล้ว</button>
     <?php else: ?>
-      <button class="btn btn-secondary btn-block" disabled>ยังไม่ถึงเวลา</button>
+      <button class="btn btn-success btn-block" onclick="confirmEventDone(<?= (int)$event->id ?>)">ยืนยันกิจกรรมเสร็จแล้ว</button>
     <?php endif; ?>
   </div>
 

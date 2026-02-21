@@ -68,7 +68,7 @@ html {
 /* --- Scroll area above tab bar ----------------------------- */
 .liff-page {
   padding: var(--pad);
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  padding-bottom: calc(110px + env(safe-area-inset-bottom));
   min-height: 100vh;
 }
 
@@ -719,11 +719,11 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 /* --- Bottom Tab Bar ---------------------------------------- */
 .bottom-tabs {
   position: fixed; bottom: 0; left: 0; right: 0;
-  height: 64px;
+  height: 86px;
   background: #fff;
   border-top: 1px solid #EAEEF6;
   display: flex; align-items: stretch;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding: 6px 0 calc(10px + env(safe-area-inset-bottom));
   box-shadow: 0 -2px 12px rgba(15,23,42,0.07);
   z-index: 100;
 }
@@ -738,7 +738,7 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
   position: relative;
   transition: color 0.18s;
   -webkit-tap-highlight-color: transparent;
-  padding: 8px 0 6px;
+  padding: 10px 0 8px;
 }
 /* Active top indicator bar */
 .bottom-tab::before {
@@ -782,7 +782,7 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 
 /* --- FAB --------------------------------------------------- */
 .fab {
-  position: fixed; bottom: calc(76px + env(safe-area-inset-bottom)); right: 20px;
+  position: fixed; bottom: calc(96px + env(safe-area-inset-bottom)); right: 20px;
   width: 56px; height: 56px; border-radius: 50%;
   background: var(--blue); color: #fff;
   border: none; font-size: 28px; line-height: 1;

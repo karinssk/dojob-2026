@@ -1088,7 +1088,7 @@ class Cron_job {
         if ($mode === 'room') {
             if (empty($rooms)) { return $sent; }
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start
+                "SELECT e.id, e.title, e.description, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start
                  FROM rise_events e
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
@@ -1102,7 +1102,7 @@ class Cron_job {
             )->getResult();
         } else {
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start,
+                "SELECT e.id, e.title, e.description, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_events e
                  JOIN $mt m ON m.rise_user_id = e.created_by
@@ -1222,7 +1222,7 @@ class Cron_job {
         if ($mode === 'room') {
             if (empty($rooms)) { return $sent; }
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end
+                "SELECT e.id, e.title, e.description, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end
                  FROM rise_events e
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
@@ -1236,7 +1236,7 @@ class Cron_job {
             )->getResult();
         } else {
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end,
+                "SELECT e.id, e.title, e.description, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_events e
                  JOIN $mt m ON m.rise_user_id = e.created_by
@@ -1294,7 +1294,7 @@ class Cron_job {
         if ($mode === 'room') {
             if (empty($rooms)) { return 0; }
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start
+                "SELECT e.id, e.title, e.description, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start
                  FROM rise_events e
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
@@ -1308,7 +1308,7 @@ class Cron_job {
             )->getResult();
         } else {
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start,
+                "SELECT e.id, e.title, e.description, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_events e
                  JOIN $mt m ON m.rise_user_id = e.created_by
@@ -1366,7 +1366,7 @@ class Cron_job {
         if ($mode === 'room') {
             if (empty($rooms)) { return 0; }
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end
+                "SELECT e.id, e.title, e.description, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end
                  FROM rise_events e
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
@@ -1380,7 +1380,7 @@ class Cron_job {
             )->getResult();
         } else {
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end,
+                "SELECT e.id, e.title, e.description, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_events e
                  JOIN $mt m ON m.rise_user_id = e.created_by
@@ -1790,7 +1790,7 @@ class Cron_job {
 
         if ($mode === 'room') {
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files
+                "SELECT e.id, e.title, e.description, e.start_date, e.start_time, e.end_date, e.end_time, e.files
                  FROM rise_events e
                  WHERE e.deleted = 0
                    AND e.type = 'event'
@@ -1802,7 +1802,7 @@ class Cron_job {
             )->getResult();
         } else {
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files,
+                "SELECT e.id, e.title, e.description, e.start_date, e.start_time, e.end_date, e.end_time, e.files,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_events e
                  JOIN $mt m ON m.rise_user_id = e.created_by
