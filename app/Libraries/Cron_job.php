@@ -746,6 +746,215 @@ class Cron_job {
         return $this->_get_liff_room_ids();
     }
 
+    private function _normalize_line_image_url($url) {
+        if (!$url) {
+            return '';
+        }
+
+        if (str_starts_with($url, "//")) {
+            return "https:" . $url;
+        }
+
+        if (!str_starts_with($url, "http://") && !str_starts_with($url, "https://")) {
+            return get_uri($url);
+        }
+
+        return $url;
+    }
+
+    private function _get_first_event_image_url($files_serialized) {
+        if (!$files_serialized) {
+            return '';
+        }
+
+        $files = @unserialize($files_serialized);
+        if (!is_array($files)) {
+            return '';
+        }
+
+        foreach ($files as $file) {
+            $file_info = is_array($file) ? $file : (array)$file;
+            $file_name = $file_info['file_name'] ?? $file_info['name'] ?? '';
+            if (!$file_name || !is_image_file($file_name)) {
+                continue;
+            }
+
+            $url = get_source_url_of_file($file_info, get_setting("timeline_file_path"), "raw");
+            $url = $this->_normalize_line_image_url($url);
+            if ($url) {
+                return $url;
+            }
+        }
+
+        return '';
+    }
+
+    private function _build_event_notification_bubble($event, $mode = 'start') {
+        $title = $event->title ?? 'กิจกรรม';
+        $start_date = $event->start_date ?? '';
+        $start_time = $event->start_time ? substr($event->start_time, 0, 5) : '';
+        $end_date = $event->end_date ?? '';
+        $end_time = $event->end_time ? substr($event->end_time, 0, 5) : '';
+
+        $is_end = $mode === 'end';
+        $header_text = $is_end ? 'แจ้งเตือนก่อนสิ้นสุดกิจกรรม' : 'แจ้งเตือนก่อนเริ่มกิจกรรม';
+        $header_color = $is_end ? '#F97316' : '#2563EB';
+
+        $time_label = $is_end ? 'สิ้นสุด' : 'เริ่ม';
+        $date_val = $is_end ? ($end_date ?: $start_date) : $start_date;
+        $time_val = $is_end ? ($end_time ?: $start_time) : $start_time;
+        $time_text = $date_val ? $date_val : '-';
+        if ($time_val) {
+            $time_text .= ' ' . $time_val;
+        }
+
+        $bubble = [
+            'type' => 'bubble',
+            'size' => 'mega',
+            'header' => [
+                'type' => 'box',
+                'layout' => 'vertical',
+                'backgroundColor' => $header_color,
+                'paddingAll' => '12px',
+                'contents' => [[
+                    'type' => 'text',
+                    'text' => $header_text,
+                    'color' => '#FFFFFF',
+                    'weight' => 'bold',
+                    'size' => 'sm',
+                ]]
+            ],
+            'body' => [
+                'type' => 'box',
+                'layout' => 'vertical',
+                'spacing' => 'sm',
+                'paddingAll' => '14px',
+                'contents' => [
+                    [
+                        'type' => 'text',
+                        'text' => $title,
+                        'weight' => 'bold',
+                        'size' => 'md',
+                        'wrap' => true,
+                    ],
+                    [
+                        'type' => 'text',
+                        'text' => "{$time_label}: {$time_text}",
+                        'size' => 'sm',
+                        'color' => '#64748B',
+                        'wrap' => true,
+                    ],
+                ],
+            ],
+            'footer' => [
+                'type' => 'box',
+                'layout' => 'vertical',
+                'spacing' => 'sm',
+                'contents' => [[
+                    'type' => 'button',
+                    'style' => 'primary',
+                    'color' => '#2563EB',
+                    'action' => [
+                        'type' => 'uri',
+                        'label' => 'ดูรายละเอียด',
+                        'uri' => get_uri("liff/app/events/{$event->id}")
+                    ]
+                ]]
+            ],
+        ];
+
+        $image_url = $this->_get_first_event_image_url($event->files ?? '');
+        if ($image_url) {
+            $bubble['hero'] = [
+                'type' => 'image',
+                'url' => $image_url,
+                'size' => 'full',
+                'aspectRatio' => '20:13',
+                'aspectMode' => 'cover',
+            ];
+        }
+
+        return $bubble;
+    }
+
+    private function _build_event_daily_bubble($event) {
+        $title = $event->title ?? 'กิจกรรม';
+        $start_date = $event->start_date ?? '';
+        $start_time = $event->start_time ? substr($event->start_time, 0, 5) : '';
+        $date_text = $start_date ?: '-';
+        if ($start_time) {
+            $date_text .= ' ' . $start_time;
+        }
+
+        $bubble = [
+            'type' => 'bubble',
+            'size' => 'mega',
+            'header' => [
+                'type' => 'box',
+                'layout' => 'vertical',
+                'backgroundColor' => '#059669',
+                'paddingAll' => '12px',
+                'contents' => [[
+                    'type' => 'text',
+                    'text' => 'กิจกรรมวันนี้',
+                    'color' => '#FFFFFF',
+                    'weight' => 'bold',
+                    'size' => 'sm',
+                ]]
+            ],
+            'body' => [
+                'type' => 'box',
+                'layout' => 'vertical',
+                'spacing' => 'sm',
+                'paddingAll' => '14px',
+                'contents' => [
+                    [
+                        'type' => 'text',
+                        'text' => $title,
+                        'weight' => 'bold',
+                        'size' => 'md',
+                        'wrap' => true,
+                    ],
+                    [
+                        'type' => 'text',
+                        'text' => $date_text,
+                        'size' => 'sm',
+                        'color' => '#64748B',
+                        'wrap' => true,
+                    ],
+                ],
+            ],
+            'footer' => [
+                'type' => 'box',
+                'layout' => 'vertical',
+                'spacing' => 'sm',
+                'contents' => [[
+                    'type' => 'button',
+                    'style' => 'primary',
+                    'color' => '#2563EB',
+                    'action' => [
+                        'type' => 'uri',
+                        'label' => 'ดูรายละเอียด',
+                        'uri' => get_uri("liff/app/events/{$event->id}")
+                    ]
+                ]]
+            ],
+        ];
+
+        $image_url = $this->_get_first_event_image_url($event->files ?? '');
+        if ($image_url) {
+            $bubble['hero'] = [
+                'type' => 'image',
+                'url' => $image_url,
+                'size' => 'full',
+                'aspectRatio' => '20:13',
+                'aspectMode' => 'cover',
+            ];
+        }
+
+        return $bubble;
+    }
+
     private function _liff_rooms_from_line_groups() {
         $raw = get_setting('liff_notify_rooms');
         $arr = $raw ? json_decode($raw, true) : [];
@@ -844,7 +1053,7 @@ class Cron_job {
         if ($mode === 'room') {
             if (empty($rooms)) { return $sent; }
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start
                  FROM rise_events e
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
@@ -858,7 +1067,7 @@ class Cron_job {
             )->getResult();
         } else {
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start,
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_events e
                  JOIN $mt m ON m.rise_user_id = e.created_by
@@ -883,15 +1092,16 @@ class Cron_job {
             $msg .= "📅 {$ev->title}\n";
             $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($ev->start_date . ' ' . $ev->start_time)) . "\n";
             $msg .= get_uri("liff/app/events/{$ev->id}");
+            $flex = $this->_build_event_notification_bubble($ev, 'start');
             $meta = ['event_id' => $ev->id, 'type' => 'liff_event_before_start'];
             if ($mode === 'room') {
                 $meta = $this->_liff_room_meta($meta);
                 foreach ($rooms as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room', $meta);
+                    $Line->send_flex_message($rid, $flex, $msg, 'room', $meta);
                 }
                 $sent += count($rooms);
             } else if (!empty($ev->line_user_id)) {
-                $Line->send_push_message($ev->line_user_id, $msg, 'user', $meta);
+                $Line->send_flex_message($ev->line_user_id, $flex, $msg, 'user', $meta);
                 $sent += 1;
             }
             $db->query("UPDATE rise_events SET line_notify_sent_start=? WHERE id=?", [$now, $ev->id]);
@@ -977,7 +1187,7 @@ class Cron_job {
         if ($mode === 'room') {
             if (empty($rooms)) { return $sent; }
             $events = $db->query(
-                "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end
                  FROM rise_events e
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
@@ -991,7 +1201,7 @@ class Cron_job {
             )->getResult();
         } else {
             $events = $db->query(
-                "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end,
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_events e
                  JOIN $mt m ON m.rise_user_id = e.created_by
@@ -1016,15 +1226,16 @@ class Cron_job {
             $msg .= "📅 {$ev->title}\n";
             $msg .= "🔚 สิ้นสุด: " . date('d/m H:i', strtotime($ev->end_date . ' ' . $ev->end_time)) . "\n";
             $msg .= get_uri("liff/app/events/{$ev->id}");
+            $flex = $this->_build_event_notification_bubble($ev, 'end');
             $meta = ['event_id' => $ev->id, 'type' => 'liff_event_before_end'];
             if ($mode === 'room') {
                 $meta = $this->_liff_room_meta($meta);
                 foreach ($rooms as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room', $meta);
+                    $Line->send_flex_message($rid, $flex, $msg, 'room', $meta);
                 }
                 $sent += count($rooms);
             } else if (!empty($ev->line_user_id)) {
-                $Line->send_push_message($ev->line_user_id, $msg, 'user', $meta);
+                $Line->send_flex_message($ev->line_user_id, $flex, $msg, 'user', $meta);
                 $sent += 1;
             }
             $db->query("UPDATE rise_events SET line_notify_sent_end=? WHERE id=?", [$now, $ev->id]);
@@ -1048,7 +1259,7 @@ class Cron_job {
         if ($mode === 'room') {
             if (empty($rooms)) { return 0; }
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start
                  FROM rise_events e
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
@@ -1062,7 +1273,7 @@ class Cron_job {
             )->getResult();
         } else {
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start,
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_start,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_events e
                  JOIN $mt m ON m.rise_user_id = e.created_by
@@ -1087,15 +1298,16 @@ class Cron_job {
             $msg .= "📅 {$ev->title}\n";
             $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($ev->start_date . ' ' . $ev->start_time)) . "\n";
             $msg .= get_uri("liff/app/events/{$ev->id}");
+            $flex = $this->_build_event_notification_bubble($ev, 'start');
             $meta = ['event_id' => $ev->id, 'type' => 'liff_event_before_start'];
             if ($mode === 'room') {
                 $meta = $this->_liff_room_meta($meta);
                 foreach ($rooms as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room', $meta);
+                    $Line->send_flex_message($rid, $flex, $msg, 'room', $meta);
                 }
                 $sent += count($rooms);
             } else if (!empty($ev->line_user_id)) {
-                $Line->send_push_message($ev->line_user_id, $msg, 'user', $meta);
+                $Line->send_flex_message($ev->line_user_id, $flex, $msg, 'user', $meta);
                 $sent += 1;
             }
             $db->query("UPDATE rise_events SET line_notify_sent_start=? WHERE id=?", [$now, $ev->id]);
@@ -1119,7 +1331,7 @@ class Cron_job {
         if ($mode === 'room') {
             if (empty($rooms)) { return 0; }
             $events = $db->query(
-                "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end
                  FROM rise_events e
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
@@ -1133,7 +1345,7 @@ class Cron_job {
             )->getResult();
         } else {
             $events = $db->query(
-                "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end,
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files, e.line_notify_before_end,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_events e
                  JOIN $mt m ON m.rise_user_id = e.created_by
@@ -1158,15 +1370,16 @@ class Cron_job {
             $msg .= "📅 {$ev->title}\n";
             $msg .= "🔚 สิ้นสุด: " . date('d/m H:i', strtotime($ev->end_date . ' ' . $ev->end_time)) . "\n";
             $msg .= get_uri("liff/app/events/{$ev->id}");
+            $flex = $this->_build_event_notification_bubble($ev, 'end');
             $meta = ['event_id' => $ev->id, 'type' => 'liff_event_before_end'];
             if ($mode === 'room') {
                 $meta = $this->_liff_room_meta($meta);
                 foreach ($rooms as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room', $meta);
+                    $Line->send_flex_message($rid, $flex, $msg, 'room', $meta);
                 }
                 $sent += count($rooms);
             } else if (!empty($ev->line_user_id)) {
-                $Line->send_push_message($ev->line_user_id, $msg, 'user', $meta);
+                $Line->send_flex_message($ev->line_user_id, $flex, $msg, 'user', $meta);
                 $sent += 1;
             }
             $db->query("UPDATE rise_events SET line_notify_sent_end=? WHERE id=?", [$now, $ev->id]);
@@ -1522,7 +1735,7 @@ class Cron_job {
 
         if ($mode === 'room') {
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files
                  FROM rise_events e
                  WHERE e.deleted = 0
                    AND e.type = 'event'
@@ -1534,7 +1747,7 @@ class Cron_job {
             )->getResult();
         } else {
             $events = $db->query(
-                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time,
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time, e.files,
                         m.line_liff_user_id AS line_user_id
                  FROM rise_events e
                  JOIN $mt m ON m.rise_user_id = e.created_by
@@ -1563,19 +1776,14 @@ class Cron_job {
                 return $is_test ? ['count' => 0, 'failed' => 1, 'errors' => ['missing_room_ids']] : 0;
             }
 
-            $lines = [];
-            $lines[] = "📅 กิจกรรมวันนี้ ({$date_label})";
-            $count = 0;
-            foreach ($events as $ev) {
-                $count++;
-                $time = $ev->start_time ? substr($ev->start_time, 0, 5) : '-';
-                $lines[] = "{$count}) {$ev->title}" . ($time && $time !== '00:00' ? " ({$time})" : '');
-                if ($count >= 10) { break; }
+            $bubbles = [];
+            foreach (array_slice($events, 0, 10) as $ev) {
+                $bubbles[] = $this->_build_event_daily_bubble($ev);
             }
-            if (count($events) > 10) {
-                $lines[] = '... และอีก ' . (count($events) - 10) . ' กิจกรรม';
-            }
-            $msg = implode("\n", $lines);
+            $flex = [
+                'type' => 'carousel',
+                'contents' => $bubbles
+            ];
 
             if (!empty($line_groups)) {
                 $meta = [
@@ -1588,7 +1796,8 @@ class Cron_job {
             }
 
             foreach ($rooms as $rid) {
-                $res = $Line->send_push_message($rid, $msg, 'room', $meta);
+                $alt = "กิจกรรมวันนี้ {$date_label} (" . count($events) . " รายการ)";
+                $res = $Line->send_flex_message($rid, $flex, $alt, 'room', $meta);
                 if (empty($res['success'])) {
                     $failed++;
                     if (!empty($res['error'])) {
@@ -1608,20 +1817,16 @@ class Cron_job {
             }
 
             foreach ($users as $uid => $list) {
-                $lines = [];
-                $lines[] = "📅 กิจกรรมวันนี้ ({$date_label})";
-                $i = 0;
-                foreach ($list as $ev) {
-                    $i++;
-                    $time = $ev->start_time ? substr($ev->start_time, 0, 5) : '-';
-                    $lines[] = "{$i}) {$ev->title}" . ($time && $time !== '00:00' ? " ({$time})" : '');
-                    if ($i >= 10) { break; }
+                $bubbles = [];
+                foreach (array_slice($list, 0, 10) as $ev) {
+                    $bubbles[] = $this->_build_event_daily_bubble($ev);
                 }
-                if (count($list) > 10) {
-                    $lines[] = '... และอีก ' . (count($list) - 10) . ' กิจกรรม';
-                }
-                $msg = implode("\n", $lines);
-                $res = $Line->send_push_message($uid, $msg, 'user', ['type' => 'liff_event_daily']);
+                $flex = [
+                    'type' => 'carousel',
+                    'contents' => $bubbles
+                ];
+                $alt = "กิจกรรมวันนี้ {$date_label} (" . count($list) . " รายการ)";
+                $res = $Line->send_flex_message($uid, $flex, $alt, 'user', ['type' => 'liff_event_daily']);
                 if (empty($res['success'])) {
                     $failed++;
                     if (!empty($res['error'])) {
