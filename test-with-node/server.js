@@ -181,12 +181,26 @@ async function tick() {
     const s = await loadSchedule();
     cronSecret = s.liff_cron_secret || cronSecret;
 
+    const now = new Date();
+    console.log('[SCHEDULE]', {
+      now_local: now.toLocaleString('th-TH'),
+      now_iso: now.toISOString(),
+      reminder_enabled: s.liff_reminder_enabled,
+      reminder_times: s.liff_reminder_times,
+      reminder_days: s.liff_reminder_days,
+      reminder_last_sent: s.liff_reminder_last_sent || null,
+      summary_enabled: s.liff_summary_enabled,
+      summary_time: s.liff_summary_time || null,
+      summary_days: s.liff_summary_days,
+      summary_last_sent: s.liff_summary_last_sent || null,
+    });
+
     if (!cronSecret) {
       addLog('WARN', 'No liff_cron_secret in DB — run once with DB connected to generate it');
       return;
     }
 
-    const now = Date.now();
+    const nowMs = Date.now();
     const DEBOUNCE = 55 * 1000; // don't fire same type twice within 55s
 
     // ── Reminder ──
@@ -197,7 +211,7 @@ async function tick() {
 
     if (reminderEnabled) {
       if (isTimeNow(reminderTimes, reminderDays, reminderLast)) {
-        if (now - lastFired.reminder > DEBOUNCE) {
+        if (nowMs - lastFired.reminder > DEBOUNCE) {
           await fireNotification('reminder', cronSecret);
         }
       }
@@ -211,7 +225,7 @@ async function tick() {
 
     if (summaryEnabled) {
       if (isTimeNow(summaryTimes, summaryDays, summaryLast)) {
-        if (now - lastFired.summary > DEBOUNCE) {
+        if (nowMs - lastFired.summary > DEBOUNCE) {
           await fireNotification('summary', cronSecret);
         }
       }
