@@ -50,6 +50,8 @@ class Line_notify extends Security_Controller {
         $view_data['task_reminder_enabled'] = get_setting('liff_reminder_enabled') === '1';
         $view_data['task_reminder_times'] = json_decode(get_setting('liff_reminder_times') ?: '["09:00","13:00"]', true) ?: ['09:00', '13:00'];
         $view_data['task_reminder_last_sent'] = get_setting('liff_reminder_last_sent');
+        $view_data['server_time'] = get_my_local_time();
+        $view_data['server_timezone'] = get_setting('timezone') ?: 'UTC';
 
         // Get recent notification logs
         $view_data['recent_logs'] = $this->get_recent_notification_logs();

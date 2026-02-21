@@ -146,6 +146,9 @@
                             </div>
                             <div class="text-muted mb-3" style="font-size:12px">
                                 ส่งทุกวันตามเวลาที่กำหนด | ส่งล่าสุด: <?php echo $task_reminder_last_sent ? format_to_datetime($task_reminder_last_sent) : '-'; ?>
+                                <br>
+                                เวลาระบบ (เครื่องคุณ): <span id="system-time">-</span>
+                                | เวลาเซิร์ฟเวอร์ (<?php echo esc($server_timezone); ?>): <?php echo esc($server_time); ?>
                             </div>
 
                             <div class="table-responsive">
@@ -759,6 +762,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         feather.replace();
         setLogFilter(currentLogFilter);
+        updateSystemTime();
+        setInterval(updateSystemTime, 1000);
     });
 </script>
 
@@ -793,3 +798,12 @@
     text-overflow: ellipsis;
 }
 </style>
+
+<script>
+function updateSystemTime() {
+    const el = document.getElementById('system-time');
+    if (!el) return;
+    const now = new Date();
+    el.textContent = now.toLocaleString();
+}
+</script>
