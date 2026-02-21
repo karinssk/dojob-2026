@@ -119,7 +119,8 @@ function isTimeNow(times, days, lastSent) {
 
   const now      = new Date();
   const dowIso   = now.getDay() === 0 ? 7 : now.getDay(); // 1=Mon, 7=Sun
-  if (!days.includes(dowIso)) return false;
+  const dayNums  = days.map(d => Number(d)).filter(n => !Number.isNaN(n));
+  if (!dayNums.includes(dowIso)) return false;
 
   const nowMin   = now.getHours() * 60 + now.getMinutes();
 
@@ -130,7 +131,7 @@ function isTimeNow(times, days, lastSent) {
   }
 
   for (const t of times) {
-    const [h, m] = t.split(':').map(Number);
+    const [h, m] = String(t).split(':').map(Number);
     const slotMin = h * 60 + m;
     if (nowMin === slotMin) return true;
   }
