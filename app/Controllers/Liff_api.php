@@ -181,9 +181,10 @@ class Liff_api extends Security_Controller {
         )->getRow();
         $doer_name = $doer_row ? trim($doer_row->first_name . ' ' . $doer_row->last_name) : 'ผู้ใช้';
 
-        // Latest comment on this task (if any)
+        // Latest comment on this task (if any) — table is rise_project_comments
+        $comments_table = $this->db->prefixTable('project_comments');
         $comment_row = $this->db->query(
-            "SELECT description FROM rise_task_comments
+            "SELECT description FROM {$comments_table}
              WHERE task_id=? AND deleted=0
              ORDER BY id DESC LIMIT 1",
             [$task_id]
