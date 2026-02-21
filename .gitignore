@@ -7,7 +7,7 @@
 
 /files/
 /writable/
-
+.claude/worktrees/*
 /server/node_modules/
 
 *.log
