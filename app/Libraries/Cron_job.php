@@ -713,6 +713,23 @@ class Cron_job {
         return [];
     }
 
+    private function _line_group_ids_list() {
+        $fallback = get_setting('line_group_ids');
+        if (!$fallback) {
+            return [];
+        }
+        $ids = preg_split('/[\n,]+/', $fallback);
+        return array_values(array_filter(array_map('trim', $ids)));
+    }
+
+    private function _get_task_reminder_rooms() {
+        $line_groups = $this->_line_group_ids_list();
+        if (!empty($line_groups)) {
+            return $line_groups;
+        }
+        return $this->_get_liff_room_ids();
+    }
+
     private function _liff_rooms_from_line_groups() {
         $raw = get_setting('liff_notify_rooms');
         $arr = $raw ? json_decode($raw, true) : [];
@@ -1135,7 +1152,8 @@ class Cron_job {
         $Line = new \App\Libraries\Liff_line_webhook();
 
         $mode  = get_setting('liff_notify_mode') ?: 'user';
-        $rooms = $this->_get_liff_room_ids();
+        $line_groups = $this->_line_group_ids_list();
+        $rooms = $this->_get_task_reminder_rooms();
         $failed = 0;
         $errors = [];
 
@@ -1192,7 +1210,15 @@ class Cron_job {
             }
             $flex = $this->_build_reminder_carousel($users, $liff_base);
             $alt  = "📋 สรุปงานค้าง — {$total_users} คน";
-            $meta = $this->_liff_room_meta(['type' => 'liff_task_reminder']);
+            if (!empty($line_groups)) {
+                $meta = [
+                    'type' => 'liff_task_reminder',
+                    'force_token' => get_setting('line_channel_access_token'),
+                    'force_token_label' => 'line_channel_access_token',
+                ];
+            } else {
+                $meta = $this->_liff_room_meta(['type' => 'liff_task_reminder']);
+            }
             foreach ($rooms as $rid) {
                 $res = $Line->send_flex_message($rid, $flex, $alt, 'room', $meta);
                 if (empty($res['success'])) {
