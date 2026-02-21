@@ -53,6 +53,12 @@ class Line_notify extends Security_Controller {
         $view_data['server_time'] = get_my_local_time();
         $view_data['server_timezone'] = get_setting('timezone') ?: 'UTC';
 
+        // Event daily reminder schedule
+        $view_data['event_reminder_enabled'] = get_setting('liff_event_reminder_enabled') === '1';
+        $view_data['event_reminder_times'] = json_decode(get_setting('liff_event_reminder_times') ?: '["09:00","13:00"]', true) ?: ['09:00', '13:00'];
+        $view_data['event_reminder_last_sent'] = get_setting('liff_event_reminder_last_sent');
+        $view_data['upcoming_event_reminders'] = $this->get_upcoming_event_reminders_preview();
+
         // Get recent notification logs
         $view_data['recent_logs'] = $this->get_recent_notification_logs();
         
@@ -645,6 +651,25 @@ class Line_notify extends Security_Controller {
         }
     }
 
+    private function get_upcoming_event_reminders_preview() {
+        try {
+            $events_table = $this->db->prefixTable('events');
+            $sql = "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time
+                    FROM $events_table e
+                    WHERE e.deleted = 0
+                      AND e.type = 'event'
+                      AND e.line_notify_enabled = 1
+                      AND e.start_date >= CURDATE()
+                      AND e.start_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+                    ORDER BY e.start_date ASC, e.start_time ASC, e.id ASC
+                    LIMIT 10";
+
+            return $this->db->query($sql)->getResult();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
     // ──────────────────────────────────────────────────────────────
     // Task Reminder (Not Done) — save schedule (room mode)
     // ──────────────────────────────────────────────────────────────
@@ -673,6 +698,46 @@ class Line_notify extends Security_Controller {
             $this->Settings_model->save_setting('liff_reminder_repeat', '1');
             // Every day
             $this->Settings_model->save_setting('liff_reminder_days', json_encode([1,2,3,4,5,6,7]));
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'บันทึกตารางแจ้งเตือนสำเร็จ'
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Event Daily Reminder — save schedule (room mode)
+    // ──────────────────────────────────────────────────────────────
+    public function save_event_reminder_settings() {
+        try {
+            $enabled = $this->request->getPost('event_reminder_enabled') ? '1' : '0';
+            $times = $this->request->getPost('event_reminder_times');
+
+            if (!is_array($times)) {
+                $raw = trim((string)$times);
+                $times = $raw ? preg_split('/[\s,]+/', $raw) : [];
+            }
+
+            $times = array_values(array_filter(array_map('trim', $times)));
+            if (empty($times)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'กรุณาระบุเวลาอย่างน้อย 1 ช่วง'
+                ]);
+            }
+
+            // Force room mode for this reminder
+            $this->Settings_model->save_setting('liff_notify_mode', 'room');
+            $this->Settings_model->save_setting('liff_event_reminder_enabled', $enabled);
+            $this->Settings_model->save_setting('liff_event_reminder_times', json_encode(array_values($times)));
+            // Every day
+            $this->Settings_model->save_setting('liff_event_reminder_days', json_encode([1,2,3,4,5,6,7]));
 
             return $this->response->setJSON([
                 'success' => true,
@@ -740,6 +805,66 @@ class Line_notify extends Security_Controller {
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'ไม่มีงานค้างในระบบ (ไม่ส่ง)'
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Event Daily Reminder — send test now
+    // ──────────────────────────────────────────────────────────────
+    public function test_event_reminder() {
+        $has_token = get_setting('liff_line_channel_access_token') || get_setting('line_channel_access_token');
+        if (!$has_token) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'ยังไม่ได้ตั้งค่า Channel Access Token'
+            ]);
+        }
+
+        try {
+            $line_group_ids = get_setting('line_group_ids');
+            $has_rooms = !empty(trim((string)$line_group_ids));
+            if (!$has_rooms) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'ยังไม่ได้ตั้งค่า Group IDs (LINE Settings → Group IDs)'
+                ]);
+            }
+
+            $this->Settings_model->save_setting('liff_notify_mode', 'room');
+            $cron = new \App\Libraries\Cron_job();
+            $result = $cron->run_event_reminder_test();
+            $count = is_array($result) ? (int)($result['count'] ?? 0) : (int)$result;
+            $failed = is_array($result) ? (int)($result['failed'] ?? 0) : 0;
+            $errors = is_array($result) ? ($result['errors'] ?? []) : [];
+
+            if ($failed > 0) {
+                $message = 'ส่งไม่สำเร็จ';
+                if (!empty($errors)) {
+                    $message .= ': ' . implode(' | ', array_slice($errors, 0, 2));
+                }
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => $message
+                ]);
+            }
+
+            if ($count > 0) {
+                $this->Settings_model->save_setting('liff_event_reminder_last_sent', get_current_utc_time());
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => "ส่งทดสอบสำเร็จ ({$count} กิจกรรม)"
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'ไม่มีรายการกิจกรรมในช่วงนี้ (ไม่ส่ง)'
             ]);
         } catch (\Exception $e) {
             return $this->response->setJSON([

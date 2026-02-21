@@ -147,11 +147,11 @@
                             <div class="text-muted mb-3" style="font-size:12px">
                                 ส่งทุกวันตามเวลาที่กำหนด |
                                 ส่งล่าสุด/ทดสอบล่าสุด:
-                                <span id="last-sent-local" data-utc="<?php echo esc($task_reminder_last_sent); ?>">
+                                <span class="last-sent-local" data-utc="<?php echo esc($task_reminder_last_sent); ?>">
                                     <?php echo $task_reminder_last_sent ? format_to_datetime($task_reminder_last_sent) : '-'; ?>
                                 </span>
                                 <br>
-                                เวลาระบบ (เครื่องคุณ): <span id="system-time">-</span>
+                                เวลาระบบ (เครื่องคุณ): <span class="system-time">-</span>
                                 | เวลาเซิร์ฟเวอร์ (<?php echo esc($server_timezone); ?>): <?php echo esc($server_time); ?>
                             </div>
 
@@ -197,6 +197,123 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Daily Event Reminder -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i data-feather="calendar" class="icon-16"></i> แจ้งเตือนกิจกรรมประจำวัน</h4>
+                            <div class="card-header-action">
+                                <button class="btn btn-sm btn-default" onclick="saveEventReminderSettings(this)">
+                                    <i data-feather="save" class="icon-12"></i> บันทึกเวลา
+                                </button>
+                                <button class="btn btn-sm btn-default" onclick="testEventReminderNow(this)">
+                                    <i data-feather="send" class="icon-12"></i> ส่งทดสอบ
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="event-reminder-enabled" <?php echo !empty($event_reminder_enabled) ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="event-reminder-enabled">
+                                    เปิดใช้งาน (ส่งไปที่ห้องจาก LINE Settings → Group IDs)
+                                </label>
+                            </div>
+                            <div class="text-muted mb-3" style="font-size:12px">
+                                ส่งทุกวันตามเวลาที่กำหนด |
+                                ส่งล่าสุด/ทดสอบล่าสุด:
+                                <span class="last-sent-local" data-utc="<?php echo esc($event_reminder_last_sent); ?>">
+                                    <?php echo $event_reminder_last_sent ? format_to_datetime($event_reminder_last_sent) : '-'; ?>
+                                </span>
+                                <br>
+                                เวลาระบบ (เครื่องคุณ): <span class="system-time">-</span>
+                                | เวลาเซิร์ฟเวอร์ (<?php echo esc($server_timezone); ?>): <?php echo esc($server_time); ?>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>เวลา</th>
+                                            <th>การทำซ้ำ</th>
+                                            <th>สถานะ</th>
+                                            <th style="width:120px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="event-reminder-times-body">
+                                        <?php $etimes = $event_reminder_times ?? ['09:00','13:00']; ?>
+                                        <?php foreach ($etimes as $t): ?>
+                                        <tr>
+                                            <td style="max-width:160px">
+                                                <input type="time" class="form-control form-control-sm event-reminder-time" value="<?php echo esc($t); ?>">
+                                            </td>
+                                            <td>ทุกวัน</td>
+                                            <td>
+                                                <?php if (!empty($event_reminder_enabled)): ?>
+                                                    <span class="badge bg-success">Enabled</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-secondary">Disabled</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-xs btn-default" onclick="removeEventReminderTime(this)">ลบ</button>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button class="btn btn-sm btn-default" onclick="addEventReminderTime()">
+                                + เพิ่มเวลา
+                            </button>
+                            <span id="event-reminder-result" style="margin-left:10px;font-size:13px"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Event Reminders -->
+            <?php if (isset($upcoming_event_reminders) && !empty($upcoming_event_reminders)): ?>
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i data-feather="calendar" class="icon-16"></i> กิจกรรมที่จะส่งแจ้งเตือน</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Event</th>
+                                            <th>Start Date</th>
+                                            <th>Start time</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($upcoming_event_reminders as $event): ?>
+                                        <tr>
+                                            <td><?php echo $event->title; ?></td>
+                                            <td><?php echo format_to_date($event->start_date, false); ?></td>
+                                            <td><?php echo $event->start_time ?: '-'; ?></td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    <i data-feather="bell" class="icon-12"></i> <?php echo app_lang('enabled'); ?>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- Upcoming Events -->
             <?php if (isset($upcoming_events) && !empty($upcoming_events)): ?>
@@ -759,6 +876,106 @@
         });
     }
 
+    function addEventReminderTime() {
+        const tbody = document.getElementById('event-reminder-times-body');
+        if (!tbody) return;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td style="max-width:160px">
+                <input type="time" class="form-control form-control-sm event-reminder-time" value="09:00">
+            </td>
+            <td>ทุกวัน</td>
+            <td><span class="badge bg-secondary">Disabled</span></td>
+            <td><button class="btn btn-xs btn-default" onclick="removeEventReminderTime(this)">ลบ</button></td>
+        `;
+        tbody.appendChild(row);
+        feather.replace();
+    }
+
+    function removeEventReminderTime(btn) {
+        const row = btn.closest('tr');
+        if (row) row.remove();
+    }
+
+    function saveEventReminderSettings(btn) {
+        const enabled = document.getElementById('event-reminder-enabled').checked;
+        const times = Array.from(document.querySelectorAll('.event-reminder-time'))
+            .map(i => (i.value || '').trim())
+            .filter(Boolean);
+
+        if (times.length === 0) {
+            appAlert.error('กรุณาระบุเวลาอย่างน้อย 1 ช่วง');
+            return;
+        }
+
+        const formData = new FormData();
+        if (enabled) { formData.append('event_reminder_enabled', '1'); }
+        times.forEach(t => formData.append('event_reminder_times[]', t));
+
+        const result = document.getElementById('event-reminder-result');
+        if (btn) {
+            btn.disabled = true;
+            btn.dataset.original = btn.innerHTML;
+            btn.innerHTML = '<i data-feather="loader" class="icon-12 spinning"></i> กำลังบันทึก...';
+        }
+
+        fetch('<?php echo get_uri("line_notify/save_event_reminder_settings"); ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                appAlert.success(data.message || 'บันทึกสำเร็จ');
+                if (result) result.textContent = data.message || 'บันทึกสำเร็จ';
+            } else {
+                appAlert.error(data.message || 'บันทึกไม่สำเร็จ');
+                if (result) result.textContent = data.message || 'บันทึกไม่สำเร็จ';
+            }
+        })
+        .catch(err => {
+            appAlert.error('บันทึกไม่สำเร็จ: ' + err.message);
+            if (result) result.textContent = 'บันทึกไม่สำเร็จ';
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.original || btn.innerHTML;
+                feather.replace();
+            }
+        });
+    }
+
+    function testEventReminderNow(btn) {
+        if (btn) {
+            btn.disabled = true;
+            btn.dataset.original = btn.innerHTML;
+            btn.innerHTML = '<i data-feather="loader" class="icon-12 spinning"></i> กำลังส่ง...';
+        }
+
+        fetch('<?php echo get_uri("line_notify/test_event_reminder"); ?>', {
+            method: 'POST'
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                appAlert.success(data.message || 'ส่งสำเร็จ');
+            } else {
+                appAlert.error(data.message || 'ส่งไม่สำเร็จ');
+            }
+        })
+        .catch(err => {
+            appAlert.error('ส่งไม่สำเร็จ: ' + err.message);
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.original || btn.innerHTML;
+                feather.replace();
+            }
+        });
+    }
+
     // Auto-refresh logs every 30 seconds
     setInterval(refreshLogs, 30000);
 
@@ -806,21 +1023,21 @@
 
 <script>
 function updateSystemTime() {
-    const el = document.getElementById('system-time');
-    if (!el) return;
     const now = new Date();
-    el.textContent = now.toLocaleString();
+    document.querySelectorAll('.system-time').forEach(el => {
+        el.textContent = now.toLocaleString();
+    });
 }
 
 function updateLastSentLocal() {
-    const el = document.getElementById('last-sent-local');
-    if (!el) return;
-    const utc = (el.dataset.utc || '').trim();
-    if (!utc) return;
-    // convert "YYYY-MM-DD HH:MM:SS" UTC to local time
-    const iso = utc.replace(' ', 'T') + 'Z';
-    const dt = new Date(iso);
-    if (isNaN(dt.getTime())) return;
-    el.textContent = dt.toLocaleString();
+    document.querySelectorAll('.last-sent-local').forEach(el => {
+        const utc = (el.dataset.utc || '').trim();
+        if (!utc) return;
+        // convert "YYYY-MM-DD HH:MM:SS" UTC to local time
+        const iso = utc.replace(' ', 'T') + 'Z';
+        const dt = new Date(iso);
+        if (isNaN(dt.getTime())) return;
+        el.textContent = dt.toLocaleString();
+    });
 }
 </script>

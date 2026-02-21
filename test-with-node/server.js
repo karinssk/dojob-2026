@@ -17,8 +17,10 @@
  *
  * Endpoints:
  *   GET /              → status dashboard (auto-refresh)
- *   GET /trigger/reminder  → force-send reminder now
- *   GET /trigger/summary   → force-send summary now
+ *   GET /trigger/reminder       → force-send reminder now
+ *   GET /trigger/summary        → force-send summary now
+ *   GET /trigger/event_reminder → force-send event daily reminder now
+ *   GET /trigger/events         → force-send event before start/end now
  *   GET /log           → last 80 log entries as JSON
  */
 
@@ -47,7 +49,7 @@ let db    = null;
 let cronSecret = null;
 
 // Track last trigger per type to prevent double-firing within same minute
-const lastFired = { reminder: 0, summary: 0 };
+const lastFired = { reminder: 0, summary: 0, event_reminder: 0, events: 0 };
 
 // ── Logger ───────────────────────────────────────────────────────────────────
 
@@ -97,6 +99,7 @@ async function loadSchedule() {
   const keys = [
     'liff_reminder_enabled', 'liff_reminder_times', 'liff_reminder_days', 'liff_reminder_last_sent',
     'liff_summary_enabled',  'liff_summary_time',   'liff_summary_days',  'liff_summary_last_sent',
+    'liff_event_reminder_enabled', 'liff_event_reminder_times', 'liff_event_reminder_days', 'liff_event_reminder_last_sent',
     'liff_cron_secret',
   ];
   const placeholders = keys.map(() => '?').join(',');
@@ -194,6 +197,10 @@ async function tick() {
       summary_time: s.liff_summary_time || null,
       summary_days: s.liff_summary_days,
       summary_last_sent: s.liff_summary_last_sent || null,
+      event_reminder_enabled: s.liff_event_reminder_enabled,
+      event_reminder_times: s.liff_event_reminder_times,
+      event_reminder_days: s.liff_event_reminder_days,
+      event_reminder_last_sent: s.liff_event_reminder_last_sent || null,
     });
 
     if (!cronSecret) {
@@ -232,6 +239,25 @@ async function tick() {
       }
     }
 
+    // ── Event Daily Reminder ──
+    const eventReminderEnabled = s.liff_event_reminder_enabled === '1';
+    const eventReminderTimes   = JSON.parse(s.liff_event_reminder_times || '[]');
+    const eventReminderDays    = JSON.parse(s.liff_event_reminder_days  || '[]');
+    const eventReminderLast    = s.liff_event_reminder_last_sent || null;
+
+    if (eventReminderEnabled) {
+      if (isTimeNow(eventReminderTimes, eventReminderDays, eventReminderLast)) {
+        if (nowMs - lastFired.event_reminder > DEBOUNCE) {
+          await fireNotification('event_reminder', cronSecret);
+        }
+      }
+    }
+
+    // ── Events (before start/end) ──
+    if (nowMs - lastFired.events > DEBOUNCE) {
+      await fireNotification('events', cronSecret);
+    }
+
     if (!reminderEnabled && !summaryEnabled) {
       addLog('INFO', 'Tick — both reminder and summary are disabled in DB settings');
     }
@@ -261,8 +287,10 @@ const server = http.createServer(async (req, res) => {
     return res.end(JSON.stringify(log.slice(0, 80), null, 2));
   }
 
-  if (url === '/trigger/reminder' || url === '/trigger/summary') {
-    const type = url === '/trigger/reminder' ? 'reminder' : 'summary';
+  if (url === '/trigger/reminder' || url === '/trigger/summary' || url === '/trigger/event_reminder' || url === '/trigger/events') {
+    const type = url === '/trigger/reminder'
+      ? 'reminder'
+      : (url === '/trigger/summary' ? 'summary' : (url === '/trigger/event_reminder' ? 'event_reminder' : 'events'));
     if (!cronSecret) {
       res.writeHead(503, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ error: 'Secret not loaded yet — retry in a moment' }));
@@ -313,11 +341,15 @@ const server = http.createServer(async (req, res) => {
   <div>
     <div class="stat"><div class="val">${lastFired.reminder ? new Date(lastFired.reminder).toLocaleTimeString('th-TH') : '-'}</div><div class="lbl">Reminder fired</div></div>
     <div class="stat"><div class="val">${lastFired.summary  ? new Date(lastFired.summary ).toLocaleTimeString('th-TH') : '-'}</div><div class="lbl">Summary fired</div></div>
+    <div class="stat"><div class="val">${lastFired.event_reminder ? new Date(lastFired.event_reminder).toLocaleTimeString('th-TH') : '-'}</div><div class="lbl">Event Daily fired</div></div>
+    <div class="stat"><div class="val">${lastFired.events   ? new Date(lastFired.events  ).toLocaleTimeString('th-TH') : '-'}</div><div class="lbl">Events fired</div></div>
     <div class="stat"><div class="val">${cronSecret ? 'OK' : '...'}</div><div class="lbl">Secret</div></div>
   </div>
 
   <a class="btn green" href="/trigger/reminder">Send Reminder now</a>
   <a class="btn" href="/trigger/summary">Send Summary now</a>
+  <a class="btn" href="/trigger/event_reminder">Send Event Daily now</a>
+  <a class="btn" href="/trigger/events">Send Events now</a>
   <a class="btn" href="/log" style="background:#444">Raw log JSON</a>
 
   <h3 style="margin-top:24px;color:#888">Log (auto-refresh 30s)</h3>

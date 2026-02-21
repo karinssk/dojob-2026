@@ -34,9 +34,14 @@ class Cron extends App_Controller {
             if ($type === 'reminder') {
                 $count = $this->cron_job->run_task_reminder_test();
                 $this->Settings_model->save_setting('liff_reminder_last_sent', get_current_utc_time());
-            } else {
+            } else if ($type === 'summary') {
                 $count = $this->cron_job->run_task_summary_test();
                 $this->Settings_model->save_setting('liff_summary_last_sent', get_current_utc_time());
+            } else if ($type === 'event_reminder' || $type === 'event_daily') {
+                $count = $this->cron_job->run_event_reminder_test();
+                $this->Settings_model->save_setting('liff_event_reminder_last_sent', get_current_utc_time());
+            } else if ($type === 'events' || $type === 'event') {
+                $count = $this->cron_job->run_liff_event_notifications();
             }
             return $this->response->setJSON(['success' => true, 'type' => $type, 'count' => $count]);
         } catch (\Throwable $e) {

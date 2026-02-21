@@ -738,6 +738,14 @@ class Cron_job {
         return $this->_get_liff_room_ids();
     }
 
+    private function _get_event_reminder_rooms() {
+        $line_groups = $this->_line_group_ids_list();
+        if (!empty($line_groups)) {
+            return $line_groups;
+        }
+        return $this->_get_liff_room_ids();
+    }
+
     private function _liff_rooms_from_line_groups() {
         $raw = get_setting('liff_notify_rooms');
         $arr = $raw ? json_decode($raw, true) : [];
@@ -767,6 +775,7 @@ class Cron_job {
      * Notify users X minutes before task/event start_time.
      */
     private function liff_notify_before_start() {
+        $sent = 0;
         $db   = \Config\Database::connect();
         $Line = new \App\Libraries\Liff_line_webhook();
         $now  = date('Y-m-d H:i:s');
@@ -776,7 +785,7 @@ class Cron_job {
 
         // ── Tasks ─────────────────────────────────────────────────
         if ($mode === 'room') {
-            if (empty($rooms)) { return; }
+            if (empty($rooms)) { return 0; }
             $tasks = $db->query(
                 "SELECT t.id, t.title, t.start_date, t.start_time, t.line_notify_before_start
                  FROM rise_tasks t
@@ -823,15 +832,17 @@ class Cron_job {
                 foreach ($rooms as $rid) {
                     $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
+                $sent += count($rooms);
             } else if (!empty($t->line_user_id)) {
                 $Line->send_push_message($t->line_user_id, $msg, 'user', $meta);
+                $sent += 1;
             }
             $db->query("UPDATE rise_tasks SET line_notify_sent_start=? WHERE id=?", [$now, $t->id]);
         }
 
         // ── Events ────────────────────────────────────────────────
         if ($mode === 'room') {
-            if (empty($rooms)) { return; }
+            if (empty($rooms)) { return $sent; }
             $events = $db->query(
                 "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start
                  FROM rise_events e
@@ -878,17 +889,22 @@ class Cron_job {
                 foreach ($rooms as $rid) {
                     $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
+                $sent += count($rooms);
             } else if (!empty($ev->line_user_id)) {
                 $Line->send_push_message($ev->line_user_id, $msg, 'user', $meta);
+                $sent += 1;
             }
             $db->query("UPDATE rise_events SET line_notify_sent_start=? WHERE id=?", [$now, $ev->id]);
         }
+
+        return $sent;
     }
 
     /**
      * Notify users X minutes before task/event end_time.
      */
     private function liff_notify_before_end() {
+        $sent = 0;
         $db   = \Config\Database::connect();
         $Line = new \App\Libraries\Liff_line_webhook();
         $now  = date('Y-m-d H:i:s');
@@ -898,7 +914,7 @@ class Cron_job {
 
         // ── Tasks ─────────────────────────────────────────────────
         if ($mode === 'room') {
-            if (empty($rooms)) { return; }
+            if (empty($rooms)) { return 0; }
             $tasks = $db->query(
                 "SELECT t.id, t.title, t.deadline, t.end_time, t.line_notify_before_end
                  FROM rise_tasks t
@@ -949,15 +965,17 @@ class Cron_job {
                 foreach ($rooms as $rid) {
                     $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
+                $sent += count($rooms);
             } else if (!empty($t->line_user_id)) {
                 $Line->send_push_message($t->line_user_id, $msg, 'user', $meta);
+                $sent += 1;
             }
             $db->query("UPDATE rise_tasks SET line_notify_sent_end=? WHERE id=?", [$now, $t->id]);
         }
 
         // ── Events ────────────────────────────────────────────────
         if ($mode === 'room') {
-            if (empty($rooms)) { return; }
+            if (empty($rooms)) { return $sent; }
             $events = $db->query(
                 "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end
                  FROM rise_events e
@@ -1004,11 +1022,157 @@ class Cron_job {
                 foreach ($rooms as $rid) {
                     $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
+                $sent += count($rooms);
             } else if (!empty($ev->line_user_id)) {
                 $Line->send_push_message($ev->line_user_id, $msg, 'user', $meta);
+                $sent += 1;
             }
             $db->query("UPDATE rise_events SET line_notify_sent_end=? WHERE id=?", [$now, $ev->id]);
         }
+
+        return $sent;
+    }
+
+    /**
+     * Notify events only: before start.
+     */
+    private function liff_notify_events_before_start() {
+        $sent = 0;
+        $db   = \Config\Database::connect();
+        $Line = new \App\Libraries\Liff_line_webhook();
+        $now  = date('Y-m-d H:i:s');
+        $mt   = $this->_liff_mappings_table();
+        $mode = $this->_liff_notify_mode();
+        $rooms = $this->_liff_notify_rooms();
+
+        if ($mode === 'room') {
+            if (empty($rooms)) { return 0; }
+            $events = $db->query(
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start
+                 FROM rise_events e
+                 WHERE e.deleted = 0
+                   AND e.line_notify_enabled = 1
+                   AND e.line_notify_before_start IS NOT NULL
+                   AND e.start_date IS NOT NULL
+                   AND e.start_time IS NOT NULL
+                   AND e.line_notify_sent_start IS NULL
+                   AND TIMESTAMPDIFF(MINUTE, ?, CONCAT(e.start_date,' ',e.start_time))
+                       BETWEEN 0 AND e.line_notify_before_start",
+                [$now]
+            )->getResult();
+        } else {
+            $events = $db->query(
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start,
+                        m.line_liff_user_id AS line_user_id
+                 FROM rise_events e
+                 JOIN $mt m ON m.rise_user_id = e.created_by
+                           AND m.is_active = 1
+                           AND m.liff_notify_user = 1
+                           AND m.line_liff_user_id IS NOT NULL
+                           AND m.line_liff_user_id != ''
+                 WHERE e.deleted = 0
+                   AND e.line_notify_enabled = 1
+                   AND e.line_notify_before_start IS NOT NULL
+                   AND e.start_date IS NOT NULL
+                   AND e.start_time IS NOT NULL
+                   AND e.line_notify_sent_start IS NULL
+                   AND TIMESTAMPDIFF(MINUTE, ?, CONCAT(e.start_date,' ',e.start_time))
+                       BETWEEN 0 AND e.line_notify_before_start",
+                [$now]
+            )->getResult();
+        }
+
+        foreach ($events as $ev) {
+            $msg  = " แจ้งเตือนก่อนเริ่ม Event\n";
+            $msg .= "📅 {$ev->title}\n";
+            $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($ev->start_date . ' ' . $ev->start_time)) . "\n";
+            $msg .= get_uri("liff/app/events/{$ev->id}");
+            $meta = ['event_id' => $ev->id, 'type' => 'liff_event_before_start'];
+            if ($mode === 'room') {
+                $meta = $this->_liff_room_meta($meta);
+                foreach ($rooms as $rid) {
+                    $Line->send_push_message($rid, $msg, 'room', $meta);
+                }
+                $sent += count($rooms);
+            } else if (!empty($ev->line_user_id)) {
+                $Line->send_push_message($ev->line_user_id, $msg, 'user', $meta);
+                $sent += 1;
+            }
+            $db->query("UPDATE rise_events SET line_notify_sent_start=? WHERE id=?", [$now, $ev->id]);
+        }
+
+        return $sent;
+    }
+
+    /**
+     * Notify events only: before end.
+     */
+    private function liff_notify_events_before_end() {
+        $sent = 0;
+        $db   = \Config\Database::connect();
+        $Line = new \App\Libraries\Liff_line_webhook();
+        $now  = date('Y-m-d H:i:s');
+        $mt   = $this->_liff_mappings_table();
+        $mode = $this->_liff_notify_mode();
+        $rooms = $this->_liff_notify_rooms();
+
+        if ($mode === 'room') {
+            if (empty($rooms)) { return 0; }
+            $events = $db->query(
+                "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end
+                 FROM rise_events e
+                 WHERE e.deleted = 0
+                   AND e.line_notify_enabled = 1
+                   AND e.line_notify_before_end IS NOT NULL
+                   AND e.end_date IS NOT NULL
+                   AND e.end_time IS NOT NULL
+                   AND e.line_notify_sent_end IS NULL
+                   AND TIMESTAMPDIFF(MINUTE, ?, CONCAT(e.end_date,' ',e.end_time))
+                       BETWEEN 0 AND e.line_notify_before_end",
+                [$now]
+            )->getResult();
+        } else {
+            $events = $db->query(
+                "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end,
+                        m.line_liff_user_id AS line_user_id
+                 FROM rise_events e
+                 JOIN $mt m ON m.rise_user_id = e.created_by
+                           AND m.is_active = 1
+                           AND m.liff_notify_user = 1
+                           AND m.line_liff_user_id IS NOT NULL
+                           AND m.line_liff_user_id != ''
+                 WHERE e.deleted = 0
+                   AND e.line_notify_enabled = 1
+                   AND e.line_notify_before_end IS NOT NULL
+                   AND e.end_date IS NOT NULL
+                   AND e.end_time IS NOT NULL
+                   AND e.line_notify_sent_end IS NULL
+                   AND TIMESTAMPDIFF(MINUTE, ?, CONCAT(e.end_date,' ',e.end_time))
+                       BETWEEN 0 AND e.line_notify_before_end",
+                [$now]
+            )->getResult();
+        }
+
+        foreach ($events as $ev) {
+            $msg  = "⚠️ แจ้งเตือนก่อนสิ้นสุด Event\n";
+            $msg .= "📅 {$ev->title}\n";
+            $msg .= "🔚 สิ้นสุด: " . date('d/m H:i', strtotime($ev->end_date . ' ' . $ev->end_time)) . "\n";
+            $msg .= get_uri("liff/app/events/{$ev->id}");
+            $meta = ['event_id' => $ev->id, 'type' => 'liff_event_before_end'];
+            if ($mode === 'room') {
+                $meta = $this->_liff_room_meta($meta);
+                foreach ($rooms as $rid) {
+                    $Line->send_push_message($rid, $msg, 'room', $meta);
+                }
+                $sent += count($rooms);
+            } else if (!empty($ev->line_user_id)) {
+                $Line->send_push_message($ev->line_user_id, $msg, 'user', $meta);
+                $sent += 1;
+            }
+            $db->query("UPDATE rise_events SET line_notify_sent_end=? WHERE id=?", [$now, $ev->id]);
+        }
+
+        return $sent;
     }
 
     /**
@@ -1151,6 +1315,23 @@ class Cron_job {
     public function run_task_summary_test() {
         $this->ci = new \App\Controllers\App_Controller();
         return $this->_send_task_summary_flex(true);
+    }
+
+    public function run_event_reminder_test() {
+        $this->ci = new \App\Controllers\App_Controller();
+        return $this->_send_event_reminder_summary(true);
+    }
+
+    public function run_liff_event_notifications() {
+        $this->ci = new \App\Controllers\App_Controller();
+        if (!(get_setting('liff_line_channel_access_token') || get_setting('line_channel_access_token'))) {
+            return 0;
+        }
+
+        $count = 0;
+        $count += (int)$this->liff_notify_events_before_start();
+        $count += (int)$this->liff_notify_events_before_end();
+        return $count;
     }
 
     // ── Core: build & send incomplete-task reminder ───────────────────
@@ -1322,6 +1503,136 @@ class Cron_job {
         }
 
         return (int)$total_tasks;
+    }
+
+    // ── Core: build & send daily event summary ───────────────────────
+
+    private function _send_event_reminder_summary($is_test = false) {
+        $db   = \Config\Database::connect();
+        $Line = new \App\Libraries\Liff_line_webhook();
+
+        $mode        = get_setting('liff_notify_mode') ?: 'user';
+        $line_groups = $this->_line_group_ids_list();
+        $rooms       = $this->_get_event_reminder_rooms();
+        $mt          = $this->_liff_mappings_table();
+
+        $failed = 0;
+        $errors = [];
+        $today  = date('Y-m-d');
+
+        if ($mode === 'room') {
+            $events = $db->query(
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time
+                 FROM rise_events e
+                 WHERE e.deleted = 0
+                   AND e.type = 'event'
+                   AND e.line_notify_enabled = 1
+                   AND e.start_date <= ?
+                   AND (e.end_date IS NULL OR e.end_date = '' OR e.end_date = '0000-00-00' OR e.end_date >= ?)
+                 ORDER BY e.start_date ASC, e.start_time ASC, e.id ASC",
+                [$today, $today]
+            )->getResult();
+        } else {
+            $events = $db->query(
+                "SELECT e.id, e.title, e.start_date, e.start_time, e.end_date, e.end_time,
+                        m.line_liff_user_id AS line_user_id
+                 FROM rise_events e
+                 JOIN $mt m ON m.rise_user_id = e.created_by
+                           AND m.is_active = 1
+                           AND m.liff_notify_user = 1
+                           AND m.line_liff_user_id IS NOT NULL
+                           AND m.line_liff_user_id != ''
+                 WHERE e.deleted = 0
+                   AND e.type = 'event'
+                   AND e.line_notify_enabled = 1
+                   AND e.start_date <= ?
+                   AND (e.end_date IS NULL OR e.end_date = '' OR e.end_date = '0000-00-00' OR e.end_date >= ?)
+                 ORDER BY e.start_date ASC, e.start_time ASC, e.id ASC",
+                [$today, $today]
+            )->getResult();
+        }
+
+        if (empty($events)) {
+            return $is_test ? ['count' => 0, 'failed' => 0, 'errors' => []] : 0;
+        }
+
+        $date_label = date('d/m');
+
+        if ($mode === 'room') {
+            if (empty($rooms)) {
+                return $is_test ? ['count' => 0, 'failed' => 1, 'errors' => ['missing_room_ids']] : 0;
+            }
+
+            $lines = [];
+            $lines[] = "📅 กิจกรรมวันนี้ ({$date_label})";
+            $count = 0;
+            foreach ($events as $ev) {
+                $count++;
+                $time = $ev->start_time ? substr($ev->start_time, 0, 5) : '-';
+                $lines[] = "{$count}) {$ev->title}" . ($time && $time !== '00:00' ? " ({$time})" : '');
+                if ($count >= 10) { break; }
+            }
+            if (count($events) > 10) {
+                $lines[] = '... และอีก ' . (count($events) - 10) . ' กิจกรรม';
+            }
+            $msg = implode("\n", $lines);
+
+            if (!empty($line_groups)) {
+                $meta = [
+                    'type' => 'liff_event_daily',
+                    'force_token' => get_setting('line_channel_access_token'),
+                    'force_token_label' => 'line_channel_access_token',
+                ];
+            } else {
+                $meta = $this->_liff_room_meta(['type' => 'liff_event_daily']);
+            }
+
+            foreach ($rooms as $rid) {
+                $res = $Line->send_push_message($rid, $msg, 'room', $meta);
+                if (empty($res['success'])) {
+                    $failed++;
+                    if (!empty($res['error'])) {
+                        $errors[] = $rid . ': ' . $res['error'];
+                    }
+                }
+            }
+        } else {
+            $users = [];
+            foreach ($events as $ev) {
+                $uid = $ev->line_user_id;
+                if (!$uid) { continue; }
+                if (!isset($users[$uid])) {
+                    $users[$uid] = [];
+                }
+                $users[$uid][] = $ev;
+            }
+
+            foreach ($users as $uid => $list) {
+                $lines = [];
+                $lines[] = "📅 กิจกรรมวันนี้ ({$date_label})";
+                $i = 0;
+                foreach ($list as $ev) {
+                    $i++;
+                    $time = $ev->start_time ? substr($ev->start_time, 0, 5) : '-';
+                    $lines[] = "{$i}) {$ev->title}" . ($time && $time !== '00:00' ? " ({$time})" : '');
+                    if ($i >= 10) { break; }
+                }
+                if (count($list) > 10) {
+                    $lines[] = '... และอีก ' . (count($list) - 10) . ' กิจกรรม';
+                }
+                $msg = implode("\n", $lines);
+                $res = $Line->send_push_message($uid, $msg, 'user', ['type' => 'liff_event_daily']);
+                if (empty($res['success'])) {
+                    $failed++;
+                    if (!empty($res['error'])) {
+                        $errors[] = $uid . ': ' . $res['error'];
+                    }
+                }
+            }
+        }
+
+        $count_events = count($events);
+        return $is_test ? ['count' => $count_events, 'failed' => $failed, 'errors' => $errors] : $count_events;
     }
 
     // ── Flex builders ─────────────────────────────────────────────────
