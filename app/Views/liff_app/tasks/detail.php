@@ -42,6 +42,7 @@ $modalIdx = 0;
         data-status-id="<?= (int)$s->id ?>"
         data-color="<?= esc($sc) ?>"
         data-title="<?= esc($s->title) ?>"
+        data-key="<?= esc(strtolower($s->key_name ?? '')) ?>"
         style="
           <?= $isActive
             ? "background:{$sc};color:#fff;border:2px solid {$sc};"
@@ -82,12 +83,13 @@ $modalIdx = 0;
 
 <script>
 async function setTaskStatus(btn, taskId, statusId) {
-  const group = document.getElementById('status-btn-group');
-  const chip  = document.getElementById('status-chip');
-  const color = btn.dataset.color;
-  const title = btn.dataset.title;
+  const group   = document.getElementById('status-btn-group');
+  const chip    = document.getElementById('status-chip');
+  const color   = btn.dataset.color;
+  const title   = btn.dataset.title;
+  const keyName = (btn.dataset.key || '').toLowerCase();
 
-  // Optimistic UI — update all buttons immediately
+  // Optimistic UI — reset all buttons
   group.querySelectorAll('.status-btn').forEach(b => {
     const bc = b.dataset.color;
     b.classList.remove('status-btn-active');
@@ -96,12 +98,11 @@ async function setTaskStatus(btn, taskId, statusId) {
     b.style.border = '2px solid ' + bc + '55';
     b.style.transform = '';
     b.style.boxShadow = '';
-    // Remove checkmark
     const chk = b.querySelector('span');
     if (chk) chk.remove();
   });
 
-  // Highlight the selected one
+  // Highlight selected
   btn.classList.add('status-btn-active');
   btn.style.background = color;
   btn.style.color = '#fff';
@@ -118,12 +119,68 @@ async function setTaskStatus(btn, taskId, statusId) {
   chip.style.background = color;
   chip.style.color = '#fff';
 
+  // 🎉 Celebrate if status is Done
+  if (keyName === 'done') {
+    _showCelebration();
+  }
+
   // Call API
   const res = await LiffApp.api('liff/api/tasks/update_status', 'POST', { task_id: taskId, status_id: statusId });
   if (!res || !res.success) {
     LiffApp.toast(res?.message || 'อัปเดตสถานะไม่สำเร็จ', 'danger');
   }
-  // No toast on success — visual chip change is feedback enough
+}
+
+/* ── Celebration overlay ── */
+function _showCelebration() {
+  // Remove any existing
+  const old = document.getElementById('done-celebrate');
+  if (old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'done-celebrate';
+  overlay.className = 'celebrate-overlay';
+  overlay.onclick = () => _hideCelebration(overlay);
+
+  // Confetti emojis
+  const emojis = ['🎉','✨','🌟','🎊','💚','⭐','🥳','🏆','👏','💯'];
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.textContent = emojis[i % emojis.length];
+    const angle = (i / 22) * 360;
+    const dist  = 80 + Math.random() * 120;
+    const rad   = angle * Math.PI / 180;
+    p.style.setProperty('--dx', Math.cos(rad) * dist + 'px');
+    p.style.setProperty('--dy', Math.sin(rad) * dist - 60 + 'px');
+    p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+    p.style.setProperty('--sc', (0.7 + Math.random() * 0.8).toFixed(2));
+    p.style.animationDuration = (1.2 + Math.random() * 0.8).toFixed(2) + 's';
+    p.style.animationDelay   = (Math.random() * 0.15).toFixed(2) + 's';
+    overlay.appendChild(p);
+  }
+
+  // Center card
+  const card = document.createElement('div');
+  card.className = 'celebrate-card';
+  card.innerHTML = `
+    <span class="celebrate-mascot">🎉</span>
+    <div class="celebrate-title">เสร็จแล้ว!</div>
+    <div class="celebrate-sub">ยอดเยี่ยมมาก 👏</div>
+  `;
+  card.onclick = e => e.stopPropagation();
+  overlay.appendChild(card);
+
+  document.body.appendChild(overlay);
+
+  // Auto-dismiss after 2.8s
+  setTimeout(() => _hideCelebration(overlay), 2800);
+}
+
+function _hideCelebration(overlay) {
+  if (!overlay || !overlay.parentNode) return;
+  overlay.classList.add('celebrate-out');
+  setTimeout(() => overlay.remove(), 420);
 }
 </script>
 
