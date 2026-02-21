@@ -730,6 +730,14 @@ class Cron_job {
         return $this->_get_liff_room_ids();
     }
 
+    private function _get_task_summary_rooms() {
+        $line_groups = $this->_line_group_ids_list();
+        if (!empty($line_groups)) {
+            return $line_groups;
+        }
+        return $this->_get_liff_room_ids();
+    }
+
     private function _liff_rooms_from_line_groups() {
         $raw = get_setting('liff_notify_rooms');
         $arr = $raw ? json_decode($raw, true) : [];
@@ -1257,7 +1265,8 @@ class Cron_job {
         $db        = \Config\Database::connect();
         $Line      = new \App\Libraries\Liff_line_webhook();
         $mode      = get_setting('liff_notify_mode') ?: 'user';
-        $rooms     = $this->_get_liff_room_ids();
+        $line_groups = $this->_line_group_ids_list();
+        $rooms     = $this->_get_task_summary_rooms();
         $liff_base = rtrim(get_setting('line_liff_id') ?: '2009171467-kn2AHM0C', '/');
         $since     = date('Y-m-d', strtotime('-7 days'));
 
@@ -1292,7 +1301,15 @@ class Cron_job {
         $alt_text = " สรุปงานเสร็จ 7 วัน — {$total_tasks} งาน จาก {$total_users} คน";
 
         if ($mode === 'room' && !empty($rooms)) {
-            $meta = $this->_liff_room_meta(['type' => 'liff_task_summary']);
+            if (!empty($line_groups)) {
+                $meta = [
+                    'type' => 'liff_task_summary',
+                    'force_token' => get_setting('line_channel_access_token'),
+                    'force_token_label' => 'line_channel_access_token',
+                ];
+            } else {
+                $meta = $this->_liff_room_meta(['type' => 'liff_task_summary']);
+            }
             foreach ($rooms as $rid) {
                 $Line->send_flex_message($rid, $flex, $alt_text, 'room', $meta);
             }
