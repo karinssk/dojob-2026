@@ -111,16 +111,18 @@ $lang['lighting_description'] = 'Lighting description';
 $lang['raw_footage_info'] = 'Raw footage information';
 $lang['additional_notes'] = 'Additional notes';
 
-
+$lang['send_notification'] = 'Send';
+$lang['enter_test_message'] = 'Enter Messages';
+$lang['refresh'] = 'Refresh';
 $lang['line_notify'] = 'การแจ้งเตือนผ่าน Line';
 $lang['upcoming_events_with_line_notifications'] = 'Upcoming Line Notifications';
 $lang['notification_statistics'] = 'Notification Statistics';
 $lang['enable_line_notifications_for_event'] = 'เปิดใช้งานการแจ้งเตือนผ่าน line';
 $lang['line_notifications'] = 'Line Notifications';
 $lang['quick_actions'] = 'Quick Actions';
-
+$lang['recent_notification_logs'] = 'Recent Notification Logs'; 
+$lang['send_test_notification'] = 'Test Connection';
 $lang['test_connection'] = 'Test Connection';
-
 $lang['line_settings'] = 'LINE Settings';
 $lang['line_channel_access_token'] = 'Channel Access Token';
 $lang['line_channel_secret'] = 'Channel Secret';

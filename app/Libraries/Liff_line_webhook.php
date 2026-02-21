@@ -40,13 +40,15 @@ class Liff_line_webhook {
     // ──────────────────────────────────────────────────────────────
     // Public: send plain-text push
     // ──────────────────────────────────────────────────────────────
-    public function send_push_message($to, $message, $type = 'user') {
+    public function send_push_message($to, $message, $type = 'user', $meta = []) {
         $this->last_error    = '';
         $this->used_fallback = false;
 
         if (!$this->primary_token || !$to) {
             $this->last_error = 'Missing LIFF channel token or target';
-            return ['success' => false, 'error' => $this->last_error];
+            $res = ['success' => false, 'error' => $this->last_error];
+            $this->_log_notification($message, $meta, false, $res);
+            return $res;
         }
 
         $message  = str_replace('**', '', $message);
@@ -54,22 +56,29 @@ class Liff_line_webhook {
 
         // Try primary
         $result = $this->_push($this->primary_token, $to, $messages);
-        if ($result['success']) { return $result; }
+        if ($result['success']) {
+            $this->_log_notification($message, $meta, true, $result);
+            return $result;
+        }
 
         // Primary failed — try fallback
-        return $this->_send_fallback_text($message, $result['error']);
+        $fallback = $this->_send_fallback_text($message, $result['error']);
+        $this->_log_notification($message, $meta, (bool)($fallback['success'] ?? false), $fallback);
+        return $fallback;
     }
 
     // ──────────────────────────────────────────────────────────────
     // Public: send Flex Message
     // ──────────────────────────────────────────────────────────────
-    public function send_flex_message($to, $flex, $alt_text = 'แจ้งเตือนงาน', $type = 'user') {
+    public function send_flex_message($to, $flex, $alt_text = 'แจ้งเตือนงาน', $type = 'user', $meta = []) {
         $this->last_error    = '';
         $this->used_fallback = false;
 
         if (!$this->primary_token || !$to) {
             $this->last_error = 'Missing LIFF channel token or target';
-            return ['success' => false, 'error' => $this->last_error];
+            $res = ['success' => false, 'error' => $this->last_error];
+            $this->_log_notification($alt_text, $meta, false, $res);
+            return $res;
         }
 
         $messages = [[
@@ -80,10 +89,15 @@ class Liff_line_webhook {
 
         // Try primary
         $result = $this->_push($this->primary_token, $to, $messages, true);
-        if ($result['success']) { return $result; }
+        if ($result['success']) {
+            $this->_log_notification($alt_text, $meta, true, $result);
+            return $result;
+        }
 
         // Primary failed — degrade to plain text sent to fallback room
-        return $this->_send_fallback_text($alt_text, $result['error']);
+        $fallback = $this->_send_fallback_text($alt_text, $result['error']);
+        $this->_log_notification($alt_text, $meta, (bool)($fallback['success'] ?? false), $fallback);
+        return $fallback;
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -151,5 +165,47 @@ class Liff_line_webhook {
         }
 
         return ['success' => false, 'error' => "Primary: {$primary_error} | Fallback: {$result['error']}"];
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Internal: log to line_notification_logs (same UI as Line Notify)
+    // ──────────────────────────────────────────────────────────────
+    private function _log_notification($message, $meta, $success, $result) {
+        try {
+            $Line_logs_model = model('App\Models\Line_notification_logs_model');
+            $notification_type = '';
+            if (is_array($meta)) {
+                $notification_type = $meta['notification_type']
+                    ?? $meta['reminder_type']
+                    ?? $meta['type']
+                    ?? '';
+            }
+            if (!$notification_type) {
+                $notification_type = 'liff';
+            }
+
+            $response = '';
+            if (is_array($result)) {
+                if (!empty($result['success'])) {
+                    $response = !empty($result['fallback']) ? 'OK (fallback)' : 'OK';
+                } else {
+                    $response = $result['error'] ?? 'failed';
+                }
+                if (isset($result['http_code']) && $result['http_code']) {
+                    $response .= " | HTTP {$result['http_code']}";
+                }
+            }
+
+            $Line_logs_model->log_notification([
+                'task_id' => is_array($meta) ? ($meta['task_id'] ?? null) : null,
+                'event_id' => is_array($meta) ? ($meta['event_id'] ?? null) : null,
+                'notification_type' => $notification_type,
+                'message' => $message,
+                'status' => $success ? 'sent' : 'failed',
+                'response' => $response,
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'LIFF log_notification failed: ' . $e->getMessage());
+        }
     }
 }

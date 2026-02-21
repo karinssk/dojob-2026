@@ -1783,6 +1783,17 @@ if (!function_exists('app_lang')) {
             $language_result = lang("default_lang.$lang");
         }
 
+        // fallback to english locale if missing in current locale
+        if ($language_result === "default_lang.$lang") {
+            $fallback = lang("custom_lang.$lang", [], "english");
+            if ($fallback === "custom_lang.$lang") {
+                $fallback = lang("default_lang.$lang", [], "english");
+            }
+            if ($fallback !== "default_lang.$lang") {
+                return $fallback;
+            }
+        }
+
         return $language_result;
     }
 }

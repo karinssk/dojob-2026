@@ -91,11 +91,12 @@ class Liff_pending_model extends Crud_model {
                 [$line_uid, $existing->id]
             );
         } else {
-            // line_user_id is NOT NULL in schema; use line_uid for first-time mapping
+            // line_user_id is NOT NULL in schema, but LIFF should only bind to line_liff_user_id.
+            // Keep line_user_id empty to avoid mixing LIFF UID with Messaging API UID.
             $this->db->query(
                 "INSERT INTO $map_t (line_user_id, line_liff_user_id, rise_user_id, line_display_name, nick_name, is_active, liff_notify_user, line_user_ids, created_at, updated_at)
                  VALUES (?, ?, ?, ?, ?, 1, 1, ?, NOW(), NOW())",
-                [$line_uid, $line_uid, $rise_user_id, $line_display_name, $line_display_name, json_encode([$line_uid])]
+                ['', $line_uid, $rise_user_id, $line_display_name, $line_display_name, null]
             );
         }
 

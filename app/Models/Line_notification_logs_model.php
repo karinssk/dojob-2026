@@ -43,6 +43,12 @@ class Line_notification_logs_model extends Crud_model {
             $where .= " AND $logs_table.notification_type='$notification_type'";
         }
 
+        $notification_type_prefix = $this->_get_clean_value($options, "notification_type_prefix");
+        if ($notification_type_prefix) {
+            $prefix = $this->db->escapeString($notification_type_prefix);
+            $where .= " AND $logs_table.notification_type LIKE '{$prefix}%'";
+        }
+
         $status = $this->_get_clean_value($options, "status");
         if ($status) {
             $where .= " AND $logs_table.status='$status'";

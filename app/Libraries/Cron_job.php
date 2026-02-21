@@ -699,8 +699,18 @@ class Cron_job {
     private function _liff_notify_rooms() {
         $raw = get_setting('liff_notify_rooms');
         $arr = $raw ? json_decode($raw, true) : [];
-        if (!is_array($arr)) { return []; }
-        return array_values(array_filter($arr));
+        if (is_array($arr) && !empty($arr)) {
+            return array_values(array_filter($arr));
+        }
+
+        // Fallback: use LINE Notify group/room IDs (same channel token)
+        $fallback = get_setting('line_group_ids');
+        if ($fallback) {
+            $ids = preg_split('/[\n,]+/', $fallback);
+            return array_values(array_filter(array_map('trim', $ids)));
+        }
+
+        return [];
     }
 
     /**
@@ -733,9 +743,13 @@ class Cron_job {
         } else {
             $tasks = $db->query(
                 "SELECT t.id, t.title, t.start_date, t.start_time, t.line_notify_before_start,
-                        COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id
+                        m.line_liff_user_id AS line_user_id
                  FROM rise_tasks t
-                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1 AND m.liff_notify_user = 1
+                 JOIN $mt m ON m.rise_user_id = t.assigned_to
+                           AND m.is_active = 1
+                           AND m.liff_notify_user = 1
+                           AND m.line_liff_user_id IS NOT NULL
+                           AND m.line_liff_user_id != ''
                  WHERE t.deleted = 0
                    AND t.line_notify_enabled = 1
                    AND t.line_notify_before_start IS NOT NULL
@@ -753,12 +767,13 @@ class Cron_job {
             $msg .= " {$t->title}\n";
             $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($t->start_date . ' ' . $t->start_time)) . "\n";
             $msg .= get_uri("liff/app/tasks/{$t->id}");
+            $meta = ['task_id' => $t->id, 'type' => 'liff_task_before_start'];
             if ($mode === 'room') {
                 foreach ($rooms as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room');
+                    $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
             } else if (!empty($t->line_user_id)) {
-                $Line->send_push_message($t->line_user_id, $msg, 'user');
+                $Line->send_push_message($t->line_user_id, $msg, 'user', $meta);
             }
             $db->query("UPDATE rise_tasks SET line_notify_sent_start=? WHERE id=?", [$now, $t->id]);
         }
@@ -782,9 +797,13 @@ class Cron_job {
         } else {
             $events = $db->query(
                 "SELECT e.id, e.title, e.start_date, e.start_time, e.line_notify_before_start,
-                        COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id
+                        m.line_liff_user_id AS line_user_id
                  FROM rise_events e
-                 JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1 AND m.liff_notify_user = 1
+                 JOIN $mt m ON m.rise_user_id = e.created_by
+                           AND m.is_active = 1
+                           AND m.liff_notify_user = 1
+                           AND m.line_liff_user_id IS NOT NULL
+                           AND m.line_liff_user_id != ''
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
                    AND e.line_notify_before_start IS NOT NULL
@@ -802,12 +821,13 @@ class Cron_job {
             $msg .= "📅 {$ev->title}\n";
             $msg .= "⏱ เริ่ม: " . date('d/m H:i', strtotime($ev->start_date . ' ' . $ev->start_time)) . "\n";
             $msg .= get_uri("liff/app/events/{$ev->id}");
+            $meta = ['event_id' => $ev->id, 'type' => 'liff_event_before_start'];
             if ($mode === 'room') {
                 foreach ($rooms as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room');
+                    $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
             } else if (!empty($ev->line_user_id)) {
-                $Line->send_push_message($ev->line_user_id, $msg, 'user');
+                $Line->send_push_message($ev->line_user_id, $msg, 'user', $meta);
             }
             $db->query("UPDATE rise_events SET line_notify_sent_start=? WHERE id=?", [$now, $ev->id]);
         }
@@ -845,9 +865,13 @@ class Cron_job {
         } else {
             $tasks = $db->query(
                 "SELECT t.id, t.title, t.deadline, t.end_time, t.line_notify_before_end,
-                        COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id
+                        m.line_liff_user_id AS line_user_id
                  FROM rise_tasks t
-                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1 AND m.liff_notify_user = 1
+                 JOIN $mt m ON m.rise_user_id = t.assigned_to
+                           AND m.is_active = 1
+                           AND m.liff_notify_user = 1
+                           AND m.line_liff_user_id IS NOT NULL
+                           AND m.line_liff_user_id != ''
                  JOIN rise_task_status ts ON ts.id = t.status_id
                  WHERE t.deleted = 0
                    AND t.line_notify_enabled = 1
@@ -867,12 +891,13 @@ class Cron_job {
             $msg .= " {$t->title}\n";
             $msg .= "🔚 สิ้นสุด: " . date('d/m H:i', strtotime($t->deadline . ' ' . $t->end_time)) . "\n";
             $msg .= get_uri("liff/app/tasks/{$t->id}");
+            $meta = ['task_id' => $t->id, 'type' => 'liff_task_before_end'];
             if ($mode === 'room') {
                 foreach ($rooms as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room');
+                    $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
             } else if (!empty($t->line_user_id)) {
-                $Line->send_push_message($t->line_user_id, $msg, 'user');
+                $Line->send_push_message($t->line_user_id, $msg, 'user', $meta);
             }
             $db->query("UPDATE rise_tasks SET line_notify_sent_end=? WHERE id=?", [$now, $t->id]);
         }
@@ -896,9 +921,13 @@ class Cron_job {
         } else {
             $events = $db->query(
                 "SELECT e.id, e.title, e.end_date, e.end_time, e.line_notify_before_end,
-                        COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id
+                        m.line_liff_user_id AS line_user_id
                  FROM rise_events e
-                 JOIN $mt m ON m.rise_user_id = e.created_by AND m.is_active = 1 AND m.liff_notify_user = 1
+                 JOIN $mt m ON m.rise_user_id = e.created_by
+                           AND m.is_active = 1
+                           AND m.liff_notify_user = 1
+                           AND m.line_liff_user_id IS NOT NULL
+                           AND m.line_liff_user_id != ''
                  WHERE e.deleted = 0
                    AND e.line_notify_enabled = 1
                    AND e.line_notify_before_end IS NOT NULL
@@ -916,12 +945,13 @@ class Cron_job {
             $msg .= "📅 {$ev->title}\n";
             $msg .= "🔚 สิ้นสุด: " . date('d/m H:i', strtotime($ev->end_date . ' ' . $ev->end_time)) . "\n";
             $msg .= get_uri("liff/app/events/{$ev->id}");
+            $meta = ['event_id' => $ev->id, 'type' => 'liff_event_before_end'];
             if ($mode === 'room') {
                 foreach ($rooms as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room');
+                    $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
             } else if (!empty($ev->line_user_id)) {
-                $Line->send_push_message($ev->line_user_id, $msg, 'user');
+                $Line->send_push_message($ev->line_user_id, $msg, 'user', $meta);
             }
             $db->query("UPDATE rise_events SET line_notify_sent_end=? WHERE id=?", [$now, $ev->id]);
         }
@@ -960,9 +990,13 @@ class Cron_job {
                 "SELECT t.id, t.title,
                         COALESCE(t.status_changed_at, t.created_date) AS last_updated,
                         t.line_notify_no_update_hours,
-                        COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id
+                        m.line_liff_user_id AS line_user_id
                  FROM rise_tasks t
-                 JOIN $mt m ON m.rise_user_id = t.assigned_to AND m.is_active = 1 AND m.liff_notify_user = 1
+                 JOIN $mt m ON m.rise_user_id = t.assigned_to
+                           AND m.is_active = 1
+                           AND m.liff_notify_user = 1
+                           AND m.line_liff_user_id IS NOT NULL
+                           AND m.line_liff_user_id != ''
                  JOIN rise_task_status ts ON ts.id = t.status_id
                  WHERE t.deleted = 0
                    AND t.line_notify_enabled = 1
@@ -981,12 +1015,13 @@ class Cron_job {
             $msg  .= " {$t->title}\n";
             $msg  .= "อัปเดตล่าสุด: " . ($t->last_updated ? date('d/m H:i', strtotime($t->last_updated)) : '—') . "\n";
             $msg  .= get_uri("liff/app/tasks/{$t->id}");
+            $meta = ['task_id' => $t->id, 'type' => 'liff_task_no_update'];
             if ($mode === 'room') {
                 foreach ($rooms as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room');
+                    $Line->send_push_message($rid, $msg, 'room', $meta);
                 }
             } else if (!empty($t->line_user_id)) {
-                $Line->send_push_message($t->line_user_id, $msg, 'user');
+                $Line->send_push_message($t->line_user_id, $msg, 'user', $meta);
             }
             $db->query("UPDATE rise_tasks SET line_notify_sent_no_update=? WHERE id=?", [$now, $t->id]);
         }
@@ -1015,7 +1050,7 @@ class Cron_job {
         $this->_liff_log("REMINDER: firing — {$reason}");
         try {
             $count = $this->_send_task_reminder_flex(false);
-            $this->ci->Settings_model->save_setting('liff_reminder_last_sent', date('Y-m-d H:i:s'));
+            $this->ci->Settings_model->save_setting('liff_reminder_last_sent', get_current_utc_time());
             $this->_liff_log("REMINDER: sent OK — {$count} task(s)");
         } catch (\Exception $e) {
             $this->_liff_log("REMINDER: ERROR — " . $e->getMessage());
@@ -1044,7 +1079,7 @@ class Cron_job {
         $this->_liff_log("SUMMARY: firing — {$reason}");
         try {
             $count = $this->_send_task_summary_flex(false);
-            $this->ci->Settings_model->save_setting('liff_summary_last_sent', date('Y-m-d H:i:s'));
+            $this->ci->Settings_model->save_setting('liff_summary_last_sent', get_current_utc_time());
             $this->_liff_log("SUMMARY: sent OK — {$count} task(s)");
         } catch (\Exception $e) {
             $this->_liff_log("SUMMARY: ERROR — " . $e->getMessage());
@@ -1080,13 +1115,16 @@ class Cron_job {
             SELECT
                 u.id AS user_id,
                 CONCAT(u.first_name,' ',u.last_name) AS user_name,
-                COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id,
+                m.line_liff_user_id AS line_user_id,
                 t.id AS task_id,
                 t.title AS task_title
             FROM rise_users u
             JOIN rise_tasks t ON t.assigned_to = u.id AND t.deleted = 0
             LEFT JOIN rise_task_status ts ON ts.id = t.status_id
-            LEFT JOIN $mt m ON m.rise_user_id = u.id AND m.is_active = 1
+            LEFT JOIN $mt m ON m.rise_user_id = u.id
+                           AND m.is_active = 1
+                           AND m.line_liff_user_id IS NOT NULL
+                           AND m.line_liff_user_id != ''
             WHERE (ts.key_name IS NULL OR ts.key_name != 'done')
               AND u.deleted = 0
             ORDER BY u.id, t.id
@@ -1117,15 +1155,16 @@ class Cron_job {
         if ($mode === 'room' && !empty($rooms)) {
             $flex = $this->_build_reminder_carousel($users, $liff_base);
             $alt  = "📋 สรุปงานค้าง — {$total_users} คน";
+            $meta = ['type' => 'liff_task_reminder'];
             foreach ($rooms as $rid) {
-                $Line->send_flex_message($rid, $flex, $alt, 'room');
+                $Line->send_flex_message($rid, $flex, $alt, 'room', $meta);
             }
         } else {
             foreach ($users as $uid => $u) {
                 if (empty($u['line_user_id'])) { continue; }
                 $single = $this->_build_reminder_bubble_single($u['user_name'], $u['tasks'], $liff_base);
                 $alt    = $u['user_name'] . ' มีงานค้าง ' . count($u['tasks']) . ' รายการ';
-                $Line->send_flex_message($u['line_user_id'], $single, $alt, 'user');
+                $Line->send_flex_message($u['line_user_id'], $single, $alt, 'user', ['type' => 'liff_task_reminder']);
             }
         }
 
@@ -1148,12 +1187,15 @@ class Cron_job {
             SELECT
                 u.id AS user_id,
                 CONCAT(u.first_name,' ',u.last_name) AS user_name,
-                COALESCE(m.line_liff_user_id, m.line_user_id) AS line_user_id,
+                m.line_liff_user_id AS line_user_id,
                 COUNT(t.id) AS done_count
             FROM rise_users u
             JOIN rise_tasks t ON t.assigned_to = u.id AND t.deleted = 0
             JOIN rise_task_status ts ON ts.id = t.status_id AND ts.key_name = 'done'
-            LEFT JOIN $mt m ON m.rise_user_id = u.id AND m.is_active = 1
+            LEFT JOIN $mt m ON m.rise_user_id = u.id
+                           AND m.is_active = 1
+                           AND m.line_liff_user_id IS NOT NULL
+                           AND m.line_liff_user_id != ''
             WHERE t.status_changed_at >= ?
               AND u.deleted = 0
             GROUP BY u.id
@@ -1171,13 +1213,13 @@ class Cron_job {
 
         if ($mode === 'room' && !empty($rooms)) {
             foreach ($rooms as $rid) {
-                $Line->send_flex_message($rid, $flex, $alt_text, 'room');
+                $Line->send_flex_message($rid, $flex, $alt_text, 'room', ['type' => 'liff_task_summary']);
             }
         } else {
             // For user mode, send the combined summary to users who have LINE linked
             foreach ($rows as $r) {
                 if (empty($r->line_user_id)) { continue; }
-                $Line->send_flex_message($r->line_user_id, $flex, $alt_text, 'user');
+                $Line->send_flex_message($r->line_user_id, $flex, $alt_text, 'user', ['type' => 'liff_task_summary']);
             }
         }
 
@@ -1478,10 +1520,7 @@ class Cron_job {
     }
 
     private function _get_liff_room_ids() {
-        $raw = get_setting('liff_notify_rooms');
-        $arr = $raw ? json_decode($raw, true) : [];
-        return is_array($arr) ? array_values(array_filter($arr)) : [];
+        return $this->_liff_notify_rooms();
     }
 
 }
-

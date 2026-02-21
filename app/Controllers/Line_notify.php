@@ -42,7 +42,15 @@ class Line_notify extends Security_Controller {
         
         // Get upcoming events with LINE notifications enabled
         $view_data['upcoming_events'] = $this->get_upcoming_line_events();
-        
+
+        // Preview: tasks not done (limited)
+        $view_data['upcoming_tasks'] = $this->get_upcoming_task_reminders_preview();
+
+        // Task reminder schedule (reuse LIFF reminder settings)
+        $view_data['task_reminder_enabled'] = get_setting('liff_reminder_enabled') === '1';
+        $view_data['task_reminder_times'] = json_decode(get_setting('liff_reminder_times') ?: '["09:00","13:00"]', true) ?: ['09:00', '13:00'];
+        $view_data['task_reminder_last_sent'] = get_setting('liff_reminder_last_sent');
+
         // Get recent notification logs
         $view_data['recent_logs'] = $this->get_recent_notification_logs();
         
@@ -561,6 +569,7 @@ class Line_notify extends Security_Controller {
         $offset = $this->request->getGet('offset') ?: 0;
         $status = $this->request->getGet('status');
         $type = $this->request->getGet('type');
+        $type_group = $this->request->getGet('type_group');
         $start_date = $this->request->getGet('start_date');
         $end_date = $this->request->getGet('end_date');
         
@@ -578,6 +587,10 @@ class Line_notify extends Security_Controller {
             
             if ($type) {
                 $options['notification_type'] = $type;
+            }
+
+            if ($type_group === 'liff') {
+                $options['notification_type_prefix'] = 'liff';
             }
             
             if ($start_date) {
@@ -600,6 +613,99 @@ class Line_notify extends Security_Controller {
             echo json_encode([
                 'success' => false,
                 'message' => 'Failed to fetch notification logs: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    private function get_upcoming_task_reminders_preview() {
+        try {
+            $tasks_table = $this->db->prefixTable('tasks');
+            $status_table = $this->db->prefixTable('task_status');
+            $users_table = $this->db->prefixTable('users');
+
+            $sql = "SELECT t.id, t.title, t.deadline, t.start_date, t.start_time, t.end_time,
+                           ts.title AS status_title, ts.key_name AS status_key,
+                           CONCAT(u.first_name,' ',u.last_name) AS assigned_name
+                    FROM $tasks_table t
+                    LEFT JOIN $status_table ts ON ts.id = t.status_id
+                    LEFT JOIN $users_table u ON u.id = t.assigned_to
+                    WHERE t.deleted = 0
+                      AND (ts.key_name IS NULL OR ts.key_name != 'done')
+                    ORDER BY 
+                        CASE WHEN t.deadline IS NULL OR t.deadline = '0000-00-00' THEN 1 ELSE 0 END,
+                        t.deadline ASC,
+                        t.id DESC
+                    LIMIT 10";
+
+            return $this->db->query($sql)->getResult();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Task Reminder (Not Done) — save schedule (room mode)
+    // ──────────────────────────────────────────────────────────────
+    public function save_task_reminder_settings() {
+        try {
+            $enabled = $this->request->getPost('reminder_enabled') ? '1' : '0';
+            $times = $this->request->getPost('reminder_times');
+
+            if (!is_array($times)) {
+                $raw = trim((string)$times);
+                $times = $raw ? preg_split('/[\s,]+/', $raw) : [];
+            }
+
+            $times = array_values(array_filter(array_map('trim', $times)));
+            if (empty($times)) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'กรุณาระบุเวลาอย่างน้อย 1 ช่วง'
+                ]);
+            }
+
+            // Force room mode for this reminder
+            $this->Settings_model->save_setting('liff_notify_mode', 'room');
+            $this->Settings_model->save_setting('liff_reminder_enabled', $enabled);
+            $this->Settings_model->save_setting('liff_reminder_times', json_encode(array_values($times)));
+            $this->Settings_model->save_setting('liff_reminder_repeat', '1');
+            // Every day
+            $this->Settings_model->save_setting('liff_reminder_days', json_encode([1,2,3,4,5,6,7]));
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'บันทึกตารางแจ้งเตือนสำเร็จ'
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // Task Reminder (Not Done) — send test now
+    // ──────────────────────────────────────────────────────────────
+    public function test_task_reminder() {
+        $has_token = get_setting('liff_line_channel_access_token') || get_setting('line_channel_access_token');
+        if (!$has_token) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'ยังไม่ได้ตั้งค่า Channel Access Token'
+            ]);
+        }
+
+        try {
+            $this->Settings_model->save_setting('liff_notify_mode', 'room');
+            $cron = new \App\Libraries\Cron_job();
+            $count = $cron->run_task_reminder_test();
+            $msg = $count > 0 ? "ส่งทดสอบสำเร็จ ({$count} งาน)" : 'ไม่มีงานค้างในระบบ (ไม่ส่ง)';
+            return $this->response->setJSON(['success' => true, 'message' => $msg]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
             ]);
         }
     }

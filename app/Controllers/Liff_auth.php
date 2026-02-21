@@ -64,12 +64,8 @@ class Liff_auth extends App_Controller {
             }
         }
 
-        // Check if LINE UID already has an approved mapping
-        $map_t   = get_user_mappings_table();
-        $mapping = $this->db->query(
-            "SELECT * FROM $map_t WHERE line_liff_user_id=? AND is_active=1 LIMIT 1",
-            [$line_uid]
-        )->getRow();
+        // Check if LINE UID already has an approved mapping (LIFF column)
+        $mapping = $this->_get_liff_mapping($line_uid);
 
         if ($mapping && $mapping->rise_user_id) {
             // Already linked — log them in
@@ -358,5 +354,43 @@ class Liff_auth extends App_Controller {
         return $this->response
             ->setContentType('application/json')
             ->setBody(json_encode($data));
+    }
+
+    /**
+     * Find LIFF mapping by line_liff_user_id.
+     * Legacy fallback: if a previous install stored LIFF UID in line_user_id,
+     * migrate it into line_liff_user_id on first login.
+     */
+    private function _get_liff_mapping($line_uid) {
+        $map_t = get_user_mappings_table();
+        $row = $this->db->query(
+            "SELECT * FROM $map_t WHERE line_liff_user_id=? AND is_active=1 LIMIT 1",
+            [$line_uid]
+        )->getRow();
+
+        if ($row && $row->rise_user_id) {
+            return $row;
+        }
+
+        // Legacy auto-migrate (line_user_id previously used for LIFF)
+        $legacy = $this->db->query(
+            "SELECT * FROM $map_t
+             WHERE line_user_id=?
+               AND (line_liff_user_id IS NULL OR line_liff_user_id='')
+               AND is_active=1
+             LIMIT 1",
+            [$line_uid]
+        )->getRow();
+
+        if ($legacy && $legacy->rise_user_id) {
+            $this->db->query(
+                "UPDATE $map_t SET line_liff_user_id=?, updated_at=NOW() WHERE id=?",
+                [$line_uid, $legacy->id]
+            );
+            $legacy->line_liff_user_id = $line_uid;
+            return $legacy;
+        }
+
+        return null;
     }
 }

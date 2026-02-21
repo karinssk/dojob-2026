@@ -8,7 +8,7 @@
                 <?php endif; ?>
             </h1>
             <div class="title-button-group">
-                <a href="<?php echo get_uri('line_settings'); ?>" class="btn btn-info">
+                <a href="<?php echo get_uri('line_settings'); ?>" class="btn btn-default">
                     <i data-feather="settings" class="icon-16"></i> <?php echo app_lang('line_settings'); ?>
                 </a>
             </div>
@@ -17,57 +17,57 @@
         <div class="card-body">
             <!-- Status Overview -->
             <div class="row mb-4">
-                <div class="col-md-3 col-sm-6">
-                    <div class="card bg-info">
+                <div class="col-md-3 col-sm-6 widget-container">
+                    <div class="card dashboard-icon-widget">
                         <div class="card-body">
-                            <div class="widget-icon">
-                                <i data-feather="bell" class="icon-24"></i>
+                            <div class="widget-icon bg-info">
+                                <i data-feather="bell" class="icon"></i>
                             </div>
                             <div class="widget-details">
                                 <h1><?php echo $line_enabled ? app_lang('enabled') : app_lang('disabled'); ?></h1>
-                                <span class="bg-transparent-white"><?php echo app_lang('line_status'); ?></span>
+                                <span class="text-muted"><?php echo app_lang('line_status'); ?></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-3 col-sm-6">
-                    <div class="card bg-primary">
+                <div class="col-md-3 col-sm-6 widget-container">
+                    <div class="card dashboard-icon-widget">
                         <div class="card-body">
-                            <div class="widget-icon">
-                                <i data-feather="settings" class="icon-24"></i>
+                            <div class="widget-icon bg-primary">
+                                <i data-feather="settings" class="icon"></i>
                             </div>
                             <div class="widget-details">
                                 <h1><?php echo $has_token ? app_lang('configured') : app_lang('not_configured'); ?></h1>
-                                <span class="bg-transparent-white"><?php echo app_lang('configuration'); ?></span>
+                                <span class="text-muted"><?php echo app_lang('configuration'); ?></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-3 col-sm-6">
-                    <div class="card bg-success">
+                <div class="col-md-3 col-sm-6 widget-container">
+                    <div class="card dashboard-icon-widget">
                         <div class="card-body">
-                            <div class="widget-icon">
-                                <i data-feather="users" class="icon-24"></i>
+                            <div class="widget-icon bg-success">
+                                <i data-feather="users" class="icon"></i>
                             </div>
                             <div class="widget-details">
                                 <h1><?php echo !empty($user_ids) ? count(explode(',', $user_ids)) : 0; ?></h1>
-                                <span class="bg-transparent-white"><?php echo app_lang('users'); ?></span>
+                                <span class="text-muted"><?php echo app_lang('users'); ?></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-3 col-sm-6">
-                    <div class="card bg-warning">
+                <div class="col-md-3 col-sm-6 widget-container">
+                    <div class="card dashboard-icon-widget">
                         <div class="card-body">
-                            <div class="widget-icon">
-                                <i data-feather="message-circle" class="icon-24"></i>
+                            <div class="widget-icon bg-warning">
+                                <i data-feather="message-circle" class="icon"></i>
                             </div>
                             <div class="widget-details">
                                 <h1><?php echo !empty($group_ids) ? count(explode(',', $group_ids)) : 0; ?></h1>
-                                <span class="bg-transparent-white"><?php echo app_lang('groups'); ?></span>
+                                <span class="text-muted"><?php echo app_lang('groups'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -83,7 +83,7 @@
                         </div>
                         <div class="card-body">
                             <div class="btn-group" role="group">
-                                <button class="btn btn-info" onclick="testConnection()">
+                                <button class="btn btn-default" onclick="testConnection()">
                                     <i data-feather="wifi" class="icon-16"></i> <?php echo app_lang('test_connection'); ?>
                                 </button>
                                 
@@ -121,6 +121,75 @@
                 </div>
             </div>
             <?php endif; ?>
+
+            <!-- Daily Task Reminder (Not Done) -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i data-feather="clock" class="icon-16"></i> แจ้งเตือนงานค้างประจำวัน</h4>
+                            <div class="card-header-action">
+                                <button class="btn btn-sm btn-default" onclick="saveTaskReminderSettings(this)">
+                                    <i data-feather="save" class="icon-12"></i> บันทึกเวลา
+                                </button>
+                                <button class="btn btn-sm btn-default" onclick="testTaskReminderNow(this)">
+                                    <i data-feather="send" class="icon-12"></i> ส่งทดสอบ
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="task-reminder-enabled" <?php echo !empty($task_reminder_enabled) ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="task-reminder-enabled">
+                                    เปิดใช้งาน (ส่งไปที่ห้องจาก LINE Settings → Group IDs)
+                                </label>
+                            </div>
+                            <div class="text-muted mb-3" style="font-size:12px">
+                                ส่งทุกวันตามเวลาที่กำหนด | ส่งล่าสุด: <?php echo $task_reminder_last_sent ? format_to_datetime($task_reminder_last_sent) : '-'; ?>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>เวลา</th>
+                                            <th>การทำซ้ำ</th>
+                                            <th>สถานะ</th>
+                                            <th style="width:120px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="task-reminder-times-body">
+                                        <?php $times = $task_reminder_times ?? ['09:00','13:00']; ?>
+                                        <?php foreach ($times as $t): ?>
+                                        <tr>
+                                            <td style="max-width:160px">
+                                                <input type="time" class="form-control form-control-sm task-reminder-time" value="<?php echo esc($t); ?>">
+                                            </td>
+                                            <td>ทุกวัน</td>
+                                            <td>
+                                                <?php if (!empty($task_reminder_enabled)): ?>
+                                                    <span class="badge bg-success">Enabled</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-secondary">Disabled</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-xs btn-default" onclick="removeTaskReminderTime(this)">ลบ</button>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button class="btn btn-sm btn-default" onclick="addTaskReminderTime()">
+                                + เพิ่มเวลา
+                            </button>
+                            <span id="task-reminder-result" style="margin-left:10px;font-size:13px"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Upcoming Events -->
             <?php if (isset($upcoming_events) && !empty($upcoming_events)): ?>
@@ -163,6 +232,49 @@
             </div>
             <?php endif; ?>
 
+            <!-- Upcoming Task Reminders (Not Done) -->
+            <?php if (isset($upcoming_tasks) && !empty($upcoming_tasks)): ?>
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i data-feather="check-square" class="icon-16"></i> งานค้างที่จะแจ้งเตือน</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Task</th>
+                                            <th>Assignee</th>
+                                            <th>Deadline</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($upcoming_tasks as $task): ?>
+                                        <tr>
+                                            <td><?php echo $task->title; ?></td>
+                                            <td><?php echo $task->assigned_name ?: '-'; ?></td>
+                                            <td><?php echo $task->deadline ? format_to_date($task->deadline, false) : '-'; ?></td>
+                                            <td>
+                                                <?php if ($task->status_title): ?>
+                                                    <span class="badge bg-info"><?php echo $task->status_title; ?></span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-secondary">-</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <!-- Recent Notification Logs -->
             <div class="row">
                 <div class="col-md-12">
@@ -176,6 +288,10 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <div class="btn-group mb-3" role="group" aria-label="Log filters">
+                                <button type="button" class="btn btn-default btn-sm log-filter-btn active" data-filter="all" onclick="setLogFilter('all')">All</button>
+                                <button type="button" class="btn btn-default btn-sm log-filter-btn" data-filter="liff" onclick="setLogFilter('liff')">LIFF</button>
+                            </div>
                             <div id="notification-logs-container">
                                 <div class="table-responsive">
                                     <table class="table table-striped" id="notification-logs-table">
@@ -417,12 +533,23 @@
         formData.append('message', message);
         formData.append('type', 'test');
 
+        console.log('[LINE Notify] send_manual_notification request', {
+            url: '<?php echo get_uri("line_notify/send_manual_notification"); ?>',
+            type: 'test',
+            message_length: message.length
+        });
+
         fetch('<?php echo get_uri("line_notify/send_manual_notification"); ?>', {
             method: 'POST',
             body: formData
         })
         .then(async response => {
             const text = await response.text();
+            console.log('[LINE Notify] send_manual_notification response', {
+                status: response.status,
+                ok: response.ok,
+                text: text
+            });
             if (!response.ok) {
                 console.error('[LINE Notify] send_manual_notification HTTP', response.status, text);
             }
@@ -434,6 +561,7 @@
             }
         })
         .then(data => {
+            console.log('[LINE Notify] send_manual_notification parsed', data);
             console.log('[LINE Notify] Full response:', JSON.stringify(data, null, 2));
             if (data.success) {
                 appAlert.success(data.message || '<?php echo app_lang("notification_sent_successfully"); ?>');
@@ -456,8 +584,25 @@
         });
     }
 
+    let currentLogFilter = 'all';
+
+    function setLogFilter(filter) {
+        currentLogFilter = filter || 'all';
+        document.querySelectorAll('.log-filter-btn').forEach(btn => {
+            const isActive = btn.dataset.filter === currentLogFilter;
+            btn.classList.toggle('active', isActive);
+            btn.classList.toggle('btn-primary', isActive);
+            btn.classList.toggle('btn-default', !isActive);
+        });
+        refreshLogs();
+    }
+
     function refreshLogs() {
-        fetch('<?php echo get_uri("line_notify/get_notification_logs"); ?>?limit=20')
+        let url = '<?php echo get_uri("line_notify/get_notification_logs"); ?>?limit=20';
+        if (currentLogFilter && currentLogFilter !== 'all') {
+            url += '&type_group=' + encodeURIComponent(currentLogFilter);
+        }
+        fetch(url)
         .then(async response => {
             const text = await response.text();
             if (!response.ok) {
@@ -507,12 +652,113 @@
         });
     }
 
+    function addTaskReminderTime() {
+        const tbody = document.getElementById('task-reminder-times-body');
+        if (!tbody) return;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td style="max-width:160px">
+                <input type="time" class="form-control form-control-sm task-reminder-time" value="09:00">
+            </td>
+            <td>ทุกวัน</td>
+            <td><span class="badge bg-secondary">Disabled</span></td>
+            <td><button class="btn btn-xs btn-default" onclick="removeTaskReminderTime(this)">ลบ</button></td>
+        `;
+        tbody.appendChild(row);
+        feather.replace();
+    }
+
+    function removeTaskReminderTime(btn) {
+        const row = btn.closest('tr');
+        if (row) row.remove();
+    }
+
+    function saveTaskReminderSettings(btn) {
+        const enabled = document.getElementById('task-reminder-enabled').checked;
+        const times = Array.from(document.querySelectorAll('.task-reminder-time'))
+            .map(i => (i.value || '').trim())
+            .filter(Boolean);
+
+        if (times.length === 0) {
+            appAlert.error('กรุณาระบุเวลาอย่างน้อย 1 ช่วง');
+            return;
+        }
+
+        const formData = new FormData();
+        if (enabled) { formData.append('reminder_enabled', '1'); }
+        times.forEach(t => formData.append('reminder_times[]', t));
+
+        const result = document.getElementById('task-reminder-result');
+        if (btn) {
+            btn.disabled = true;
+            btn.dataset.original = btn.innerHTML;
+            btn.innerHTML = '<i data-feather="loader" class="icon-12 spinning"></i> กำลังบันทึก...';
+        }
+
+        fetch('<?php echo get_uri("line_notify/save_task_reminder_settings"); ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                appAlert.success(data.message || 'บันทึกสำเร็จ');
+                if (result) result.textContent = data.message || 'บันทึกสำเร็จ';
+            } else {
+                appAlert.error(data.message || 'บันทึกไม่สำเร็จ');
+                if (result) result.textContent = data.message || 'บันทึกไม่สำเร็จ';
+            }
+        })
+        .catch(err => {
+            appAlert.error('บันทึกไม่สำเร็จ: ' + err.message);
+            if (result) result.textContent = 'บันทึกไม่สำเร็จ';
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.original || btn.innerHTML;
+                feather.replace();
+            }
+        });
+    }
+
+    function testTaskReminderNow(btn) {
+        if (btn) {
+            btn.disabled = true;
+            btn.dataset.original = btn.innerHTML;
+            btn.innerHTML = '<i data-feather="loader" class="icon-12 spinning"></i> กำลังส่ง...';
+        }
+
+        fetch('<?php echo get_uri("line_notify/test_task_reminder"); ?>', {
+            method: 'POST'
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                appAlert.success(data.message || 'ส่งสำเร็จ');
+            } else {
+                appAlert.error(data.message || 'ส่งไม่สำเร็จ');
+            }
+        })
+        .catch(err => {
+            appAlert.error('ส่งไม่สำเร็จ: ' + err.message);
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.original || btn.innerHTML;
+                feather.replace();
+            }
+        });
+    }
+
     // Auto-refresh logs every 30 seconds
     setInterval(refreshLogs, 30000);
 
     // Initialize feather icons
     document.addEventListener('DOMContentLoaded', function() {
         feather.replace();
+        setLogFilter(currentLogFilter);
     });
 </script>
 
@@ -528,7 +774,7 @@
 
 .widget-icon {
     float: left;
-    margin-right: 15px;
+    margin-right: 12px;
 }
 
 .widget-details {
@@ -537,14 +783,8 @@
 
 .widget-details h1 {
     margin: 0;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 600;
-}
-
-.bg-transparent-white {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 12px;
-    text-transform: uppercase;
 }
 
 .text-truncate {

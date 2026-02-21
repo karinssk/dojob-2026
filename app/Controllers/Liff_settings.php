@@ -447,11 +447,11 @@ class Liff_settings extends Security_Controller {
             $cron = new \App\Libraries\Cron_job();
             if ($type === 'reminder') {
                 $count = $cron->run_task_reminder_test();
-                $this->Settings_model->save_setting('liff_reminder_last_sent', date('Y-m-d H:i:s'));
+                $this->Settings_model->save_setting('liff_reminder_last_sent', get_current_utc_time());
                 $msg = $count > 0 ? "ส่งแจ้งเตือนสำเร็จ ({$count} ราย)" : 'ไม่มีงานค้าง (ไม่ส่ง)';
             } else {
                 $count = $cron->run_task_summary_test();
-                $this->Settings_model->save_setting('liff_summary_last_sent', date('Y-m-d H:i:s'));
+                $this->Settings_model->save_setting('liff_summary_last_sent', get_current_utc_time());
                 $msg = $count > 0 ? "ส่งรายงานสำเร็จ ({$count} รายการ)" : 'ไม่มีงานเสร็จใน 7 วัน (ไม่ส่ง)';
             }
             return $this->response->setJSON(['success' => true, 'message' => $msg]);
@@ -615,8 +615,10 @@ class Liff_settings extends Security_Controller {
         $msg .= get_uri('liff');
 
         try {
-            $Line = new \App\Libraries\Line_webhook();
-            $Line->send_push_message($line_uid, $msg, 'user');
+            $Line = new \App\Libraries\Liff_line_webhook();
+            $Line->send_push_message($line_uid, $msg, 'user', [
+                'type' => 'liff_approval_approved'
+            ]);
         } catch (\Exception $e) {
             log_message('error', 'LIFF notify approved failed: ' . $e->getMessage());
         }
@@ -630,8 +632,10 @@ class Liff_settings extends Security_Controller {
         $msg .= "ติดต่อผู้ดูแลระบบเพื่อข้อมูลเพิ่มเติม";
 
         try {
-            $Line = new \App\Libraries\Line_webhook();
-            $Line->send_push_message($line_uid, $msg, 'user');
+            $Line = new \App\Libraries\Liff_line_webhook();
+            $Line->send_push_message($line_uid, $msg, 'user', [
+                'type' => 'liff_approval_rejected'
+            ]);
         } catch (\Exception $e) {
             log_message('error', 'LIFF notify rejected failed: ' . $e->getMessage());
         }

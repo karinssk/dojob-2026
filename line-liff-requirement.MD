@@ -75,7 +75,7 @@ status]            │
 ### 1.3 LIFF Verify (Server-Side)
 - Verify LINE `id_token` via LINE API: `POST https://api.line.me/oauth2/v2.1/verify`
 - Extract `sub` (LINE UID) from verified token
-- Check `user_mappings_arr.line_user_id = UID`
+- Check `user_mappings_arr.line_liff_user_id = UID`
 - If mapping exists → check `liff_pending_registrations.approval_status`
 
 ### 1.4 Link New User
@@ -519,7 +519,7 @@ All fields stored in `settings` table via existing `Settings_model`:
 
 **Approve Action:**
 1. `UPDATE liff_pending_registrations SET status='approved', approved_by={admin_id}, approved_at=NOW()`
-2. `INSERT INTO user_mappings_arr (line_user_id, rise_user_id, nick_name, line_display_name, is_active)` — or update if UID already exists
+2. `INSERT INTO user_mappings_arr (line_liff_user_id, rise_user_id, nick_name, line_display_name, is_active)` — or update if UID already exists
 3. Push LINE message to user via `line_channel_access_token`:
    ```
    คำขอของคุณได้รับการอนุมัติแล้ว!

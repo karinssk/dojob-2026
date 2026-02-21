@@ -600,13 +600,19 @@ class Liff_api extends Security_Controller {
 
         if ($mode === 'room' && !empty($rooms)) {
             foreach ($rooms as $rid) {
-                $Line->send_flex_message($rid, $flex, $alt_text, 'room');
+                $Line->send_flex_message($rid, $flex, $alt_text, 'room', [
+                    'task_id' => $task_id,
+                    'type' => 'liff_task_assignment'
+                ]);
             }
             return;
         }
 
         if (!$mapping || empty($mapping->line_liff_user_id)) { return; }
-        $Line->send_flex_message($mapping->line_liff_user_id, $flex, $alt_text, 'user');
+        $Line->send_flex_message($mapping->line_liff_user_id, $flex, $alt_text, 'user', [
+            'task_id' => $task_id,
+            'type' => 'liff_task_assignment'
+        ]);
     }
 
     private function _get_liff_rooms() {
