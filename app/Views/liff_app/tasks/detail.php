@@ -116,13 +116,13 @@ $modalIdx = 0;
   <div class="card-header">
     <h3>ความคิดเห็น</h3>
     <?php if (!empty($comments)): ?>
-    <span class="chip chip-gray"><?= count($comments) ?></span>
+    <span class="chip chip-gray" id="comment-count"><?= count($comments) ?></span>
     <?php endif; ?>
   </div>
 
   <?php if (!empty($comments)): ?>
   <div class="card-body" style="padding-bottom:0">
-    <div class="comment-list">
+    <div class="comment-list" id="comment-list">
       <?php foreach ($comments as $c):
         $avatar = get_avatar($c->created_by_avatar ?? '');
         $files  = $c->files ? @unserialize($c->files) : [];
@@ -158,7 +158,7 @@ $modalIdx = 0;
 
   <div class="card-body" style="padding-top:12px">
     <?php if (empty($comments)): ?>
-    <p class="text-sm text-muted" style="margin-bottom:12px">ยังไม่มีความคิดเห็น เป็นคนแรกที่แสดงความเห็น</p>
+    <p class="text-sm text-muted" id="comment-empty" style="margin-bottom:12px">ยังไม่มีความคิดเห็น เป็นคนแรกที่แสดงความเห็น</p>
     <?php endif; ?>
     <form id="task-comment-form" onsubmit="submitTaskComment(event)">
       <textarea class="form-control" name="description" rows="2" placeholder="เขียนความคิดเห็น..." style="margin-bottom:8px"></textarea>
@@ -257,10 +257,109 @@ async function submitTaskComment(e) {
   btn.disabled = true;
   const res = await LiffApp.api('liff/api/tasks/comment_save', 'POST', form);
   if (res.success) {
-    location.reload();
+    appendTaskComment(res.comment || {});
+    e.target.reset();
+    const input = document.getElementById('task-comment-images');
+    if (input) input.value = '';
+    const previews = document.getElementById('task-comment-previews');
+    if (previews) previews.innerHTML = '';
   } else {
     LiffApp.toast(res.message || 'เกิดข้อผิดพลาด', 'error');
-    btn.disabled = false;
   }
+  btn.disabled = false;
+}
+
+function appendTaskComment(comment) {
+  if (!comment || !comment.id) return;
+
+  const formCardBody = document.querySelector('#task-comment-form')?.closest('.card-body');
+  if (!formCardBody) return;
+
+  let list = document.getElementById('comment-list');
+  if (!list) {
+    const listBody = document.createElement('div');
+    listBody.className = 'card-body';
+    listBody.style.paddingBottom = '0';
+    list = document.createElement('div');
+    list.className = 'comment-list';
+    list.id = 'comment-list';
+    listBody.appendChild(list);
+    formCardBody.parentElement.insertBefore(listBody, formCardBody);
+
+    const divider = document.createElement('div');
+    divider.className = 'divider';
+    divider.style.margin = '0 16px';
+    formCardBody.parentElement.insertBefore(divider, formCardBody);
+  }
+
+  const empty = document.getElementById('comment-empty');
+  if (empty) empty.remove();
+
+  let countChip = document.getElementById('comment-count');
+  if (!countChip) {
+    const header = formCardBody.parentElement.querySelector('.card-header');
+    if (header) {
+      countChip = document.createElement('span');
+      countChip.id = 'comment-count';
+      countChip.className = 'chip chip-gray';
+      countChip.textContent = '0';
+      header.appendChild(countChip);
+    }
+  }
+  if (countChip) {
+    const n = parseInt(countChip.textContent || '0', 10) + 1;
+    countChip.textContent = String(n);
+  }
+
+  const item = document.createElement('div');
+  item.className = 'comment-item';
+
+  const avatar = document.createElement('img');
+  avatar.className = 'comment-avatar';
+  avatar.alt = '';
+  avatar.src = comment.user_avatar || '';
+
+  const body = document.createElement('div');
+  body.className = 'comment-body';
+
+  const meta = document.createElement('div');
+  meta.className = 'comment-meta';
+  const name = document.createElement('span');
+  name.className = 'comment-name';
+  name.textContent = comment.user_name || 'User';
+  const time = document.createElement('span');
+  time.className = 'comment-time';
+  time.textContent = comment.created_at_label || '';
+  meta.appendChild(name);
+  meta.appendChild(time);
+
+  body.appendChild(meta);
+
+  if (comment.description) {
+    const text = document.createElement('div');
+    text.className = 'comment-text';
+    text.textContent = comment.description;
+    body.appendChild(text);
+  }
+
+  if (Array.isArray(comment.images) && comment.images.length) {
+    const attach = document.createElement('div');
+    attach.className = 'comment-attachments';
+    comment.images.forEach(img => {
+      if (!img || !img.thumb) return;
+      const el = document.createElement('img');
+      el.src = img.thumb;
+      el.alt = '';
+      const idx = _imgs.length;
+      _imgs.push(img.full || img.thumb);
+      el.onclick = () => openImgModal(idx);
+      attach.appendChild(el);
+    });
+    body.appendChild(attach);
+  }
+
+  item.appendChild(avatar);
+  item.appendChild(body);
+  list.prepend(item);
 }
 </script>

@@ -251,7 +251,36 @@ class Liff_api extends Security_Controller {
             return $this->_json(['success' => false, 'message' => 'บันทึกความคิดเห็นไม่สำเร็จ']);
         }
 
-        return $this->_json(['success' => true]);
+        $comment = $this->Project_comments_model->get_details([
+            'id' => $save_id
+        ])->getRow();
+
+        $images = [];
+        $files = $files_data ? @unserialize($files_data) : [];
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                if (!is_array($file)) { continue; }
+                $file_name = $file['file_name'] ?? '';
+                if (!$file_name || !is_image_file($file_name)) { continue; }
+                $images[] = [
+                    'thumb' => get_source_url_of_file($file, get_setting("timeline_file_path"), "thumbnail"),
+                    'full'  => get_source_url_of_file($file, get_setting("timeline_file_path")),
+                ];
+            }
+        }
+
+        return $this->_json([
+            'success' => true,
+            'comment' => [
+                'id' => $comment->id ?? $save_id,
+                'user_name' => $comment->created_by_user ?? trim($this->login_user->first_name . ' ' . $this->login_user->last_name),
+                'user_avatar' => get_avatar($comment->created_by_avatar ?? $this->login_user->image ?? ''),
+                'created_at' => $comment->created_at ?? get_current_utc_time(),
+                'created_at_label' => date('d M H:i', strtotime($comment->created_at ?? 'now')),
+                'description' => $comment->description ?? $desc,
+                'images' => $images,
+            ]
+        ]);
     }
 
     // ── Event: save ────────────────────────────────────────────────
