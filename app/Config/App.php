@@ -138,6 +138,20 @@ public $proxyIPs = [
 
         $current = trim((string) $current);
         $is_local = (stripos($current, 'localhost') !== false) || (stripos($current, '127.0.0.1') !== false);
+
+        // If request is HTTPS but configured URL is HTTP, upgrade to HTTPS
+        $req_scheme = null;
+        if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+            $proto = explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO']);
+            $req_scheme = strtolower(trim($proto[0] ?? ''));
+        } elseif (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+            $req_scheme = 'https';
+        }
+
+        if ($current && $req_scheme === 'https' && stripos($current, 'http://') === 0) {
+            $current = 'https://' . substr($current, 7);
+        }
+
         if ($current && !$is_local) {
             return rtrim($current, '/') . '/';
         }
