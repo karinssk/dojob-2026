@@ -117,24 +117,111 @@ class Liff_api extends Security_Controller {
             $this->_notify_assignment($save_id, $data['assigned_to'], $data['title']);
         }
 
-        // Notify LINE rooms (Group IDs) about task save
+        // Notify LINE rooms about task save — Flex Message with LIFF deep-link
         $group_ids_raw = get_setting('line_group_ids');
         if ($group_ids_raw) {
             $ids = preg_split('/[\n,]+/', $group_ids_raw);
             $ids = array_values(array_filter(array_map('trim', $ids)));
             if (!empty($ids)) {
-                $Line = new \App\Libraries\Liff_line_webhook();
+                $Line      = new \App\Libraries\Liff_line_webhook();
                 $user_name = trim($this->login_user->first_name . ' ' . $this->login_user->last_name);
-                $action = $id ? 'อัปเดตงาน' : 'สร้างงาน';
-                $msg = "{$action}\n{$data['title']}\nโดย: {$user_name}\n" . get_uri("liff/app/tasks/{$save_id}");
+                $action    = $id ? 'อัปเดตงาน' : 'สร้างงาน';
+                $is_new    = !$id;
+                $hdr_color = $is_new ? '#4F7DF3' : '#F59E0B';
+                $btn_color = $is_new ? '#4F7DF3' : '#F59E0B';
+                $hdr_icon  = $is_new ? '📝' : '✏️';
+
+                $liff_base = rtrim(get_setting('line_liff_id') ?: '2009171467-kn2AHM0C', '/');
+                $liff_url  = 'https://liff.line.me/' . $liff_base . '/tasks/' . $save_id;
+
+                $task_desc = trim($data['description'] ?? '');
+
+                $body_contents = [
+                    [
+                        'type'   => 'text',
+                        'text'   => $data['title'],
+                        'weight' => 'bold',
+                        'size'   => 'md',
+                        'color'  => '#1A1A2E',
+                        'wrap'   => true,
+                    ],
+                    [
+                        'type'  => 'separator',
+                        'margin'=> 'sm',
+                        'color' => '#E8EAF6',
+                    ],
+                    [
+                        'type'  => 'text',
+                        'text'  => 'โดย: ' . $user_name,
+                        'size'  => 'xs',
+                        'color' => '#888888',
+                        'margin'=> 'sm',
+                        'wrap'  => true,
+                    ],
+                ];
+
+                if ($task_desc) {
+                    $body_contents[] = [
+                        'type'     => 'text',
+                        'text'     => $task_desc,
+                        'size'     => 'sm',
+                        'color'    => '#555555',
+                        'wrap'     => true,
+                        'maxLines' => 3,
+                        'margin'   => 'sm',
+                    ];
+                }
+
+                $flex = [
+                    'type'   => 'bubble',
+                    'size'   => 'kilo',
+                    'header' => [
+                        'type'            => 'box',
+                        'layout'          => 'horizontal',
+                        'backgroundColor' => $hdr_color,
+                        'paddingAll'      => '14px',
+                        'contents'        => [[
+                            'type'   => 'text',
+                            'text'   => $hdr_icon . ' ' . $action,
+                            'color'  => '#FFFFFF',
+                            'weight' => 'bold',
+                            'size'   => 'md',
+                            'flex'   => 1,
+                        ]],
+                    ],
+                    'body' => [
+                        'type'       => 'box',
+                        'layout'     => 'vertical',
+                        'paddingAll' => '16px',
+                        'spacing'    => 'sm',
+                        'contents'   => $body_contents,
+                    ],
+                    'footer' => [
+                        'type'       => 'box',
+                        'layout'     => 'vertical',
+                        'paddingAll' => '12px',
+                        'contents'   => [[
+                            'type'   => 'button',
+                            'style'  => 'primary',
+                            'color'  => $btn_color,
+                            'height' => 'sm',
+                            'action' => [
+                                'type'  => 'uri',
+                                'label' => 'ดูรายละเอียดงาน',
+                                'uri'   => $liff_url,
+                            ],
+                        ]],
+                    ],
+                ];
+
+                $alt_text = $hdr_icon . ' ' . $action . ': ' . mb_substr($data['title'], 0, 50);
                 $meta = [
                     'task_id' => $save_id,
-                    'type' => $id ? 'liff_task_updated' : 'liff_task_created',
-                    'force_token' => get_setting('line_channel_access_token'),
-                    'force_token_label' => 'line_channel_access_token',
+                    'type'    => $id ? 'liff_task_updated' : 'liff_task_created',
                 ];
+
                 foreach ($ids as $rid) {
-                    $Line->send_push_message($rid, $msg, 'room', $meta);
+                    $Line->send_flex_message($rid, $flex, $alt_text, 'room', $meta);
                 }
             }
         }
