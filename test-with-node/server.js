@@ -29,12 +29,12 @@ const mysql    = require('mysql2/promise');
 // ── Config ───────────────────────────────────────────────────────────────────
 
 const PORT     = process.env.DOJOB_PORT || 3259;
-const BASE_URL = (process.env.BASE_URL || 'http://localhost:8888/dojob-2026').replace(/\/$/, '');
+const BASE_URL = (process.env.BASE_URL || 'https://dojob.rubyshop.co.th/').replace(/\/$/, '');
 const DB_CFG   = {
   host    : process.env.DB_HOST || '127.0.0.1',
-  port    : parseInt(process.env.DB_PORT || '8889'),
+  port    : parseInt(process.env.DB_PORT || '3306'),
   user    : process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || 'root',
+  password: process.env.DB_PASS || 'root258369',
   database: process.env.DB_NAME || 'rubyshop.co.th_dojob',
 };
 
@@ -111,8 +111,7 @@ async function loadSchedule() {
 // ── Schedule check ────────────────────────────────────────────────────────────
 
 /**
- * Returns true if NOW matches one of the configured time slots.
- * Slot window: ±2 minutes around the configured HH:MM.
+ * Returns true if NOW matches one of the configured time slots (exact HH:MM).
  * Cooldown: won't re-fire if last_sent was within 40 minutes.
  */
 function isTimeNow(times, days, lastSent) {
@@ -133,7 +132,7 @@ function isTimeNow(times, days, lastSent) {
   for (const t of times) {
     const [h, m] = t.split(':').map(Number);
     const slotMin = h * 60 + m;
-    if (Math.abs(nowMin - slotMin) <= 2) return true;
+    if (nowMin === slotMin) return true;
   }
   return false;
 }
