@@ -349,13 +349,6 @@ class Liff_api extends Security_Controller {
         }
 
         $user_id = $this->login_user->id;
-        $end_date = $event->end_date ?: $event->start_date;
-        $end_time = $event->end_time ?: '23:59:59';
-        $end_ts = $end_date ? strtotime($end_date . ' ' . $end_time) : null;
-        if ($end_ts && $end_ts > time()) {
-            return $this->_json(['success' => false, 'message' => 'ยังไม่ถึงเวลาให้ยืนยัน'], 422);
-        }
-
         $this->Events_model->save_event_status($event_id, $user_id, "confirmed");
         $this->Events_model->ci_save(['reminder_status' => 'done'], $event_id);
 
