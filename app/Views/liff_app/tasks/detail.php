@@ -250,10 +250,9 @@ async function setTaskStatus(btn, taskId, statusId) {
       <input type="hidden" name="project_id" value="<?= (int)($task->project_id ?? 0) ?>">
       <div class="comment-actions">
         <label class="comment-attach">
-          แนบรูป
+          📷 แนบรูป
           <input type="file" id="task-comment-images" name="manualFiles[]" accept="image/*" multiple hidden>
         </label>
-        <button type="submit" class="btn btn-primary btn-sm">ส่ง</button>
       </div>
       <div class="upload-previews" id="task-comment-previews"></div>
     </form>
@@ -281,7 +280,7 @@ async function setTaskStatus(btn, taskId, statusId) {
 </div>
 <?php endif; ?>
 
-<a class="btn btn-primary btn-block" href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>">อัพเดตงาน</a>
+<button class="btn btn-primary btn-block" id="save-comment-btn" onclick="saveCommentFromBtn(this)">อัพเดตงาน</button>
 
 <!-- Image modal -->
 <div id="img-modal" class="img-modal" onclick="closeImgModal()">
@@ -327,30 +326,76 @@ function _updateModal() {
   });
 })();
 
-/* ── Init image upload (wait for LiffApp) ── */
+/* ── Init image upload + auto-submit on image pick ── */
 (function waitForLiffApp() {
   if (!window.LiffApp) { setTimeout(waitForLiffApp, 50); return; }
   LiffApp.initImageUpload('task-comment-images', 'task-comment-previews');
+
+  // Auto-submit comment form when images are selected
+  const imgInput = document.getElementById('task-comment-images');
+  if (imgInput) {
+    imgInput.addEventListener('change', function() {
+      if (this.files && this.files.length > 0) {
+        // Small delay to let LiffApp process the preview files first
+        setTimeout(() => {
+          document.getElementById('task-comment-form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        }, 300);
+      }
+    });
+  }
 })();
+
+/* ── "อัพเดตงาน" save button — submits the comment form ── */
+async function saveCommentFromBtn(btn) {
+  const form = document.getElementById('task-comment-form');
+  const textarea = form.querySelector('textarea[name="description"]');
+  const hasText = textarea && textarea.value.trim().length > 0;
+  const hasImages = document.getElementById('task-comment-previews')?.children.length > 0;
+
+  if (!hasText && !hasImages) {
+    // Nothing to save — just show a brief hint
+    LiffApp.toast('พิมพ์ความคิดเห็นหรือแนบรูปก่อนบันทึก', 'info');
+    textarea && textarea.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = 'กำลังบันทึก...';
+
+  form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+  // Re-enable after short delay (submitTaskComment handles actual state)
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }, 1500);
+}
 
 /* ── Comment submit ── */
 async function submitTaskComment(e) {
   e.preventDefault();
-  const form = new FormData(e.target);
-  const btn = e.target.querySelector('button[type="submit"]');
-  btn.disabled = true;
-  const res = await LiffApp.api('liff/api/tasks/comment_save', 'POST', form);
+  const form = e.target;
+  const formData = new FormData(form);
+
+  // Disable save button while submitting
+  const saveBtn = document.getElementById('save-comment-btn');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'กำลังบันทึก...'; }
+
+  const res = await LiffApp.api('liff/api/tasks/comment_save', 'POST', formData);
   if (res.success) {
     appendTaskComment(res.comment || {});
-    e.target.reset();
+    form.reset();
     const input = document.getElementById('task-comment-images');
     if (input) input.value = '';
     const previews = document.getElementById('task-comment-previews');
     if (previews) previews.innerHTML = '';
+    LiffApp.toast('บันทึกแล้ว ✓', 'success');
   } else {
     LiffApp.toast(res.message || 'เกิดข้อผิดพลาด', 'error');
   }
-  btn.disabled = false;
+
+  if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'อัพเดตงาน'; }
 }
 
 function appendTaskComment(comment) {
