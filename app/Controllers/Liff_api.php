@@ -349,8 +349,37 @@ class Liff_api extends Security_Controller {
         }
 
         $user_id = $this->login_user->id;
+        $end_date = $event->end_date ?: $event->start_date;
+        $end_time = $event->end_time ?: '23:59:59';
+        $end_ts = $end_date ? strtotime($end_date . ' ' . $end_time) : null;
+        if ($end_ts && $end_ts > time()) {
+            return $this->_json(['success' => false, 'message' => 'ยังไม่ถึงเวลาให้ยืนยัน'], 422);
+        }
+
         $this->Events_model->save_event_status($event_id, $user_id, "confirmed");
         $this->Events_model->ci_save(['reminder_status' => 'done'], $event_id);
+
+        // Notify LINE rooms (Group IDs)
+        $group_ids_raw = get_setting('line_group_ids');
+        if ($group_ids_raw) {
+            $ids = preg_split('/[\n,]+/', $group_ids_raw);
+            $ids = array_values(array_filter(array_map('trim', $ids)));
+            if (!empty($ids)) {
+                $Line = new \App\Libraries\Liff_line_webhook();
+                $user_name = trim($this->login_user->first_name . ' ' . $this->login_user->last_name);
+                $date_label = $end_date ? date('d/m/y', strtotime($end_date)) : '-';
+                $msg = "✅ ยืนยันกิจกรรมเสร็จแล้ว\n{$event->title}\nวันที่: {$date_label}\nโดย: {$user_name}";
+                $meta = [
+                    'event_id' => $event_id,
+                    'type' => 'liff_event_confirmed',
+                    'force_token' => get_setting('line_channel_access_token'),
+                    'force_token_label' => 'line_channel_access_token',
+                ];
+                foreach ($ids as $rid) {
+                    $Line->send_push_message($rid, $msg, 'room', $meta);
+                }
+            }
+        }
 
         return $this->_json(['success' => true]);
     }
