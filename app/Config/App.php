@@ -9,6 +9,7 @@ class App extends BaseConfig
     public function __construct()
     {
         $this->set_supported_languages();
+        $this->baseURL = $this->resolve_base_url($this->baseURL);
     }
 
     /**
@@ -122,5 +123,44 @@ public $proxyIPs = [
         }
 
         $this->supportedLocales = $language_dropdown;
+    }
+
+    /**
+     * Auto-detect baseURL when the configured value is empty or localhost.
+     * This prevents production from generating localhost URLs when .env is misconfigured.
+     */
+    private function resolve_base_url($current)
+    {
+        $env_base = env('app.baseURL');
+        if ($env_base) {
+            $current = $env_base;
+        }
+
+        $current = trim((string) $current);
+        $is_local = (stripos($current, 'localhost') !== false) || (stripos($current, '127.0.0.1') !== false);
+        if ($current && !$is_local) {
+            return rtrim($current, '/') . '/';
+        }
+
+        if (PHP_SAPI === 'cli' || empty($_SERVER['HTTP_HOST'])) {
+            return $current ? rtrim($current, '/') . '/' : $current;
+        }
+
+        $scheme = 'http';
+        if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+            $proto = explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO']);
+            $scheme = trim($proto[0]) ?: $scheme;
+        } elseif (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+            $scheme = 'https';
+        }
+
+        $host = $_SERVER['HTTP_HOST'];
+        $script = $_SERVER['SCRIPT_NAME'] ?? '';
+        $path = $script ? rtrim(str_replace('\\', '/', dirname($script)), '/') : '';
+        if ($path === '/') {
+            $path = '';
+        }
+
+        return $scheme . '://' . $host . $path . '/';
     }
 }
