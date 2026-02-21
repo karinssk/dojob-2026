@@ -2294,7 +2294,7 @@ class NodeJSEnhancedKanban {
           color: #374151 !important;
           background: white !important;
         ">
-          📝 Edit
+          Edit
         </div>
         <div class="menu-divider" style="
           height: 1px !important;

@@ -17,7 +17,7 @@ function initTaskDataDisplay() {
       var assigneeId = parseInt($container.data('current-assignee')) || 0;
       var taskId = $container.data('task-id');
       
-      console.log("📝 Updating assignee display for task:", taskId, "assignee:", assigneeId);
+      console.log("Updating assignee display for task:", taskId, "assignee:", assigneeId);
       
       if (assigneeId > 0) {
         updateAssigneeDisplay($container, assigneeId, null, users);
@@ -683,7 +683,7 @@ window.testTaskListFunctions = function () {
     // Check if form was created
     setTimeout(function () {
       const forms = $(".inline-task-form");
-      console.log("📝 Inline forms created:", forms.length);
+      console.log("Inline forms created:", forms.length);
 
       if (forms.length > 0) {
         console.log(" Form created successfully");
@@ -723,7 +723,7 @@ window.testTaskListFunctions = function () {
     // Check if editor appeared
     setTimeout(function () {
       const editors = $(".task-title-editor:visible");
-      console.log("📝 Visible editors:", editors.length);
+      console.log("Visible editors:", editors.length);
     }, 200);
   }
 
@@ -760,7 +760,7 @@ window.testEventHandlers = function () {
   console.log("Event handlers:", handlers);
 
   // Test creating a form manually
-  console.log("📝 Creating test form...");
+  console.log("Creating test form...");
   const testForm = `<tr class="inline-task-form test-form" data-parent-id="0" data-level="0" style="background: #F7F8F9; border-left: 3px solid #0052CC;">
         <td colspan="13">
             <input type="text" class="new-task-title" value="Test Task" style="margin: 10px; padding: 5px;">
@@ -850,7 +850,7 @@ function testAllFunctionality() {
   }
 
   if (titleDisplays.length > 0) {
-    console.log("\n📝 Testing title displays...");
+    console.log("\nTesting title displays...");
     var firstTitle = titleDisplays.first();
     console.log("- First title display:", firstTitle.length);
     console.log("- Class names:", firstTitle.attr("class"));

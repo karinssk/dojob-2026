@@ -1860,7 +1860,7 @@ app.listen(port, async () => {
   console.log(` Test API: http://localhost:${port}/api/test-expense`);
   console.log(` View Expenses: http://localhost:${port}/api/expenses`);
   console.log(`🔢 Test Amount Parsing: http://localhost:${port}/api/test-amount-parsing/1,500.50`);
-  console.log(`📝 Test Expense Parsing: http://localhost:${port}/api/test-expense-parsing`);
+  console.log(`Test Expense Parsing: http://localhost:${port}/api/test-expense-parsing`);
   console.log(`💰 Test Number Formatting: http://localhost:${port}/api/test-number-formatting/10000`);
   console.log(`🗓️ Test Date Parsing: http://localhost:${port}/api/test-date-parsing/2/6/68`);
   console.log(`🔍 Test Project Lookup: http://localhost:${port}/api/test-project-lookup/ruby?date=2/6/68`);

@@ -265,7 +265,7 @@ function renderLabelsDropdown(
   dropdownHtml += "</div>";
 
   console.log(
-    "📝 Generated dropdown HTML preview:",
+    "Generated dropdown HTML preview:",
     dropdownHtml.substring(0, 200) + "..."
   );
 
@@ -308,7 +308,7 @@ function renderLabelsDropdown(
       e.stopImmediatePropagation();
 
       var buttonTaskId = $(this).data("task-id");
-      console.log("📝 Task ID from button:", buttonTaskId);
+      console.log("Task ID from button:", buttonTaskId);
 
       // Get selected label IDs
       var selectedLabelIds = [];
@@ -324,7 +324,7 @@ function renderLabelsDropdown(
         }
       );
 
-      console.log("📝 All selected IDs:", selectedLabelIds);
+      console.log("All selected IDs:", selectedLabelIds);
 
       if (selectedLabelIds.length === 0) {
         console.log(
@@ -467,7 +467,7 @@ function renderLabelsDropdown(
         e.stopImmediatePropagation();
 
         var buttonTaskId = $(this).data("task-id");
-        console.log("📝 Clearing all labels for task:", buttonTaskId);
+        console.log("Clearing all labels for task:", buttonTaskId);
 
         // Show confirmation dialog
         Swal.fire({

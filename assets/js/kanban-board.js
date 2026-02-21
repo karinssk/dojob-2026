@@ -495,7 +495,7 @@ class KanbanBoard {
           e.stopPropagation(); // Prevent task modal from opening
           const taskId = button.dataset.taskId;
           const direction = button.dataset.direction;
-          console.log("📝 Reorder data:", { taskId, direction });
+          console.log("Reorder data:", { taskId, direction });
           this.reorderTask(taskId, direction);
         });
       });
@@ -769,7 +769,7 @@ class KanbanBoard {
       }
 
       console.log(
-        `📝 Updating task ${cleanTaskId} to status ${statusId} via Node.js API`
+        `Updating task ${cleanTaskId} to status ${statusId} via Node.js API`
       );
 
       // Use Node.js API

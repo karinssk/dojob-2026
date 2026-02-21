@@ -22,7 +22,7 @@ function initInlineEditing() {
     var $editor = $display.siblings(".task-title-editor");
     var taskId = $display.data("task-id");
 
-    console.log("📝 Starting title edit for task:", taskId);
+    console.log("Starting title edit for task:", taskId);
 
     if ($editor.length === 0) {
       console.error("❌ No title editor element found");
@@ -186,7 +186,7 @@ function initInlineEditing() {
     var taskId = $container.data("task-id");
     var currentAssignee = $container.data("current-assignee") || 0;
 
-    console.log("📝 Starting assignee edit for task:", taskId);
+    console.log("Starting assignee edit for task:", taskId);
 
     // Remove any existing dropdown
     $(".assignee-dropdown").remove();
@@ -294,7 +294,7 @@ function initInlineEditing() {
     var $editor = $display.siblings(".task-description-editor");
     var taskId = $display.data("task-id");
 
-    console.log("📝 Starting description edit for task:", taskId);
+    console.log("Starting description edit for task:", taskId);
 
     if ($editor.length === 0) {
       console.error("❌ No description editor element found");

@@ -311,7 +311,7 @@ function initInlineTaskCreation() {
 // Show inline task form
 function showInlineTaskForm(parentId, level, $insertAfter) {
   console.log(
-    "📝 Showing inline task form for parent:",
+    "Showing inline task form for parent:",
     parentId,
     "level:",
     level
@@ -1728,7 +1728,7 @@ function renderLabelsDropdown(
   dropdownHtml += "</div>";
 
   console.log(
-    "📝 Generated dropdown HTML preview:",
+    "Generated dropdown HTML preview:",
     dropdownHtml.substring(0, 200) + "..."
   );
 
@@ -1770,7 +1770,7 @@ function renderLabelsDropdown(
         }
       );
 
-      console.log("📝 All selected IDs:", selectedLabelIds);
+      console.log("All selected IDs:", selectedLabelIds);
 
       if (selectedLabelIds.length === 0) {
         console.log("⚠️ No labels selected");
@@ -1935,7 +1935,7 @@ window.handleSaveLabels = function (taskId) {
   var selectedLabelIds = [];
   $(".label-option input[type='checkbox']:checked").each(function () {
     var labelId = parseInt($(this).closest(".label-option").data("label-id"));
-    console.log("📝 Found checked label ID:", labelId);
+    console.log("Found checked label ID:", labelId);
     if (!isNaN(labelId)) {
       selectedLabelIds.push(labelId);
     }
@@ -2537,7 +2537,7 @@ function initTaskDataDisplay() {
       var taskId = $container.data("task-id");
 
       console.log(
-        "📝 Updating assignee display for task:",
+        "Updating assignee display for task:",
         taskId,
         "assignee:",
         assigneeId
@@ -3177,7 +3177,7 @@ function initInlineEditing() {
     var $editor = $display.siblings(".task-title-editor");
     var taskId = $display.data("task-id");
 
-    console.log("📝 Starting title edit for task:", taskId);
+    console.log("Starting title edit for task:", taskId);
 
     if ($editor.length === 0) {
       console.error("❌ No title editor element found");
@@ -3324,7 +3324,7 @@ function initInlineEditing() {
     var taskId = $container.data("task-id");
     var currentAssignee = $container.data("current-assignee") || 0;
 
-    console.log("📝 Starting assignee edit for task:", taskId);
+    console.log("Starting assignee edit for task:", taskId);
 
     // Remove any existing dropdown
     $(".assignee-dropdown").remove();
@@ -3436,7 +3436,7 @@ function initInlineEditing() {
     var $editor = $display.siblings(".task-description-editor");
     var taskId = $display.data("task-id");
 
-    console.log("📝 Starting description edit for task:", taskId);
+    console.log("Starting description edit for task:", taskId);
 
     if ($editor.length === 0) {
       console.error("❌ No description editor element found");
@@ -3651,7 +3651,7 @@ window.testTaskListFunctions = function () {
     // Check if form was created
     setTimeout(function () {
       const forms = $(".inline-task-form");
-      console.log("📝 Inline forms created:", forms.length);
+      console.log("Inline forms created:", forms.length);
 
       if (forms.length > 0) {
         console.log(" Form created successfully");
@@ -3691,7 +3691,7 @@ window.testTaskListFunctions = function () {
     // Check if editor appeared
     setTimeout(function () {
       const editors = $(".task-title-editor:visible");
-      console.log("📝 Visible editors:", editors.length);
+      console.log("Visible editors:", editors.length);
     }, 200);
   }
 
@@ -3728,7 +3728,7 @@ window.testEventHandlers = function () {
   console.log("Event handlers:", handlers);
 
   // Test creating a form manually
-  console.log("📝 Creating test form...");
+  console.log("Creating test form...");
   const testForm = `<tr class="inline-task-form test-form" data-parent-id="0" data-level="0" style="background: #F7F8F9; border-left: 3px solid #0052CC;">
         <td colspan="13">
             <input type="text" class="new-task-title" value="Test Task" style="margin: 10px; padding: 5px;">
@@ -4799,7 +4799,7 @@ function testAllFunctionality() {
   }
 
   if (titleDisplays.length > 0) {
-    console.log("\n📝 Testing title displays...");
+    console.log("\nTesting title displays...");
     var firstTitle = titleDisplays.first();
     console.log("- First title display:", firstTitle.length);
     console.log("- Class names:", firstTitle.attr("class"));

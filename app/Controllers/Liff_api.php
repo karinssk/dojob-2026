@@ -126,7 +126,7 @@ class Liff_api extends Security_Controller {
                 $Line = new \App\Libraries\Liff_line_webhook();
                 $user_name = trim($this->login_user->first_name . ' ' . $this->login_user->last_name);
                 $action = $id ? 'อัปเดตงาน' : 'สร้างงาน';
-                $msg = "📝 {$action}\n{$data['title']}\nโดย: {$user_name}\n" . get_uri("liff/app/tasks/{$save_id}");
+                $msg = "{$action}\n{$data['title']}\nโดย: {$user_name}\n" . get_uri("liff/app/tasks/{$save_id}");
                 $meta = [
                     'task_id' => $save_id,
                     'type' => $id ? 'liff_task_updated' : 'liff_task_created',

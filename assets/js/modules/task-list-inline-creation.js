@@ -145,7 +145,7 @@ function initInlineTaskCreation() {
 // Show inline task form
 function showInlineTaskForm(parentId, level, $insertAfter) {
   console.log(
-    "📝 Showing inline task form for parent:",
+    "Showing inline task form for parent:",
     parentId,
     "level:",
     level

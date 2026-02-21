@@ -20,29 +20,113 @@ $modalIdx = 0;
     <h1 style="font-size:16px;line-height:1.4"><?= esc($task->title) ?></h1>
     <p><?= esc($task->project_title ?? 'ไม่ระบุโปรเจกต์') ?></p>
   </div>
-  <a href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>" class="btn btn-primary btn-sm edit-btn">อัพเดตงาน</a>
+  <a href="<?= get_uri('liff/app/tasks/' . $task->id . '/edit') ?>" class="btn btn-primary btn-sm edit-btn">แก้ไข</a>
 </div>
 
 <!-- Status: current chip + horizontal scroll options -->
 <div class="card">
   <div class="card-body">
-    <div class="d-flex align-center justify-between" style="margin-bottom:10px">
+    <div class="d-flex align-center justify-between" style="margin-bottom:12px">
       <span class="text-sm fw-600 text-muted">สถานะ</span>
-      <span class="chip" style="background:<?= $bg ?>;color:<?= $color ?>" id="status-chip">
+      <span class="chip" style="background:<?= $color ?>;color:#fff;font-size:12px;padding:4px 12px" id="status-chip">
         <?= esc($task->status_title) ?>
       </span>
     </div>
-    <div class="status-scroll">
+    <div class="status-scroll" id="status-btn-group">
       <?php foreach ($statuses as $s):
-        $sc = $s->color ?: '#6C8EF5'; ?>
-      <button class="chip" style="background:<?= $sc ?>22;color:<?= $sc ?>"
-        onclick="LiffApp.updateTaskStatus(<?= $task->id ?>, <?= $s->id ?>, document.getElementById('status-chip'))">
+        $sc = $s->color ?: '#6C8EF5';
+        $isActive = (int)$s->id === (int)$task->status_id;
+      ?>
+      <button
+        class="status-btn <?= $isActive ? 'status-btn-active' : '' ?>"
+        data-status-id="<?= (int)$s->id ?>"
+        data-color="<?= esc($sc) ?>"
+        data-title="<?= esc($s->title) ?>"
+        style="
+          <?= $isActive
+            ? "background:{$sc};color:#fff;border:2px solid {$sc};"
+            : "background:{$sc}22;color:{$sc};border:2px solid {$sc}55;" ?>
+        "
+        onclick="setTaskStatus(this, <?= $task->id ?>, <?= $s->id ?>)">
+        <?php if ($isActive): ?>
+        <span style="margin-right:4px">✓</span>
+        <?php endif; ?>
         <?= esc($s->title) ?>
       </button>
       <?php endforeach; ?>
     </div>
   </div>
 </div>
+
+<style>
+.status-btn {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.status-btn:active { transform: scale(0.94); }
+.status-btn-active {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  transform: scale(1.06);
+}
+</style>
+
+<script>
+async function setTaskStatus(btn, taskId, statusId) {
+  const group = document.getElementById('status-btn-group');
+  const chip  = document.getElementById('status-chip');
+  const color = btn.dataset.color;
+  const title = btn.dataset.title;
+
+  // Optimistic UI — update all buttons immediately
+  group.querySelectorAll('.status-btn').forEach(b => {
+    const bc = b.dataset.color;
+    b.classList.remove('status-btn-active');
+    b.style.background = bc + '22';
+    b.style.color = bc;
+    b.style.border = '2px solid ' + bc + '55';
+    b.style.transform = '';
+    b.style.boxShadow = '';
+    // Remove checkmark
+    const chk = b.querySelector('span');
+    if (chk) chk.remove();
+  });
+
+  // Highlight the selected one
+  btn.classList.add('status-btn-active');
+  btn.style.background = color;
+  btn.style.color = '#fff';
+  btn.style.border = '2px solid ' + color;
+  btn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.18)';
+  btn.style.transform = 'scale(1.06)';
+  const chk = document.createElement('span');
+  chk.style.marginRight = '4px';
+  chk.textContent = '✓';
+  btn.prepend(chk);
+
+  // Update header chip
+  chip.textContent = title;
+  chip.style.background = color;
+  chip.style.color = '#fff';
+
+  // Call API
+  const res = await LiffApp.api('liff/api/tasks/update_status', 'POST', { task_id: taskId, status_id: statusId });
+  if (!res || !res.success) {
+    LiffApp.toast(res?.message || 'อัปเดตสถานะไม่สำเร็จ', 'danger');
+  } else {
+    LiffApp.toast('อัปเดตสถานะแล้ว', 'success');
+  }
+}
+</script>
 
 <!-- Task detail + Images — single merged card -->
 <div class="card">

@@ -670,7 +670,7 @@ class Line_webhook {
             if (strlen($description) > 100) {
                 $description = substr($description, 0, 100) . '...';
             }
-            $message .= "📝 **Description:** {$description}\n";
+            $message .= "**Description:** {$description}\n";
         }
 
         if (!empty($event->start_date)) {

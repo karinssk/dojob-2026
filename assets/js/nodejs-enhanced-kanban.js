@@ -2643,7 +2643,7 @@ $(document).ready(function() {
     
     // Function to update task status via drag and drop
     window.updateTaskStatus = function(taskId, newStatus) {
-        console.log(`📝 Updating task ${taskId} status to ${newStatus}`);
+        console.log(`Updating task ${taskId} status to ${newStatus}`);
         
         // Try different endpoints for updating task status
         const endpoints = [

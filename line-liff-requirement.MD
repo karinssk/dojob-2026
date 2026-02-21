@@ -143,7 +143,7 @@ After submitting link request, user sees a **full-screen pending page**:
   │ 📅 19 Feb —  09:00 → 17:00       │
   │  Assigned to: พี่ mike            │
   │ 🖼 [thumbnail] [thumbnail]          │
-  │ [📝 Update] [Done]               │
+  │ [Update] [Done]               │
   └─────────────────────────────────────┘
   ```
 
@@ -179,7 +179,7 @@ Fields:
 ### 3.4 Quick Update (from LINE message)
 - When LINE notification is sent, include **Flex Message** with:
   - `[Mark Done]` button → callback to `/liff/task_quick_update`
-  - `[📝 Add Update]` button → opens LIFF task detail
+  - `[Add Update]` button → opens LIFF task detail
   - `[ Snooze]` button → postpone next notification by 2h
 
 ---
@@ -318,7 +318,7 @@ Per-project toggles (stored in `project_settings` or new column):
 │  Assigned: พี่ mike           │
 │  Status: In Progress          │
 │─────────────────────────────────│
-│ [📝 Open Task] [Mark Done]   │
+│ [Open Task] [Mark Done]   │
 └─────────────────────────────────┘
 ```
 

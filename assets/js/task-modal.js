@@ -608,7 +608,7 @@ class TaskModal {
         deleted: 0,
       };
 
-      console.log("📝 Logging activity to rise_activity_logs:", {
+      console.log("Logging activity to rise_activity_logs:", {
         ...activityData,
         created_by: `${userId} (${this.currentUser.first_name} ${this.currentUser.last_name})`,
       });
@@ -1889,7 +1889,7 @@ class TaskModal {
             `${this.currentUser.first_name} ${this.currentUser.last_name}`.trim()
         );
 
-        console.log("📝 Adding comment with user info:", {
+        console.log("Adding comment with user info:", {
           user_id: this.currentUser.id,
           user_name:
             this.currentUser.full_name ||
@@ -1917,7 +1917,7 @@ class TaskModal {
 
         const result = await response.json();
 
-        console.log("📝 Comment response:", {
+        console.log("Comment response:", {
           status: response.status,
           success: result.success,
           error: result.error,
@@ -1949,7 +1949,7 @@ class TaskModal {
           `${this.currentUser.first_name} ${this.currentUser.last_name}`.trim() ||
           "Unknown User";
 
-        console.log("📝 Adding comment with user info:", {
+        console.log("Adding comment with user info:", {
           user_id: this.currentUser.id,
           user_name: commentData.user_name,
           has_images: false,
