@@ -352,6 +352,7 @@ class Liff_api extends Security_Controller {
         $this->Events_model->save_event_status($event_id, $user_id, "confirmed");
         $this->Events_model->ci_save(['reminder_status' => 'done'], $event_id);
 
+        $end_date = $event->end_date ?: $event->start_date;
         // Notify LINE rooms (Group IDs)
         $group_ids_raw = get_setting('line_group_ids');
         if ($group_ids_raw) {
