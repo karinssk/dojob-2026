@@ -1195,7 +1195,11 @@ class Cron_job {
                     'tasks'       => [],
                 ];
             }
-            $users[$uid]['tasks'][] = ['id' => $r->task_id, 'title' => $r->task_title];
+            $users[$uid]['tasks'][$r->task_id] = ['id' => $r->task_id, 'title' => $r->task_title];
+        }
+
+        foreach ($users as $uid => $u) {
+            $users[$uid]['tasks'] = array_values($u['tasks']);
         }
 
         $total_users = count($users);
