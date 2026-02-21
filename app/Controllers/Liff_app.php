@@ -341,6 +341,7 @@ class Liff_app extends Security_Controller {
             'active_tab' => 'events',
             'event'      => $event,
             'comments'   => $event_comments,
+            'login_user_id' => $this->login_user->id,
         ]);
     }
 

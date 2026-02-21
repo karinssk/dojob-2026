@@ -336,6 +336,25 @@ class Liff_api extends Security_Controller {
         return $this->_json(['success' => true]);
     }
 
+    // ── Event: confirm done (manual) ─────────────────────────────
+    public function event_confirm() {
+        $event_id = (int)$this->request->getPost('event_id');
+        if (!$event_id) {
+            return $this->_json(['success' => false, 'message' => 'Missing event_id'], 400);
+        }
+
+        $event = $this->Events_model->get_one($event_id);
+        if (!$event || $event->deleted) {
+            return $this->_json(['success' => false, 'message' => 'Event not found'], 404);
+        }
+
+        $user_id = $this->login_user->id;
+        $this->Events_model->save_event_status($event_id, $user_id, "confirmed");
+        $this->Events_model->ci_save(['reminder_status' => 'done'], $event_id);
+
+        return $this->_json(['success' => true]);
+    }
+
     // ── Event: calendar data (month/week/day) ─────────────────────
     public function events_calendar() {
         $user_id = $this->login_user->id;

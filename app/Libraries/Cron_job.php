@@ -789,12 +789,37 @@ class Cron_job {
         return '';
     }
 
+    private function _event_desc_text($event, $max_len = 160) {
+        $raw = $event->description ?? '';
+        if (!$raw) {
+            return '';
+        }
+        $text = html_entity_decode(strip_tags($raw), ENT_QUOTES, 'UTF-8');
+        $text = trim(preg_replace('/\s+/', ' ', $text));
+        if ($text === '') {
+            return '';
+        }
+        if (mb_strlen($text, 'UTF-8') > $max_len) {
+            $text = mb_substr($text, 0, $max_len - 1, 'UTF-8') . '…';
+        }
+        return $text;
+    }
+
+    private function _format_event_date($date) {
+        if (!$date) {
+            return '-';
+        }
+        $ts = strtotime($date);
+        if (!$ts) {
+            return $date;
+        }
+        return date('d/m/y', $ts);
+    }
+
     private function _build_event_notification_bubble($event, $mode = 'start') {
         $title = $event->title ?? 'กิจกรรม';
         $start_date = $event->start_date ?? '';
-        $start_time = $event->start_time ? substr($event->start_time, 0, 5) : '';
         $end_date = $event->end_date ?? '';
-        $end_time = $event->end_time ? substr($event->end_time, 0, 5) : '';
 
         $is_end = $mode === 'end';
         $header_text = $is_end ? 'แจ้งเตือนก่อนสิ้นสุดกิจกรรม' : 'แจ้งเตือนก่อนเริ่มกิจกรรม';
@@ -802,11 +827,8 @@ class Cron_job {
 
         $time_label = $is_end ? 'สิ้นสุด' : 'เริ่ม';
         $date_val = $is_end ? ($end_date ?: $start_date) : $start_date;
-        $time_val = $is_end ? ($end_time ?: $start_time) : $start_time;
-        $time_text = $date_val ? $date_val : '-';
-        if ($time_val) {
-            $time_text .= ' ' . $time_val;
-        }
+        $time_text = $this->_format_event_date($date_val);
+        $desc_text = $this->_event_desc_text($event, 160);
 
         $bubble = [
             'type' => 'bubble',
@@ -836,6 +858,14 @@ class Cron_job {
                         'weight' => 'bold',
                         'size' => 'md',
                         'wrap' => true,
+                    ],
+                    [
+                        'type' => 'text',
+                        'text' => $desc_text ?: ' ',
+                        'size' => 'sm',
+                        'color' => '#475569',
+                        'wrap' => true,
+                        'maxLines' => 3,
                     ],
                     [
                         'type' => 'text',
@@ -880,11 +910,8 @@ class Cron_job {
     private function _build_event_daily_bubble($event) {
         $title = $event->title ?? 'กิจกรรม';
         $start_date = $event->start_date ?? '';
-        $start_time = $event->start_time ? substr($event->start_time, 0, 5) : '';
-        $date_text = $start_date ?: '-';
-        if ($start_time) {
-            $date_text .= ' ' . $start_time;
-        }
+        $date_text = $this->_format_event_date($start_date);
+        $desc_text = $this->_event_desc_text($event, 140);
 
         $bubble = [
             'type' => 'bubble',
@@ -914,6 +941,14 @@ class Cron_job {
                         'weight' => 'bold',
                         'size' => 'md',
                         'wrap' => true,
+                    ],
+                    [
+                        'type' => 'text',
+                        'text' => $desc_text ?: ' ',
+                        'size' => 'sm',
+                        'color' => '#475569',
+                        'wrap' => true,
+                        'maxLines' => 3,
                     ],
                     [
                         'type' => 'text',
@@ -1542,9 +1577,29 @@ class Cron_job {
         }
 
         $count = 0;
+        $this->_auto_mark_past_events();
         $count += (int)$this->liff_notify_events_before_start();
         $count += (int)$this->liff_notify_events_before_end();
         return $count;
+    }
+
+    private function _auto_mark_past_events() {
+        $db  = \Config\Database::connect();
+        $now = date('Y-m-d H:i:s');
+
+        $db->query(
+            "UPDATE rise_events
+             SET reminder_status='shown'
+             WHERE deleted = 0
+               AND type = 'event'
+               AND reminder_status = 'new'
+               AND CONCAT(
+                     COALESCE(end_date, start_date),
+                     ' ',
+                     COALESCE(end_time, '23:59:59')
+               ) < ?",
+            [$now]
+        );
     }
 
     // ── Core: build & send incomplete-task reminder ───────────────────

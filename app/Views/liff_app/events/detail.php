@@ -1,3 +1,13 @@
+<?php
+$login_uid = (int)($login_user_id ?? 0);
+$confirmed_ids = array_filter(array_map('trim', explode(',', (string)($event->confirmed_by ?? ''))));
+$is_confirmed = $login_uid && in_array((string)$login_uid, $confirmed_ids, true);
+$end_date = $event->end_date ?: $event->start_date;
+$end_time = $event->end_time ?: '23:59:59';
+$end_ts = $end_date ? strtotime($end_date . ' ' . $end_time) : null;
+$is_past = $end_ts ? ($end_ts < time()) : false;
+?>
+
 <div class="page-header page-header-row">
   <h1><?= esc($event->title) ?></h1>
   <a href="<?= get_uri('liff/app/events/' . $event->id . '/edit') ?>" class="btn btn-primary btn-sm edit-btn">แก้ไข</a>
@@ -52,6 +62,26 @@
     </div>
   </div>
   <?php endif; ?>
+
+  <div style="margin-top:16px;padding-top:16px;border-top:1px solid #F1F5F9">
+    <div style="font-size:12px;color:#94A3B8;font-weight:600;margin-bottom:8px">สถานะกิจกรรม</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+      <span class="chip" style="background:#E2E8F0;color:#475569">
+        <?= $is_past ? 'ผ่านแล้ว' : 'กำลังจะถึง' ?>
+      </span>
+      <span class="chip" style="background:<?= $is_confirmed ? '#DCFCE7' : '#F1F5F9' ?>;color:<?= $is_confirmed ? '#166534' : '#64748B' ?>">
+        <?= $is_confirmed ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' ?>
+      </span>
+    </div>
+
+    <?php if ($is_confirmed): ?>
+      <button class="btn btn-success btn-block" disabled>ยืนยันแล้ว</button>
+    <?php elseif ($is_past): ?>
+      <button class="btn btn-success btn-block" onclick="confirmEventDone(<?= (int)$event->id ?>)">ยืนยันกิจกรรมเสร็จแล้ว</button>
+    <?php else: ?>
+      <button class="btn btn-secondary btn-block" disabled>ยังไม่ถึงเวลา</button>
+    <?php endif; ?>
+  </div>
 
   <div style="margin-top:16px;padding-top:16px;border-top:1px solid #F1F5F9;font-size:12px;color:#94A3B8">
     สร้างโดย <?= esc($event->creator_name ?? 'ไม่ระบุ') ?>
@@ -180,6 +210,16 @@ async function submitEventComment(e) {
   } else {
     LiffApp.toast(res.message || 'เกิดข้อผิดพลาด', 'error');
     btn.disabled = false;
+  }
+}
+
+async function confirmEventDone(id) {
+  const res = await LiffApp.api('liff/api/events/confirm', 'POST', { event_id: id });
+  if (res.success) {
+    LiffApp.toast('ยืนยันแล้ว', 'success');
+    setTimeout(() => location.reload(), 400);
+  } else {
+    LiffApp.toast(res.message || 'ยืนยันไม่สำเร็จ', 'danger');
   }
 }
 </script>
