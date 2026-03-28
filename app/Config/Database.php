@@ -34,7 +34,7 @@ class Database extends Config
 		'DSN'      => '',
 		'hostname' => 'localhost',
 		'username' => 'root',
-		'password' => 'root',
+		'password' => 'root258369',
 		'database' => 'rubyshop.co.th_dojob',
 		'DBDriver' => 'MySQLi',
 		'DBPrefix' => 'rise_',
