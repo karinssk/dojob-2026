@@ -21,6 +21,14 @@ $use_actions_to_get_started_text = $lang_or("use_actions_to_get_started", "Use N
 $click_to_open_text = $lang_or("click_to_open", "Click to open");
 $click_to_preview_text = $lang_or("click_to_preview", "Click to preview");
 $file_storage_path = $client_id ? get_general_file_path("client", $client_id) : get_general_file_path("global_files", "all");
+$format_24h_dot_time = function ($date_time) {
+    if (!$date_time) {
+        return "";
+    }
+    $local_date_time = convert_date_utc_to_local($date_time);
+    $timestamp = strtotime($local_date_time);
+    return $timestamp ? date("H.i", $timestamp) : "";
+};
 ?>
 
 <div id="file-manager-detail-area" class="file-manager-pane">
@@ -121,6 +129,7 @@ $file_storage_path = $client_id ? get_general_file_path("client", $client_id) : 
                                     if ($folder_item_type == "file") {
                                         $file_name = short_file_name(remove_file_prefix($folder_item->file_name));
                                         $file_size = convert_file_size($folder_item->file_size);
+                                        $file_time = $format_24h_dot_time(get_array_value((array) $folder_item, "created_at"));
                                         $is_image_file = is_viewable_image_file($folder_item->file_name);
                                         $thumbnail_url = "";
                                         if ($is_image_file) {
@@ -150,10 +159,20 @@ $file_storage_path = $client_id ? get_general_file_path("client", $client_id) : 
                                                     </div>
                                                     <div class="finder-card-title">
                                                         <div class="finder-card-name file-name item-name"><?php echo js_anchor($file_name, $preview_link_attr); ?></div>
-                                                        <div class="finder-card-meta"><?php echo app_lang('file'); ?> &middot; <?php echo $click_to_preview_text; ?></div>
+                                                        <div class="finder-card-meta">
+                                                            <?php echo app_lang('file'); ?> &middot; <?php echo $click_to_preview_text; ?>
+                                                            <?php if ($file_time) { ?>
+                                                                &middot; <?php echo $file_time; ?>
+                                                            <?php } ?>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="finder-card-details"><?php echo $file_size; ?></div>
+                                                <div class="finder-card-details">
+                                                    <?php echo $file_size; ?>
+                                                    <?php if ($file_time) { ?>
+                                                        &middot; <?php echo $file_time; ?>
+                                                    <?php } ?>
+                                                </div>
                                             </div>
                                             <span class="file-manager-more-menu">
                                                 <i data-feather="more-horizontal" class="icon-18"></i>
@@ -223,6 +242,7 @@ $file_storage_path = $client_id ? get_general_file_path("client", $client_id) : 
                                 if ($folder_item_type == "file") {
                                     $file_name = short_file_name(remove_file_prefix($folder_item->file_name));
                                     $file_size = convert_file_size($folder_item->file_size);
+                                    $file_time = $format_24h_dot_time(get_array_value((array) $folder_item, "created_at"));
                                     $is_image_file = is_viewable_image_file($folder_item->file_name);
                                     $thumbnail_url = "";
                                     if ($is_image_file) {
@@ -256,7 +276,12 @@ $file_storage_path = $client_id ? get_general_file_path("client", $client_id) : 
                                             </div>
                                             <div class="finder-list-details"><?php echo app_lang('file'); ?></div>
                                             <div class="finder-list-size file-size"><?php echo $file_size; ?></div>
-                                            <div class="finder-list-type"><?php echo app_lang('file'); ?></div>
+                                            <div class="finder-list-type">
+                                                <?php echo app_lang('file'); ?>
+                                                <?php if ($file_time) { ?>
+                                                    &middot; <?php echo $file_time; ?>
+                                                <?php } ?>
+                                            </div>
                                         </div>
                                         <span class="file-manager-more-menu">
                                             <i data-feather="more-horizontal" class="icon-18"></i>
