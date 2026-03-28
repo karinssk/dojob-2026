@@ -1,24 +1,42 @@
-<div id="file-manager-window-area" class="show-context-menu">
+<div id="file-manager-window-area" class="show-context-menu file-manager-pane">
     <?php
     $folder_count = count($folders_list);
     $file_count = $folder_item_type === "file" ? count($folder_items) : 0;
     $has_any_items = $folder_count || $file_count;
+
+    $lang_or = function ($key, $fallback) {
+        $value = app_lang($key);
+        if ($value === "default_lang.$key" || $value === "custom_lang.$key") {
+            return $fallback;
+        }
+        return $value;
+    };
+
+    $view_options_text = $lang_or("view_options", "View options");
+    $choose_how_to_browse_text = $lang_or("choose_how_to_browse", "Choose how to browse");
+    $icon_view_text = $lang_or("icon_view", "Icon view");
+    $list_view_text = $lang_or("list_view", "List view");
+    $quickly_find_folders_text = $lang_or("quickly_find_folders", "Quickly find folders in this location.");
+    $quickly_find_files_text = $lang_or("quickly_find_files", "Quickly preview files stored in this location.");
+    $use_actions_to_get_started_text = $lang_or("use_actions_to_get_started", "Use New folder or Add files to get started.");
+    $click_to_open_text = $lang_or("click_to_open", "Click to open");
+    $click_to_preview_text = $lang_or("click_to_preview", "Click to preview");
     ?>
 
     <div class="finder-canvas">
         <div class="finder-toolbar">
             <div class="finder-toolbar-info">
-                <div class="finder-label"><?php echo app_lang('view_options'); ?></div>
-                <div class="finder-helper"><?php echo app_lang('choose_how_to_browse'); ?></div>
+                <div class="finder-label"><?php echo $view_options_text; ?></div>
+                <div class="finder-helper"><?php echo $choose_how_to_browse_text; ?></div>
             </div>
             <div class="finder-toggle" id="file-view-toggle">
                 <button class="view-mode-btn" data-mode="grid">
-                    <span class="view-mode-icon">?</span>
-                    <span><?php echo app_lang('icon_view'); ?></span>
+                    <span class="view-mode-icon"><i data-feather="grid" class="icon-14"></i></span>
+                    <span><?php echo $icon_view_text; ?></span>
                 </button>
                 <button class="view-mode-btn" data-mode="list">
-                    <span class="view-mode-icon">?</span>
-                    <span><?php echo app_lang('list_view'); ?></span>
+                    <span class="view-mode-icon"><i data-feather="list" class="icon-14"></i></span>
+                    <span><?php echo $list_view_text; ?></span>
                 </button>
             </div>
         </div>
@@ -26,9 +44,9 @@
         <?php if (!$has_any_items) { ?>
             <div class="finder-empty">
                 <div class="finder-empty-card">
-                    <div class="finder-empty-icon">?</div>
+                    <div class="finder-empty-icon"><i data-feather="inbox"></i></div>
                     <div class="finder-empty-title"><?php echo app_lang('no_record_found'); ?></div>
-                    <div class="finder-empty-text"><?php echo app_lang('use_actions_to_get_started'); ?></div>
+                    <div class="finder-empty-text"><?php echo $use_actions_to_get_started_text; ?></div>
                 </div>
             </div>
         <?php } else { ?>
@@ -40,7 +58,7 @@
                 <div class="finder-section-header">
                             <div>
                                 <div class="finder-section-title"><?php echo app_lang('folders'); ?></div>
-                                <div class="finder-section-helper"><?php echo app_lang('quickly_find_folders'); ?></div>
+                                <div class="finder-section-helper"><?php echo $quickly_find_folders_text; ?></div>
                             </div>
                             <span class="finder-pill"><?php echo $folder_count; ?></span>
                         </div>
@@ -55,12 +73,12 @@
                                 }
                             ?>
                                 <li class="folder-item" data-id="<?php echo $folder->id; ?>" data-folder_id="<?php echo $folder->folder_id; ?>" data-type="folder" data-is_favourite="<?php echo $is_favourite; ?>" data-has_this_folder_write_permission="<?php echo $has_this_folder_write_permission; ?>">
-                                    <div class="folder-item-content show-context-menu finder-card finder-card-folder">
+                                    <div class="folder-item-content show-context-menu finder-card finder-card-folder folder-thumb-area">
                                         <div class="finder-card-top">
-                                            <div class="finder-card-icon">?</div>
+                                            <div class="finder-card-icon"><i data-feather="folder"></i></div>
                                             <div class="finder-card-title">
-                                                <div class="finder-card-name folder-name"><?php echo $folder->title; ?></div>
-                                                <div class="finder-card-meta"><?php echo app_lang('folder'); ?> · <?php echo app_lang('click_to_open'); ?></div>
+                                                <div class="finder-card-name folder-name item-name"><?php echo $folder->title; ?></div>
+                                                <div class="finder-card-meta"><?php echo app_lang('folder'); ?> &middot; <?php echo $click_to_open_text; ?></div>
                                             </div>
                                         </div>
                                         <div class="finder-card-badges">
@@ -93,7 +111,7 @@
                         <div class="finder-section-header">
                             <div>
                                 <div class="finder-section-title"><?php echo app_lang('files'); ?></div>
-                                <div class="finder-section-helper"><?php echo app_lang('quickly_find_files'); ?></div>
+                                <div class="finder-section-helper"><?php echo $quickly_find_files_text; ?></div>
                             </div>
                             <span class="finder-pill"><?php echo $file_count; ?></span>
                         </div>
@@ -115,12 +133,12 @@
                                     $preview_link_attr["data-group"] = "window_files";
                             ?>
                                     <li class="folder-item" data-id="<?php echo $folder_item->id; ?>" data-type="file">
-                                        <div class="folder-item-content show-context-menu finder-card finder-card-file">
+                                        <div class="folder-item-content show-context-menu finder-card finder-card-file file-thumb-area">
                                             <div class="finder-card-top">
-                                                <div class="finder-card-icon">?</div>
+                                                <div class="finder-card-icon"><i data-feather="file-text"></i></div>
                                                 <div class="finder-card-title">
-                                                    <div class="finder-card-name file-name"><?php echo js_anchor($file_name, $preview_link_attr); ?></div>
-                                                    <div class="finder-card-meta"><?php echo app_lang('file'); ?> · <?php echo app_lang('click_to_preview'); ?></div>
+                                                    <div class="finder-card-name file-name item-name"><?php echo js_anchor($file_name, $preview_link_attr); ?></div>
+                                                    <div class="finder-card-meta"><?php echo app_lang('file'); ?> &middot; <?php echo $click_to_preview_text; ?></div>
                                                 </div>
                                             </div>
                                             <div class="finder-card-details"><?php echo $file_size; ?></div>
@@ -155,11 +173,11 @@
                             }
                         ?>
                             <li class="folder-item" data-id="<?php echo $folder->id; ?>" data-folder_id="<?php echo $folder->folder_id; ?>" data-type="folder" data-is_favourite="<?php echo $is_favourite; ?>" data-has_this_folder_write_permission="<?php echo $has_this_folder_write_permission; ?>">
-                                <div class="folder-item-content show-context-menu finder-list-row">
+                                <div class="folder-item-content show-context-menu finder-list-row folder-thumb-area">
                                     <div class="finder-list-name">
-                                        <span class="finder-list-icon">?</span>
+                                        <span class="finder-list-icon"><i data-feather="folder"></i></span>
                                         <div>
-                                            <div class="folder-name"><?php echo $folder->title; ?></div>
+                                            <div class="folder-name item-name"><?php echo $folder->title; ?></div>
                                             <small><?php echo app_lang('folder'); ?></small>
                                         </div>
                                     </div>
@@ -175,7 +193,7 @@
                                         if (!$details) {
                                             $details[] = app_lang('empty');
                                         }
-                                        echo implode(" · ", $details);
+                                        echo implode(" &middot; ", $details);
                                         ?>
                                     </div>
                                     <div class="finder-list-size"><?php echo app_lang('na'); ?></div>
@@ -205,12 +223,12 @@
                                 $preview_link_attr["data-group"] = "window_files";
                         ?>
                                 <li class="folder-item" data-id="<?php echo $folder_item->id; ?>" data-type="file">
-                                    <div class="folder-item-content show-context-menu finder-list-row">
+                                    <div class="folder-item-content show-context-menu finder-list-row file-thumb-area">
                                         <div class="finder-list-name">
-                                            <span class="finder-list-icon">?</span>
+                                            <span class="finder-list-icon"><i data-feather="file-text"></i></span>
                                             <div>
-                                                <div class="file-name"><?php echo js_anchor($file_name, $preview_link_attr); ?></div>
-                                                <small><?php echo app_lang('click_to_preview'); ?></small>
+                                                <div class="file-name item-name"><?php echo js_anchor($file_name, $preview_link_attr); ?></div>
+                                                <small><?php echo $click_to_preview_text; ?></small>
                                             </div>
                                         </div>
                                         <div class="finder-list-details"><?php echo app_lang('file'); ?></div>
@@ -234,11 +252,11 @@
 
 <style>
     /* Scope all styles to the window area only, not the details panel */
-    #file-manager-window-area .finder-canvas {
+    .file-manager-pane .finder-canvas {
         padding: 0;
     }
 
-    #file-manager-window-area .finder-toolbar {
+    .file-manager-pane .finder-toolbar {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -252,7 +270,7 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
-    #file-manager-window-area .finder-label {
+    .file-manager-pane .finder-label {
         font-size: 11px;
         font-weight: 600;
         letter-spacing: 0.05em;
@@ -260,7 +278,7 @@
         color: #6b7280;
     }
 
-    #file-manager-window-area .finder-helper {
+    .file-manager-pane .finder-helper {
         font-size: 14px;
         color: #374151;
         margin-top: 2px;
@@ -294,6 +312,17 @@
         color: #374151;
     }
 
+    .finder-canvas .view-mode-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .finder-canvas .view-mode-icon .icon-14 {
+        width: 14px;
+        height: 14px;
+    }
+
     .finder-canvas .view-mode-btn.active {
         background: #ffffff;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -315,9 +344,17 @@
     }
 
     .finder-canvas .finder-empty-icon {
-        font-size: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         margin-bottom: 16px;
         opacity: 0.5;
+    }
+
+    .finder-canvas .finder-empty-icon svg {
+        width: 48px;
+        height: 48px;
+        stroke-width: 1.5;
     }
 
     .finder-canvas .finder-empty-title {
@@ -464,9 +501,17 @@
     }
 
     .finder-canvas .finder-card-icon {
-        font-size: 28px;
-        line-height: 1;
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         flex-shrink: 0;
+    }
+
+    .finder-canvas .finder-card-icon svg {
+        width: 22px;
+        height: 22px;
     }
 
     .finder-canvas .finder-card-title {
@@ -577,8 +622,15 @@
     }
 
     .finder-canvas .finder-list-icon {
-        font-size: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         flex-shrink: 0;
+    }
+
+    .finder-canvas .finder-list-icon svg {
+        width: 18px;
+        height: 18px;
     }
 
     .finder-canvas .finder-list-name > div {
@@ -636,40 +688,23 @@
         display: none !important;
     }
 
-    /* Modal and positioning fixes */
-    #file-manager-window-area {
+    .file-manager-pane {
         position: relative;
         z-index: 1;
         overflow: visible;
         min-height: 400px;
     }
 
-    /* Fix for modal overlays */
-    #file-manager-window-area .finder-canvas {
+    .file-manager-pane .finder-canvas {
         position: relative;
         z-index: auto;
-        transform: translateZ(0); /* Create stacking context */
-    }
-
-    /* Ensure file manager doesn't interfere with modals */
-    .app-modal {
-        z-index: 9999 !important;
-    }
-
-    .app-modal .modal-backdrop {
-        z-index: 9998 !important;
+        transform: translateZ(0);
     }
 
     /* Fix context menu positioning */
     #folder-context-menu {
         z-index: 10000 !important;
         position: fixed !important;
-    }
-
-    /* Prevent scroll issues in modals */
-    .modal-open #file-manager-window-area {
-        transform: none;
-        filter: none;
     }
 
     @media (max-width: 1024px) {
@@ -749,42 +784,9 @@
 
         // Initialize view mode
         setMode(currentMode);
-
-        // Fix modal issues - prevent event bubbling conflicts
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ensure modals work properly with file manager
-            const fileManagerContainer = document.getElementById('file-manager-window-area');
-            if (fileManagerContainer) {
-                fileManagerContainer.addEventListener('click', function(e) {
-                    // Prevent clicks on file manager from interfering with modals
-                    if (document.querySelector('.modal.show')) {
-                        return;
-                    }
-                });
-            }
-
-            // Fix z-index conflicts
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'childList') {
-                        // Check for modal being added
-                        const addedNodes = Array.from(mutation.addedNodes);
-                        addedNodes.forEach(function(node) {
-                            if (node.classList && node.classList.contains('modal')) {
-                                // Ensure modal is on top
-                                node.style.zIndex = '9999';
-                                const backdrop = document.querySelector('.modal-backdrop');
-                                if (backdrop) {
-                                    backdrop.style.zIndex = '9998';
-                                }
-                            }
-                        });
-                    }
-                });
-            });
-
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
+        if (typeof feather !== "undefined") {
+            feather.replace();
+        }
 
     })();
 </script>

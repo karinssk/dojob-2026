@@ -113,6 +113,9 @@ if ($view_type) {
 
         var fileManagerRightPanel = '<div class="no-file-selected"><div class="files-icon"><i data-feather="file-text" class="no-file-selected-icon" style=""></i><div class="no-file-selected-text font-12 text-off"><?php echo app_lang("select_a_file_to_view_details"); ?></div></div></div>';
         $("#file-manager-right-panel").html(fileManagerRightPanel);
+        if (typeof feather !== "undefined") {
+            feather.replace();
+        }
         //$("#new_folder_button").attr("data-post-parent_id", folder_id);
 
         var viewFrom = "<?php echo $view_from; ?>";
@@ -158,6 +161,9 @@ if ($view_type) {
                     $("#file-manager-container").html(result.window_content);
                     $("#file-manger-title-bar").html(result.title_bar_content);
                     setFolderWindowHeight();
+                    if (typeof feather !== "undefined") {
+                        feather.replace();
+                    }
 
                 }
                 appLoader.hide();
@@ -433,6 +439,9 @@ if ($view_type) {
                         if (result.success) {
                             $(fileDetailsContainer).html(result.content);
                             setFolderWindowHeight();
+                            if (typeof feather !== "undefined") {
+                                feather.replace();
+                            }
                         }
                         appLoader.hide();
                     }
@@ -489,14 +498,14 @@ if ($view_type) {
 
         $('body').on('click', '#file-manager-container-card .folder-item-content', function() {
             window.isDoubleClick = false;
-            var $this = $(this).closest("li");
+            var $this = $(this).closest(".folder-item");
 
             $(".selected-folder-item").removeClass("selected-folder-item");
             $(".folder-item-content").removeClass('focus');
             $this.find(".folder-item-content").addClass("selected-folder-item");
 
             if (!window.isDoubleClick) {
-                var data = $this.closest("li").data();
+                var data = $this.data();
 
                 getItemDetails(data.type, data.id);
             }
@@ -533,7 +542,7 @@ if ($view_type) {
                 window.isDoubleClick = true;
             }
 
-            var data = $(this).closest("li").data();
+            var data = $(this).closest(".folder-item").data();
 
             if (data.type === "folder") {
                 openFolderWindow(data.folder_id);
@@ -586,30 +595,6 @@ if ($view_type) {
 
         $('body').on('click', "#folder-context-menu .dropdown-item", function(e) {
             $("#folder-context-menu").addClass("hide");
-        });
-
-        // Additional modal fixes for file manager
-        $(document).on('shown.bs.modal', '.modal', function () {
-            // Ensure modals are on top
-            $(this).css('z-index', 9999);
-            $('.modal-backdrop').css('z-index', 9998);
-            
-            // Fix scrolling issues
-            $('body').addClass('modal-open');
-        });
-
-        $(document).on('hidden.bs.modal', '.modal', function () {
-            // Clean up after modal closes
-            if (!$('.modal.show').length) {
-                $('body').removeClass('modal-open');
-            }
-        });
-
-        // Prevent file manager events from interfering with modals
-        $('#file-manager-window-area').on('click', function(e) {
-            if ($('.modal.show').length > 0) {
-                e.stopPropagation();
-            }
         });
 
     });

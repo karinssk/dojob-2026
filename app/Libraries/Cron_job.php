@@ -824,7 +824,8 @@ class Cron_job {
         $is_end = $mode === 'end';
         $header_text = $is_end ? 'แจ้งเตือนก่อนสิ้นสุดกิจกรรม' : 'แจ้งเตือนก่อนเริ่มกิจกรรม';
         $header_color = $is_end ? '#F97316' : '#2563EB';
-
+        $liff_url = 'https://liff.line.me/2009171467-kn2AHM0C' ;
+        
         $time_label = $is_end ? 'สิ้นสุด' : 'เริ่ม';
         $date_val = $is_end ? ($end_date ?: $start_date) : $start_date;
         $time_text = $this->_format_event_date($date_val);
@@ -887,7 +888,7 @@ class Cron_job {
                     'action' => [
                         'type' => 'uri',
                         'label' => 'ดูรายละเอียด',
-                        'uri' => get_uri("liff/app/events/{$event->id}")
+                        'uri' => $liff_url ,
                     ]
                 ]]
             ],
@@ -912,7 +913,7 @@ class Cron_job {
         $start_date = $event->start_date ?? '';
         $date_text = $this->_format_event_date($start_date);
         $desc_text = $this->_event_desc_text($event, 140);
-
+         $liff_url = 'https://liff.line.me/2009171467-kn2AHM0C' ;
         $bubble = [
             'type' => 'bubble',
             'size' => 'mega',
@@ -970,7 +971,7 @@ class Cron_job {
                     'action' => [
                         'type' => 'uri',
                         'label' => 'ดูรายละเอียด',
-                        'uri' => get_uri("liff/app/events/{$event->id}")
+                        'uri' => $liff_url,
                     ]
                 ]]
             ],
@@ -1624,7 +1625,24 @@ class Cron_job {
                 CONCAT(u.first_name,' ',u.last_name) AS user_name,
                 m.line_liff_user_id AS line_user_id,
                 t.id AS task_id,
-                t.title AS task_title
+                t.title AS task_title,
+                ts.key_name AS status_key,
+                ts.title AS status_title,
+                (
+                    SELECT pc.description
+                    FROM rise_project_comments pc
+                    WHERE pc.task_id = t.id AND pc.deleted = 0
+                    ORDER BY pc.created_at DESC
+                    LIMIT 1
+                ) AS last_comment,
+                (
+                    SELECT CONCAT(cu.first_name,' ',cu.last_name)
+                    FROM rise_project_comments pc
+                    JOIN rise_users cu ON cu.id = pc.created_by
+                    WHERE pc.task_id = t.id AND pc.deleted = 0
+                    ORDER BY pc.created_at DESC
+                    LIMIT 1
+                ) AS last_comment_by
             FROM rise_users u
             JOIN rise_tasks t ON t.assigned_to = u.id AND t.deleted = 0
             LEFT JOIN rise_task_status ts ON ts.id = t.status_id
@@ -1652,7 +1670,14 @@ class Cron_job {
                     'tasks'       => [],
                 ];
             }
-            $users[$uid]['tasks'][$r->task_id] = ['id' => $r->task_id, 'title' => $r->task_title];
+            $users[$uid]['tasks'][$r->task_id] = [
+                'id'              => $r->task_id,
+                'title'           => $r->task_title,
+                'status_key'      => $r->status_key ?? '',
+                'status_title'    => $r->status_title ?? '',
+                'last_comment'    => $r->last_comment ?? '',
+                'last_comment_by' => $r->last_comment_by ?? '',
+            ];
         }
 
         foreach ($users as $uid => $u) {
@@ -1692,7 +1717,7 @@ class Cron_job {
         } else {
             foreach ($users as $uid => $u) {
                 if (empty($u['line_user_id'])) { continue; }
-                $single = $this->_build_reminder_bubble_single($u['user_name'], $u['tasks'], $liff_base);
+                $single = $this->_build_reminder_carousel_user($u['user_name'], $u['tasks'], $liff_base);
                 $alt    = $u['user_name'] . ' มีงานค้าง ' . count($u['tasks']) . ' รายการ';
                 $res = $Line->send_flex_message($u['line_user_id'], $single, $alt, 'user', ['type' => 'liff_task_reminder']);
                 if (empty($res['success'])) {
@@ -1900,34 +1925,265 @@ class Cron_job {
     /**
      * Single-user reminder bubble
      */
+    private function _status_to_thai($key_name) {
+        $map = [
+            'to_do'       => 'รอดำเนินการ',
+            'in_progress' => 'กำลังดำเนินการ',
+            'on_hold'     => 'พักงานไว้',
+            'review'      => 'รอตรวจสอบ',
+            'testing'     => 'กำลังทดสอบ',
+            'pending'     => 'รอดำเนินการ',
+            'open'        => 'เปิด',
+            'closed'      => 'ปิด',
+        ];
+        return $map[$key_name] ?? null;
+    }
+
+    private function _status_color($key_name) {
+        $map = [
+            'to_do'       => '#64748B',
+            'in_progress' => '#3B82F6',
+            'on_hold'     => '#EAB308',
+            'review'      => '#A855F7',
+            'testing'     => '#06B6D4',
+            'pending'     => '#64748B',
+            'open'        => '#22C55E',
+            'closed'      => '#EF4444',
+        ];
+        return $map[$key_name] ?? '#94A3B8';
+    }
+
+    /**
+     * User mode — carousel: card 0 = full task list overview, cards 1-11 = one task each
+     */
+    private function _build_reminder_carousel_user($user_name, $tasks, $liff_base) {
+        // Card 0: full list overview (same as old single bubble — shows all tasks at a glance)
+        $bubbles = [$this->_build_reminder_bubble_single($user_name, $tasks, $liff_base)];
+
+        // Cards 1-11: one per task (carousel max = 12)
+        foreach (array_slice($tasks, 0, 11) as $i => $t) {
+            $bubbles[] = $this->_build_task_card($i + 1, $t, $liff_base);
+        }
+
+        return ['type' => 'carousel', 'contents' => $bubbles];
+    }
+
+    /**
+     * Individual task card — used by both user-mode and room-mode carousels.
+     * $user_name is optional; shown in room mode so context isn't lost.
+     */
+    private function _build_task_card($num, $task, $liff_base, $user_name = '') {
+        $status_key  = $task['status_key'] ?? '';
+        $status_thai = $this->_status_to_thai($status_key);
+        if ($status_thai === null) {
+            $status_thai = !empty($task['status_title']) ? $task['status_title'] : $status_key;
+        }
+        $status_color = $this->_status_color($status_key);
+
+        $raw_comment   = strip_tags($task['last_comment'] ?? '');
+        $raw_comment   = preg_replace('/\s+/', ' ', trim($raw_comment));
+        $short_comment = mb_strlen($raw_comment) > 200
+            ? mb_substr($raw_comment, 0, 200) . '…'
+            : $raw_comment;
+
+        $task_url = get_uri('liff/app/tasks/' . $task['id']);
+
+        // Top row: #number + (user name if room mode) + status badge
+        $top_row_contents = [
+            [
+                'type'  => 'text',
+                'text'  => '#' . $num,
+                'size'  => 'xxs',
+                'color' => '#94A3B8',
+                'flex'  => 0,
+            ],
+        ];
+        if (!empty($user_name)) {
+            $top_row_contents[] = [
+                'type'  => 'text',
+                'text'  => $user_name,
+                'size'  => 'xxs',
+                'color' => '#94A3B8',
+                'flex'  => 1,
+                'margin' => 'xs',
+            ];
+        } else {
+            $top_row_contents[] = ['type' => 'filler'];
+        }
+        $top_row_contents[] = [
+            'type'            => 'box',
+            'layout'          => 'vertical',
+            'flex'            => 0,
+            'backgroundColor' => $status_color,
+            'cornerRadius'    => '4px',
+            'paddingStart'    => '6px',
+            'paddingEnd'      => '6px',
+            'paddingTop'      => '2px',
+            'paddingBottom'   => '2px',
+            'contents'        => [[
+                'type'  => 'text',
+                'text'  => $status_thai ?: '-',
+                'size'  => 'xxs',
+                'color' => '#FFFFFF',
+                'align' => 'center',
+            ]],
+        ];
+
+        $body_contents = [
+            ['type' => 'box', 'layout' => 'horizontal', 'contents' => $top_row_contents],
+            // Task title
+            [
+                'type'     => 'text',
+                'text'     => $task['title'],
+                'size'     => 'sm',
+                'color'    => '#1E293B',
+                'weight'   => 'bold',
+                'wrap'     => true,
+                'maxLines' => 3,
+                'margin'   => 'sm',
+            ],
+        ];
+
+        // Last comment block
+        if (!empty($short_comment)) {
+            $body_contents[] = [
+                'type'   => 'separator',
+                'margin' => 'sm',
+                'color'  => '#E2E8F0',
+            ];
+            $body_contents[] = [
+                'type'     => 'text',
+                'text'     => $short_comment,
+                'size'     => 'xs',
+                'color'    => '#64748B',
+                'wrap'     => true,
+                'maxLines' => 5,
+                'margin'   => 'sm',
+            ];
+        }
+
+        return [
+            'type' => 'bubble',
+            'size' => 'kilo',
+            'body' => [
+                'type'       => 'box',
+                'layout'     => 'vertical',
+                'paddingAll' => '14px',
+                'spacing'    => 'none',
+                'contents'   => $body_contents,
+            ],
+            'footer' => [
+                'type'       => 'box',
+                'layout'     => 'vertical',
+                'paddingAll' => '10px',
+                'contents'   => [[
+                    'type'   => 'button',
+                    'style'  => 'secondary',
+                    'height' => 'sm',
+                    'action' => [
+                        'type'  => 'uri',
+                        'label' => 'อัปเดตงาน',
+                        'uri'   => $task_url,
+                    ],
+                ]],
+            ],
+        ];
+    }
+
+    /**
+     * Single-user reminder bubble (used by room-mode carousel)
+     */
     private function _build_reminder_bubble_single($user_name, $tasks, $liff_base) {
         $task_count = count($tasks);
         $body_rows  = [];
 
         foreach (array_slice($tasks, 0, 8) as $i => $t) {
-            $body_rows[] = [
-                'type'   => 'box',
-                'layout' => 'horizontal',
-                'contents' => [
-                    [
-                        'type'  => 'text',
-                        'text'  => ($i + 1) . '.',
-                        'size'  => 'xs',
-                        'color' => '#94A3B8',
-                        'flex'  => 0,
-                        'align' => 'start',
-                    ],
-                    [
-                        'type'      => 'text',
-                        'text'      => $t['title'],
-                        'size'      => 'xs',
-                        'color'     => '#334155',
-                        'wrap'      => true,
-                        'maxLines'  => 2,
-                        'flex'      => 1,
-                    ],
+            $status_key   = $t['status_key'] ?? '';
+            $status_thai  = $this->_status_to_thai($status_key);
+            if ($status_thai === null) {
+                // Fallback: use original title if exists, else key_name
+                $status_thai = !empty($t['status_title']) ? $t['status_title'] : $status_key;
+            }
+            $status_color = $this->_status_color($status_key);
+
+            // Build the middle column (title + last comment)
+            $raw_comment = strip_tags($t['last_comment'] ?? '');
+            $raw_comment = preg_replace('/\s+/', ' ', trim($raw_comment));
+            // Hard-cap at 200 chars for payload size; LINE's maxLines handles display truncation
+            $short_comment = mb_strlen($raw_comment) > 200
+                ? mb_substr($raw_comment, 0, 200) . '…'
+                : $raw_comment;
+
+            $title_col_contents = [
+                [
+                    'type'     => 'text',
+                    'text'     => $t['title'],
+                    'size'     => 'xs',
+                    'color'    => '#334155',
+                    'wrap'     => true,
+                    'maxLines' => 2,
                 ],
-                'spacing' => 'xs',
+            ];
+
+            if (!empty($short_comment)) {
+                $title_col_contents[] = [
+                    'type'     => 'text',
+                    'text'     => $short_comment,
+                    'size'     => 'xxs',
+                    'color'    => '#94A3B8',
+                    'wrap'     => true,
+                    'maxLines' => 3,
+                ];
+            }
+
+            $row_contents = [
+                [
+                    'type'  => 'text',
+                    'text'  => ($i + 1) . '.',
+                    'size'  => 'xs',
+                    'color' => '#94A3B8',
+                    'flex'  => 0,
+                    'align' => 'start',
+                ],
+                [
+                    'type'     => 'box',
+                    'layout'   => 'vertical',
+                    'flex'     => 1,
+                    'spacing'  => 'none',
+                    'contents' => $title_col_contents,
+                ],
+            ];
+
+            // Append status badge if available
+            if (!empty($status_thai)) {
+                $row_contents[] = [
+                    'type'            => 'box',
+                    'layout'          => 'vertical',
+                    'flex'            => 0,
+                    'backgroundColor' => $status_color,
+                    'cornerRadius'    => '4px',
+                    'paddingStart'    => '5px',
+                    'paddingEnd'      => '5px',
+                    'paddingTop'      => '2px',
+                    'paddingBottom'   => '2px',
+                    'contents'        => [
+                        [
+                            'type'  => 'text',
+                            'text'  => $status_thai,
+                            'size'  => 'xxs',
+                            'color' => '#FFFFFF',
+                            'align' => 'center',
+                        ],
+                    ],
+                ];
+            }
+
+            $body_rows[] = [
+                'type'     => 'box',
+                'layout'   => 'horizontal',
+                'contents' => $row_contents,
+                'spacing'  => 'xs',
+                'alignItems' => 'center',
             ];
         }
 
@@ -2004,20 +2260,28 @@ class Cron_job {
     }
 
     /**
-     * Room mode — carousel of per-user bubbles (max 12 bubbles per carousel)
+     * Room mode — carousel:
+     * - Single user  → Card 0 = full list overview + Cards 1-11 = per-task detail
+     * - Multi user   → one full-list card per user (max 12)
      */
     private function _build_reminder_carousel($users, $liff_base) {
         $bubbles = [];
-        foreach (array_slice($users, 0, 12) as $u) {
-            $bubbles[] = $this->_build_reminder_bubble_single(
-                $u['user_name'], $u['tasks'], $liff_base
-            );
+
+        if (count($users) === 1) {
+            // Single user in room: same structure as user-mode carousel
+            $u = reset($users);
+            $bubbles[] = $this->_build_reminder_bubble_single($u['user_name'], $u['tasks'], $liff_base);
+            foreach (array_slice($u['tasks'], 0, 11) as $i => $t) {
+                $bubbles[] = $this->_build_task_card($i + 1, $t, $liff_base);
+            }
+        } else {
+            // Multiple users: one overview card per user, max 12
+            foreach (array_slice($users, 0, 12) as $u) {
+                $bubbles[] = $this->_build_reminder_bubble_single($u['user_name'], $u['tasks'], $liff_base);
+            }
         }
 
-        return [
-            'type'     => 'carousel',
-            'contents' => $bubbles,
-        ];
+        return ['type' => 'carousel', 'contents' => $bubbles];
     }
 
     /**
