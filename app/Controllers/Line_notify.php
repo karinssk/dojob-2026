@@ -128,6 +128,17 @@ class Line_notify extends Security_Controller {
             $this->capture_line_room($event);
             $this->capture_line_user($event);
 
+            $this->log_line_webhook_event(
+                'line_webhook_incoming',
+                'sent',
+                'Webhook event received: ' . (get_array_value($event, 'type') ?: 'unknown'),
+                array(
+                    'type' => get_array_value($event, 'type'),
+                    'timestamp' => get_array_value($event, 'timestamp'),
+                    'source' => get_array_value($event, 'source')
+                )
+            );
+
             log_message('info', 'LINE Webhook: Event details: ' . json_encode($event));
             log_message('info', 'LINE Webhook: Event type: ' . ($event['type'] ?? 'unknown'));
             
@@ -306,10 +317,47 @@ class Line_notify extends Security_Controller {
 
     private function handle_message_event($event) {
         $user_id = $event['source']['userId'] ?? null;
-        $message_text = $event['message']['text'] ?? '';
-        
+        $message = get_array_value($event, 'message');
+        $message_type = get_array_value($message, 'type') ?: 'unknown';
+        $message_text = $message_type === 'text' ? (get_array_value($message, 'text') ?: '') : '';
+        $message_id = get_array_value($message, 'id');
+
+        // Download media message and store in File Manager.
+        if (in_array($message_type, array('image', 'video', 'file'))) {
+            $saved = $this->save_line_media_message_to_file_manager($event);
+
+            if ($saved['success']) {
+                $this->log_line_webhook_event(
+                    'line_webhook_media_saved',
+                    'sent',
+                    "Saved {$message_type} to File Manager: {$saved['stored_file_name']}",
+                    array(
+                        'folder_id' => $saved['folder_id'],
+                        'file_id' => $saved['file_db_id'],
+                        'stored_file_name' => $saved['stored_file_name'],
+                        'mime_type' => $saved['mime_type'],
+                        'source_message_id' => $message_id
+                    )
+                );
+            } else {
+                $this->log_line_webhook_event(
+                    'line_webhook_media_saved',
+                    'failed',
+                    "Failed saving {$message_type}: " . $saved['message'],
+                    array(
+                        'source_message_id' => $message_id,
+                        'error' => $saved['message']
+                    )
+                );
+            }
+        }
+
         // Log the message for debugging
         log_message('info', "LINE Message from {$user_id}: {$message_text}");
+
+        if ($message_type !== 'text') {
+            return;
+        }
 
         if ($this->is_task_tracking_keyword($message_text)) {
             $this->handle_task_tracking_request($event);
@@ -599,6 +647,8 @@ class Line_notify extends Security_Controller {
 
             if ($type_group === 'liff') {
                 $options['notification_type_prefix'] = 'liff';
+            } else if ($type_group === 'webhook') {
+                $options['notification_type_prefix'] = 'line_webhook';
             }
             
             if ($start_date) {
@@ -1372,6 +1422,327 @@ class Line_notify extends Security_Controller {
         } catch (\Exception $e) {
             log_message('error', 'Failed to save button click log: ' . $e->getMessage());
         }
+    }
+
+    private function log_line_webhook_event($notification_type, $status, $message, $response = null) {
+        try {
+            $Line_logs_model = model('App\Models\Line_notification_logs_model');
+            $Line_logs_model->create_table_if_not_exists();
+
+            if (is_array($response) || is_object($response)) {
+                $response = json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            }
+
+            $data = array(
+                'notification_type' => $notification_type ?: 'line_webhook_incoming',
+                'message' => $message ?: '-',
+                'status' => $status === 'failed' ? 'failed' : 'sent',
+                'response' => $response ? mb_substr($response, 0, 65535) : ''
+            );
+
+            $Line_logs_model->ci_save($data);
+        } catch (\Exception $e) {
+            log_message('error', 'LINE webhook log save failed: ' . $e->getMessage());
+        }
+    }
+
+    private function save_line_media_message_to_file_manager($event) {
+        try {
+            $token = get_setting('line_channel_access_token');
+            if (!$token) {
+                return array('success' => false, 'message' => 'Missing line_channel_access_token');
+            }
+
+            $message = get_array_value($event, 'message');
+            $message_id = get_array_value($message, 'id');
+            $message_type = get_array_value($message, 'type') ?: 'file';
+            if (!$message_id) {
+                return array('success' => false, 'message' => 'Missing LINE message id');
+            }
+
+            $download = $this->download_line_message_content($message_id, $token);
+            if (!$download['success']) {
+                return array('success' => false, 'message' => $download['message']);
+            }
+
+            $folder_result = $this->get_or_create_line_file_manager_day_folder();
+            if (!$folder_result['success']) {
+                return array('success' => false, 'message' => $folder_result['message']);
+            }
+
+            $content = $download['content'];
+            $content_size = strlen($content);
+            $mime_type = $download['content_type'] ?: 'application/octet-stream';
+            $original_name = get_array_value($message, 'fileName') ?: $download['original_name'];
+            $file_ext = $this->detect_line_file_extension($message_type, $mime_type, $original_name);
+
+            $file_name = time() . "-" . date('d-m-y') . "-" . substr((string) $message_id, -6);
+            if ($file_ext) {
+                $file_name .= "." . $file_ext;
+            }
+            $file_name = $this->sanitize_line_file_name($file_name);
+
+            $target_path = getcwd() . "/" . get_general_file_path("global_files", "all");
+            $moved_file = move_temp_file(
+                $file_name,
+                $target_path,
+                "line_oa",
+                null,
+                $file_name,
+                $content,
+                false,
+                $content_size,
+                true
+            );
+
+            if (!$moved_file) {
+                return array('success' => false, 'message' => 'Failed to write file to server storage');
+            }
+
+            $General_files_model = model('App\Models\General_files_model');
+            $saved_id = $General_files_model->ci_save(array(
+                "file_name" => get_array_value($moved_file, 'file_name'),
+                "file_id" => get_array_value($moved_file, 'file_id'),
+                "service_type" => get_array_value($moved_file, 'service_type'),
+                "description" => "Uploaded from LINE webhook ({$message_type})",
+                "file_size" => get_array_value($message, 'fileSize') ?: $content_size,
+                "created_at" => get_current_utc_time(),
+                "uploaded_by" => 0,
+                "folder_id" => $folder_result['folder']->id,
+                "client_id" => 0,
+                "context" => "global_files",
+                "context_id" => 0
+            ));
+
+            if (!$saved_id) {
+                delete_app_files($target_path, array($moved_file));
+                return array('success' => false, 'message' => 'Failed to save file metadata');
+            }
+
+            return array(
+                'success' => true,
+                'folder_id' => $folder_result['folder']->id,
+                'file_db_id' => $saved_id,
+                'stored_file_name' => get_array_value($moved_file, 'file_name'),
+                'mime_type' => $mime_type
+            );
+        } catch (\Exception $e) {
+            return array('success' => false, 'message' => $e->getMessage());
+        }
+    }
+
+    private function download_line_message_content($message_id, $token) {
+        $url = "https://api-data.line.me/v2/bot/message/{$message_id}/content";
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 45);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            "Authorization: Bearer {$token}"
+        ));
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        $curl_error = curl_error($ch);
+        curl_close($ch);
+
+        if ($response === false) {
+            return array(
+                'success' => false,
+                'message' => $curl_error ?: 'LINE content request failed'
+            );
+        }
+
+        if ($http_code < 200 || $http_code >= 300) {
+            return array(
+                'success' => false,
+                'message' => "LINE content API HTTP {$http_code}"
+            );
+        }
+
+        $raw_headers = substr($response, 0, $header_size);
+        $body = substr($response, $header_size);
+
+        if ($body === '' || $body === null) {
+            return array(
+                'success' => false,
+                'message' => 'LINE content API returned empty body'
+            );
+        }
+
+        $headers = $this->parse_line_http_headers($raw_headers);
+        $content_disposition = get_array_value($headers, 'content-disposition');
+        $original_name = $this->extract_line_filename_from_disposition($content_disposition);
+
+        return array(
+            'success' => true,
+            'content' => $body,
+            'content_type' => $content_type ?: get_array_value($headers, 'content-type'),
+            'original_name' => $original_name
+        );
+    }
+
+    private function parse_line_http_headers($raw_headers) {
+        // Keep the last header block in case of redirects/proxy headers.
+        $header_blocks = preg_split("/\r\n\r\n|\n\n|\r\r/", trim((string) $raw_headers));
+        $header_block = end($header_blocks);
+        $lines = preg_split("/\r\n|\n|\r/", (string) $header_block);
+
+        $headers = array();
+        foreach ($lines as $line) {
+            $parts = explode(":", $line, 2);
+            if (count($parts) === 2) {
+                $headers[strtolower(trim($parts[0]))] = trim($parts[1]);
+            }
+        }
+
+        return $headers;
+    }
+
+    private function extract_line_filename_from_disposition($content_disposition) {
+        if (!$content_disposition) {
+            return '';
+        }
+
+        if (preg_match("/filename\\*=UTF-8''([^;]+)/i", $content_disposition, $m)) {
+            return rawurldecode(trim($m[1], "\"'"));
+        }
+
+        if (preg_match('/filename="?([^"]+)"?/i', $content_disposition, $m)) {
+            return trim($m[1]);
+        }
+
+        return '';
+    }
+
+    private function detect_line_file_extension($message_type, $mime_type, $file_name = '') {
+        $file_name_ext = strtolower(pathinfo((string) $file_name, PATHINFO_EXTENSION));
+        if ($file_name_ext) {
+            return $file_name_ext;
+        }
+
+        $mime_map = array(
+            'image/jpeg' => 'jpg',
+            'image/jpg' => 'jpg',
+            'image/png' => 'png',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp',
+            'video/mp4' => 'mp4',
+            'video/quicktime' => 'mov',
+            'application/pdf' => 'pdf',
+            'application/zip' => 'zip',
+            'application/msword' => 'doc',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+            'application/vnd.ms-excel' => 'xls',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+            'text/plain' => 'txt'
+        );
+
+        $mime_type = strtolower((string) $mime_type);
+        if (isset($mime_map[$mime_type])) {
+            return $mime_map[$mime_type];
+        }
+
+        if ($message_type === 'image') {
+            return 'jpg';
+        }
+        if ($message_type === 'video') {
+            return 'mp4';
+        }
+
+        return 'bin';
+    }
+
+    private function sanitize_line_file_name($file_name) {
+        $file_name = preg_replace('/[\\\\\\/]+/', '-', (string) $file_name);
+        $file_name = preg_replace('/\s+/', '-', $file_name);
+        $file_name = preg_replace('/[^A-Za-z0-9._-]/', '-', $file_name);
+        $file_name = preg_replace('/-+/', '-', $file_name);
+        return trim($file_name, '-');
+    }
+
+    private function get_or_create_line_file_manager_day_folder() {
+        $root = $this->get_or_create_file_manager_folder('Line-file-manager', 0);
+        if (!$root['success']) {
+            return $root;
+        }
+
+        $month_folder = $this->get_or_create_file_manager_folder(date('m/y'), $root['folder']->id);
+        if (!$month_folder['success']) {
+            return $month_folder;
+        }
+
+        $day_folder = $this->get_or_create_file_manager_folder(date('d/m/y'), $month_folder['folder']->id);
+        if (!$day_folder['success']) {
+            return $day_folder;
+        }
+
+        return $day_folder;
+    }
+
+    private function get_or_create_file_manager_folder($title, $parent_id = 0) {
+        try {
+            $Folders_model = model('App\Models\Folders_model');
+            $folders_table = $this->db->prefixTable('folders');
+
+            $existing = $this->db->query(
+                "SELECT * FROM $folders_table
+                 WHERE deleted = 0
+                   AND context = 'file_manager'
+                   AND context_id = 0
+                   AND parent_id = ?
+                   AND title = ?
+                 ORDER BY id DESC
+                 LIMIT 1",
+                array($parent_id, $title)
+            )->getRow();
+
+            if ($existing) {
+                return array('success' => true, 'folder' => $existing);
+            }
+
+            $level = '';
+            if ($parent_id) {
+                $parent = $Folders_model->get_one($parent_id);
+                if (!$parent || !$parent->id) {
+                    return array('success' => false, 'message' => 'Parent folder not found');
+                }
+                $level = $parent->level ? ($parent->level . $parent->id . ",") : ("," . $parent->id . ",");
+            }
+
+            $save_id = $Folders_model->ci_save(array(
+                'title' => $title,
+                'parent_id' => $parent_id,
+                'level' => $level,
+                'permissions' => 'all_team_members,',
+                'folder_id' => $this->generate_line_folder_id($parent_id),
+                'context' => 'file_manager',
+                'context_id' => 0,
+                'created_by' => 0,
+                'created_at' => get_current_utc_time()
+            ));
+
+            if (!$save_id) {
+                return array('success' => false, 'message' => "Failed to create folder: {$title}");
+            }
+
+            return array('success' => true, 'folder' => $Folders_model->get_one($save_id));
+        } catch (\Exception $e) {
+            return array('success' => false, 'message' => $e->getMessage());
+        }
+    }
+
+    private function generate_line_folder_id($parent_id = 0) {
+        $rand = function_exists('make_random_string') ? make_random_string(11) : substr(md5(uniqid('', true)), 0, 11);
+        return substr(md5('file_manager'), -7) . "-"
+            . substr(md5("0"), -5) . "-"
+            . substr(md5("0"), -4) . "-"
+            . substr(md5($parent_id ? $parent_id : "root"), -5) . "-"
+            . $rand;
     }
 
     private function verify_line_signature($body, $signature, $channel_secret) {

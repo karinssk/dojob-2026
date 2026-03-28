@@ -415,6 +415,7 @@
                             <div class="btn-group mb-3" role="group" aria-label="Log filters">
                                 <button type="button" class="btn btn-default btn-sm log-filter-btn active" data-filter="all" onclick="setLogFilter('all')">All</button>
                                 <button type="button" class="btn btn-default btn-sm log-filter-btn" data-filter="liff" onclick="setLogFilter('liff')">LIFF</button>
+                                <button type="button" class="btn btn-default btn-sm log-filter-btn" data-filter="webhook" onclick="setLogFilter('webhook')">Webhook</button>
                             </div>
                             <div id="notification-logs-container">
                                 <div class="table-responsive">
