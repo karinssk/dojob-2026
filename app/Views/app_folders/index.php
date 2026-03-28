@@ -58,7 +58,7 @@ if ($view_type) {
             </div>
         </div>
 
-        <div class="box-content w300" id="file-details-box">
+        <div class="box-content w300 hide" id="file-details-box">
             <div class="sticky-details-section">
                 <div class="card">
                     <div class="page-title">
@@ -73,6 +73,7 @@ if ($view_type) {
                 </div>
             </div>
         </div>
+        <div id="file-details-backdrop" class="hide"></div>
     </div>
 </div>
 
@@ -85,6 +86,61 @@ if ($view_type) {
 <div id="modal-button-container"></div>
 <?php echo js_anchor(" ", array('id' => "app-modal-button", 'title' => "", "data-toggle" => "app-modal")); ?>
 
+<style>
+    #file-details-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 1050;
+    }
+
+    #file-details-box {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1055;
+        width: min(980px, calc(100vw - 32px)) !important;
+        max-height: calc(100vh - 36px);
+        margin: 0;
+        padding: 0;
+    }
+
+    #file-details-box .sticky-details-section {
+        position: static;
+    }
+
+    #file-details-box .card {
+        margin: 0;
+        max-height: calc(100vh - 36px);
+        overflow: hidden;
+    }
+
+    #file-manager-right-panel {
+        overflow-y: auto;
+        max-height: calc(100vh - 160px);
+    }
+
+    body.file-details-modal-open {
+        overflow: hidden;
+    }
+
+    @media (max-width: 767px) {
+        #file-details-box {
+            width: calc(100vw - 20px) !important;
+            max-height: calc(100vh - 20px);
+        }
+
+        #file-details-box .card {
+            max-height: calc(100vh - 20px);
+        }
+
+        #file-manager-right-panel {
+            max-height: calc(100vh - 128px);
+        }
+    }
+</style>
+
 <script type="text/javascript">
     function setFolderWindowHeight() {
         var minHeight = $(window).height() - 290;
@@ -96,8 +152,10 @@ if ($view_type) {
         });
         $("#file-manager-container").css("min-height", minHeight + 115);
         $("#file-manager-right-panel").css({
-            "min-height": minHeight + 115,
-            "height": "auto"
+            "min-height": "auto",
+            "height": "auto",
+            "max-height": ($(window).height() - 160) + "px",
+            "overflow-y": "auto"
         });
 
         // Fix modal z-index issues
@@ -451,6 +509,18 @@ if ($view_type) {
     }
 
     $(document).ready(function() {
+        function openDetailsModal() {
+            $("#file-details-box").removeClass("hide");
+            $("#file-details-backdrop").removeClass("hide");
+            $("body").addClass("file-details-modal-open");
+        }
+
+        function closeDetailsModal() {
+            $("#file-details-box").addClass("hide");
+            $("#file-details-backdrop").addClass("hide");
+            $("body").removeClass("file-details-modal-open");
+        }
+
         $('body').on('contextmenu', '.show-context-menu', function(e) {
             e.preventDefault();
             var it = $(this);
@@ -490,8 +560,24 @@ if ($view_type) {
 
         setFolderWindowHeight();
 
-        $('body').on('click', "#view-details-button, #close-details-button", function(e) {
-            $("#file-details-box").toggleClass("hide");
+        $('body').on('click', "#view-details-button", function(e) {
+            e.preventDefault();
+            openDetailsModal();
+        });
+
+        $('body').on('click', "#close-details-button", function(e) {
+            e.preventDefault();
+            closeDetailsModal();
+        });
+
+        $('body').on('click', "#file-details-backdrop", function() {
+            closeDetailsModal();
+        });
+
+        $(document).on("keydown", function(e) {
+            if (e.key === "Escape" && !$("#file-details-box").hasClass("hide")) {
+                closeDetailsModal();
+            }
         });
 
         window.isDoubleClick = false;
@@ -499,14 +585,20 @@ if ($view_type) {
         $('body').on('click', '#file-manager-container-card .folder-item-content', function() {
             window.isDoubleClick = false;
             var $this = $(this).closest(".folder-item");
+            var data = $this.data();
 
             $(".selected-folder-item").removeClass("selected-folder-item");
             $(".folder-item-content").removeClass('focus');
             $this.find(".folder-item-content").addClass("selected-folder-item");
 
-            if (!window.isDoubleClick) {
-                var data = $this.data();
+            // Open folder with single click.
+            if (data.type === "folder") {
+                openFolderWindow(data.folder_id);
+                return;
+            }
 
+            if (!window.isDoubleClick) {
+                openDetailsModal();
                 getItemDetails(data.type, data.id);
             }
         });
@@ -516,25 +608,14 @@ if ($view_type) {
             window.isDoubleClick = false;
             var $this = $(this);
             var data = $this.data();
-            $("#file-details-box").removeClass("hide");
+            openDetailsModal();
 
             getItemDetails(data.type, data.id);
-            if ($(window).width() < 576) {
-                //prepare for small devices
-                $("#file-manager-items-box").addClass("hide");
-                $("#file-details-box").addClass("d-block");
-                $("#file-details-box").addClass("w-100");
-            }
         });
 
         var mouseEvent = 'dblclick';
         if ($(window).width() < 576) {
             mouseEvent = 'click';
-
-            $('body').on('click', "#close-details-button", function(e) {
-                $("#file-details-box").addClass("hide");
-                $("#file-manager-items-box").removeClass("hide");
-            });
         }
 
         $('body').on(mouseEvent, '.folder-item-content', function() {
@@ -544,9 +625,8 @@ if ($view_type) {
 
             var data = $(this).closest(".folder-item").data();
 
-            if (data.type === "folder") {
-                openFolderWindow(data.folder_id);
-            } else if (data.type === "file") {
+            // Keep double click behavior for files only.
+            if (data.type === "file") {
                 var $button = $(this).find("a");
                 var buttonData = $button.data();
 
@@ -567,15 +647,6 @@ if ($view_type) {
         $('body').on('click', '.explore-favourite-folder', function() {
             var favouriteFolderId = $(this).data().folder_id;
             openFolderWindow(favouriteFolderId);
-        });
-
-        $(".scrollable-page").on('scroll', function() {
-            var StickySectionTop = $('#file-manager-items-box').offset().top;
-            if (85 > StickySectionTop && !$('.sticky-details-section').hasClass('stick')) {
-                $('.sticky-details-section').addClass('stick w300');
-            } else if (85 < StickySectionTop && $('.sticky-details-section').hasClass('stick')) {
-                $('.sticky-details-section').removeClass('stick w300');
-            }
         });
 
         //search file or folder
