@@ -20,6 +20,7 @@ $quickly_find_files_text = $lang_or("quickly_find_files", "Quickly preview files
 $use_actions_to_get_started_text = $lang_or("use_actions_to_get_started", "Use New folder or Add files to get started.");
 $click_to_open_text = $lang_or("click_to_open", "Click to open");
 $click_to_preview_text = $lang_or("click_to_preview", "Click to preview");
+$file_storage_path = $client_id ? get_general_file_path("client", $client_id) : get_general_file_path("global_files", "all");
 ?>
 
 <div id="file-manager-detail-area" class="file-manager-pane">
@@ -120,6 +121,11 @@ $click_to_preview_text = $lang_or("click_to_preview", "Click to preview");
                                     if ($folder_item_type == "file") {
                                         $file_name = short_file_name(remove_file_prefix($folder_item->file_name));
                                         $file_size = convert_file_size($folder_item->file_size);
+                                        $is_image_file = is_viewable_image_file($folder_item->file_name);
+                                        $thumbnail_url = "";
+                                        if ($is_image_file) {
+                                            $thumbnail_url = get_source_url_of_file(make_array_of_file($folder_item), $file_storage_path, "thumbnail");
+                                        }
 
                                         $preview_link_attr = $file_preview_link_attributes;
 
@@ -135,7 +141,13 @@ $click_to_preview_text = $lang_or("click_to_preview", "Click to preview");
                                         <li class="folder-item" data-id="<?php echo $folder_item->id; ?>" data-type="file">
                                             <div class="folder-item-content show-context-menu finder-card finder-card-file file-thumb-area">
                                                 <div class="finder-card-top">
-                                                    <div class="finder-card-icon"><i data-feather="file-text"></i></div>
+                                                    <div class="finder-card-icon">
+                                                        <?php if ($thumbnail_url) { ?>
+                                                            <img src="<?php echo $thumbnail_url; ?>" alt="<?php echo esc($file_name); ?>" class="finder-image-thumb">
+                                                        <?php } else { ?>
+                                                            <i data-feather="file-text"></i>
+                                                        <?php } ?>
+                                                    </div>
                                                     <div class="finder-card-title">
                                                         <div class="finder-card-name file-name item-name"><?php echo js_anchor($file_name, $preview_link_attr); ?></div>
                                                         <div class="finder-card-meta"><?php echo app_lang('file'); ?> &middot; <?php echo $click_to_preview_text; ?></div>
@@ -211,6 +223,11 @@ $click_to_preview_text = $lang_or("click_to_preview", "Click to preview");
                                 if ($folder_item_type == "file") {
                                     $file_name = short_file_name(remove_file_prefix($folder_item->file_name));
                                     $file_size = convert_file_size($folder_item->file_size);
+                                    $is_image_file = is_viewable_image_file($folder_item->file_name);
+                                    $thumbnail_url = "";
+                                    if ($is_image_file) {
+                                        $thumbnail_url = get_source_url_of_file(make_array_of_file($folder_item), $file_storage_path, "thumbnail");
+                                    }
 
                                     $preview_link_attr = $file_preview_link_attributes;
                                     $data_url = $file_preview_url . "/" . $folder_item->id;
@@ -225,7 +242,13 @@ $click_to_preview_text = $lang_or("click_to_preview", "Click to preview");
                                     <li class="folder-item" data-id="<?php echo $folder_item->id; ?>" data-type="file">
                                         <div class="folder-item-content show-context-menu finder-list-row file-thumb-area">
                                             <div class="finder-list-name">
-                                                <span class="finder-list-icon"><i data-feather="file-text"></i></span>
+                                                <span class="finder-list-icon">
+                                                    <?php if ($thumbnail_url) { ?>
+                                                        <img src="<?php echo $thumbnail_url; ?>" alt="<?php echo esc($file_name); ?>" class="finder-list-image-thumb">
+                                                    <?php } else { ?>
+                                                        <i data-feather="file-text"></i>
+                                                    <?php } ?>
+                                                </span>
                                                 <div>
                                                     <div class="file-name item-name"><?php echo js_anchor($file_name, $preview_link_attr); ?></div>
                                                     <small><?php echo $click_to_preview_text; ?></small>
