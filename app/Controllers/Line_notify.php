@@ -162,6 +162,17 @@ class Line_notify extends Security_Controller {
         log_message('info', 'LINE Webhook: Completed processing, sending OK response');
         return $this->response->setBody('OK');
     }
+
+    /**
+     * Health check endpoint for browser/manual verification.
+     * Real LINE webhook callbacks must use POST to webhook().
+     */
+    function webhook_health() {
+        return $this->response
+            ->setContentType('text/plain')
+            ->setStatusCode(200)
+            ->setBody('LINE webhook endpoint is alive. Use POST with LINE signature.');
+    }
     
     /**
      * Handle postback events from LINE flex message buttons

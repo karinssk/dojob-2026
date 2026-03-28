@@ -245,6 +245,8 @@ $routes->group('api', function($routes) {
 });
 
 // LINE Webhook Routes (outside API group for security)
+$routes->get('line_webhook', 'Line_notify::webhook_health');
+$routes->get('line/v1/webhook', 'Line_notify::webhook_health');
 $routes->post('line_webhook', 'Line_notify::webhook');
 $routes->post('line/v1/webhook', 'Line_notify::webhook');
 $routes->post('liff/line_webhook', 'Liff_notify_webhook::webhook');
